@@ -69,22 +69,22 @@
             </thead>
             <tbody>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right"></td>
+                <td class="mat-mdc-cell px-3 py-2 text-end"></td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product1.slogan }}</td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product2.slogan }}</td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>Founded</td>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Founded</td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product1.founded }}</td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product2.founded }}</td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>Origin</td>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Origin</td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product1.origin }}</td>
                 <td class="mat-mdc-cell px-1 py-2">{{ product2.origin }}</td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>Region</td>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Region</td>
                 <td class="mat-mdc-cell px-1 py-2">
                   @for (
                     region of product1.regions;
@@ -105,7 +105,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>
                   Available in
                 </td>
                 <td class="mat-mdc-cell px-1 py-2">
@@ -128,7 +128,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right">
+                <td class="mat-mdc-cell px-3 py-2 text-end">
                   Open Source Software
                 </td>
                 <td class="mat-mdc-cell px-1 py-2">
@@ -167,7 +167,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>
                   Self-Hosting
                 </td>
                 <td class="mat-mdc-cell px-1 py-2">
@@ -206,7 +206,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>
                   Use anonymously
                 </td>
                 <td class="mat-mdc-cell px-1 py-2">
@@ -245,9 +245,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>
-                  Free Plan
-                </td>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Free Plan</td>
                 <td class="mat-mdc-cell px-1 py-2">
                   @if (product1.hasFreePlan === true) {
                     <span
@@ -284,7 +282,7 @@
                 </td>
               </tr>
               <tr class="mat-mdc-row">
-                <td class="mat-mdc-cell px-3 py-2 text-right" i18n>Pricing</td>
+                <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Pricing</td>
                 <td class="mat-mdc-cell px-1 py-2">
                   <span i18n>Starting from</span> ${{ price }} /
                   <span i18n>year</span>
@@ -299,7 +297,7 @@
               </tr>
               @if (product1.note || product2.note) {
                 <tr class="mat-mdc-row">
-                  <td class="mat-mdc-cell px-3 py-2 text-right" i18n>Notes</td>
+                  <td class="mat-mdc-cell px-3 py-2 text-end" i18n>Notes</td>
                   <td class="mat-mdc-cell px-1 py-2">{{ product1.note }}</td>
                   <td class="mat-mdc-cell px-1 py-2">{{ product2.note }}</td>
                 </tr>
@@ -339,7 +337,7 @@
           <ul class="list-inline">
             @for (tag of tags; track tag) {
               <li class="list-inline-item">
-                <span class="badge badge-light">{{ tag }}</span>
+                <span class="badge text-bg-light">{{ tag }}</span>
               </li>
             }
           </ul>

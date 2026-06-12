@@ -16,6 +16,7 @@ npm-debug.log
 *.launch
 .settings/
 *.sublime-workspace
+.antigravitycli
 
 # IDE - VSCode
 .vscode/*

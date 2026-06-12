@@ -11,7 +11,7 @@
           [matDatepicker]="date"
           [(ngModel)]="data.dateString"
         />
-        <mat-datepicker-toggle class="mr-2" matSuffix [for]="date">
+        <mat-datepicker-toggle class="me-2" matSuffix [for]="date">
           <ion-icon
             class="text-muted"
             matDatepickerToggleIcon
@@ -31,10 +31,10 @@
           [ngModel]="marketPrice()"
           (ngModelChange)="marketPrice.set($event)"
         />
-        <span class="ml-2" matTextSuffix>{{ data.currency }}</span>
+        <span class="ms-2" matTextSuffix>{{ data.currency }}</span>
       </mat-form-field>
       <button
-        class="ml-2 mt-1 no-min-width"
+        class="ms-2 mt-1 no-min-width"
         mat-button
         title="Fetch market price"
         (click)="onFetchSymbolForDate()"

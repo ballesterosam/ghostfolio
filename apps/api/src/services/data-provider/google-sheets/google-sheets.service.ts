@@ -20,6 +20,7 @@ import {
 import { Injectable, Logger } from '@nestjs/common';
 import { DataSource, SymbolProfile } from '@prisma/client';
 import { format } from 'date-fns';
+import { JWT } from 'google-auth-library';
 import { GoogleSpreadsheet } from 'google-spreadsheet';
 
 @Injectable()
@@ -79,8 +80,8 @@ export class GoogleSheetsService implements DataProviderInterface {
           return index >= 1;
         })
         .forEach((row) => {
-          const date = parseDate(row._rawData[0]);
-          const close = parseFloat(row._rawData[1]);
+          const date = parseDate((row as any)._rawData[0]);
+          const close = parseFloat((row as any)._rawData[1]);
 
           historicalData[format(date, DATE_FORMAT)] = { marketPrice: close };
         });
@@ -200,14 +201,15 @@ export class GoogleSheetsService implements DataProviderInterface {
     sheetId: string;
     symbol: string;
   }) {
-    const doc = new GoogleSpreadsheet(sheetId);
-
-    await doc.useServiceAccountAuth({
-      client_email: this.configurationService.get('GOOGLE_SHEETS_ACCOUNT'),
-      private_key: this.configurationService
+    const serviceAccountAuth = new JWT({
+      email: this.configurationService.get('GOOGLE_SHEETS_ACCOUNT'),
+      key: this.configurationService
         .get('GOOGLE_SHEETS_PRIVATE_KEY')
-        .replace(/\\n/g, '\n')
+        .replace(/\\n/g, '\n'),
+      scopes: ['https://www.googleapis.com/auth/spreadsheets']
     });
+
+    const doc = new GoogleSpreadsheet(sheetId, serviceAccountAuth);
 
     await doc.loadInfo();
 

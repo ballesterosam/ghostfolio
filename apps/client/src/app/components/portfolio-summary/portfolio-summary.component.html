@@ -9,14 +9,14 @@
     class="flex-nowrap px-3 py-1 row"
     [hidden]="summary?.activityCount === null"
   >
-    <div class="d-flex flex-grow-1 ml-3 text-truncate">
+    <div class="d-flex flex-grow-1 ms-3 text-truncate">
       {{ summary?.activityCount }}
       <ng-container i18n>{summary?.activityCount, plural,
         =1 {activity}
         other {activities}
       }</ng-container>
       <span
-        class="align-items-center d-none d-sm-flex ml-1"
+        class="align-items-center d-none d-sm-flex ms-1"
         matTooltipPosition="above"
         [matTooltip]="buyAndSellActivitiesTooltip"
       >
@@ -92,7 +92,7 @@
     <div class="flex-grow-1 text-truncate" i18n>Fees</div>
     <div class="d-flex justify-content-end">
       @if (summary?.fees || summary?.fees === 0) {
-        <span class="mr-1">-</span>
+        <span class="me-1">-</span>
       }
       <gf-value
         class="justify-content-end"
@@ -123,10 +123,10 @@
     </div>
   </div>
   <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate ml-3">
+    <div class="flex-grow-1 text-truncate ms-3">
       <ng-container i18n>Net Performance</ng-container>
       <abbr
-        class="d-none d-sm-inline-block initialism ml-2 text-muted"
+        class="d-none d-sm-inline-block initialism ms-2 text-muted"
         title="Return on Average Investment"
         >(ROAI)</abbr
       >
@@ -172,7 +172,7 @@
         user?.settings?.isExperimentalFeatures
       ) {
         <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
+          class="d-lg-inline-block d-none ms-2 small text-muted"
           [isPercent]="true"
           [locale]="locale"
           [value]="isLoading ? undefined : emergencyFundPercentage"
@@ -200,7 +200,7 @@
         user?.subscription?.type !== 'Basic'
       ) {
         <ion-icon
-          class="mr-1 text-muted"
+          class="me-1 text-muted"
           name="ellipsis-horizontal-circle-outline"
         />
       }
@@ -215,7 +215,7 @@
     </div>
   </div>
   <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate" i18n>Cash</div>
+    <div class="flex-grow-1 ms-3 text-truncate" i18n>Cash</div>
     <div class="flex-column flex-wrap justify-content-end">
       <gf-value
         class="justify-content-end"
@@ -229,7 +229,7 @@
     </div>
   </div>
   <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate" i18n>Assets</div>
+    <div class="flex-grow-1 ms-3 text-truncate" i18n>Assets</div>
     <div class="flex-column flex-wrap justify-content-end">
       <gf-value
         class="justify-content-end"
@@ -251,7 +251,7 @@
         user?.settings?.isExperimentalFeatures
       ) {
         <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
+          class="d-lg-inline-block d-none ms-2 small text-muted"
           [isPercent]="true"
           [locale]="locale"
           [value]="isLoading ? undefined : buyingPowerPercentage"
@@ -277,7 +277,7 @@
         user?.settings?.isExperimentalFeatures
       ) {
         <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
+          class="d-lg-inline-block d-none ms-2 small text-muted"
           [isPercent]="true"
           [locale]="locale"
           [value]="isLoading ? undefined : excludedFromAnalysisPercentage"
@@ -304,7 +304,7 @@
         summary?.liabilitiesInBaseCurrency ||
         summary?.liabilitiesInBaseCurrency === 0
       ) {
-        <span class="mr-1">-</span>
+        <span class="me-1">-</span>
       }
       <gf-value
         class="justify-content-end"
@@ -320,7 +320,7 @@
     <div class="col"><hr /></div>
   </div>
   <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 font-weight-bold text-truncate" i18n>Net Worth</div>
+    <div class="flex-grow-1 fw-bold text-truncate" i18n>Net Worth</div>
     <div class="justify-content-end">
       <gf-value
         class="justify-content-end"
@@ -333,7 +333,7 @@
     </div>
   </div>
   <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate">
+    <div class="flex-grow-1 ms-3 text-truncate">
       <ng-container i18n>Annualized Performance</ng-container>
     </div>
     <div class="flex-column flex-wrap justify-content-end">

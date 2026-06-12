@@ -102,6 +102,22 @@ export class GfCreateAssetProfileDialogComponent implements OnInit {
       }
     );
 
+    this.createAssetProfileForm.controls.addCurrency.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        if (value) {
+          const transformed = value.trim().toUpperCase();
+          if (value !== transformed) {
+            this.createAssetProfileForm.controls.addCurrency.setValue(
+              transformed,
+              {
+                emitEvent: false
+              }
+            );
+          }
+        }
+      });
+
     this.mode = 'auto';
   }
 

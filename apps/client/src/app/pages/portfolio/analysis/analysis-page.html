@@ -26,16 +26,16 @@
               >
                 <span class="align-items-center d-flex">
                   @if (user?.subscription?.type === 'Basic') {
-                    <gf-premium-indicator class="mr-2" />
+                    <gf-premium-indicator class="me-2" />
                   } @else {
                     @if (isLoadingPortfolioPrompt) {
                       <mat-spinner
-                        class="mr-2"
+                        class="me-2"
                         color="accent"
                         [diameter]="16"
                       />
                     } @else {
-                      <ion-icon class="mr-2" name="copy-outline" />
+                      <ion-icon class="me-2" name="copy-outline" />
                     }
                   }
                   <ng-container i18n
@@ -51,16 +51,16 @@
               >
                 <span class="align-items-center d-flex">
                   @if (user?.subscription?.type === 'Basic') {
-                    <gf-premium-indicator class="mr-2" />
+                    <gf-premium-indicator class="me-2" />
                   } @else {
                     @if (isLoadingAnalysisPrompt) {
                       <mat-spinner
-                        class="mr-2"
+                        class="me-2"
                         color="accent"
                         [diameter]="16"
                       />
                     } @else {
-                      <ion-icon class="mr-2" name="copy-outline" />
+                      <ion-icon class="me-2" name="copy-outline" />
                     }
                   }
                   <ng-container i18n
@@ -161,11 +161,11 @@
         <mat-card-content>
           <div class="d-flex py-1">
             <div
-              class="align-items-center d-flex flex-grow-1 mr-2 text-truncate"
+              class="align-items-center d-flex flex-grow-1 me-2 text-truncate"
             >
               <span i18n>Absolute Asset Performance</span>
               @if (user?.subscription?.type === 'Basic') {
-                <gf-premium-indicator class="ml-1" />
+                <gf-premium-indicator class="ms-1" />
               }
             </div>
             <div class="d-flex justify-content-end">
@@ -183,8 +183,8 @@
               />
             </div>
           </div>
-          <div class="d-flex mb-3 ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
+          <div class="d-flex mb-3 ms-3 py-1">
+            <div class="flex-grow-1 me-2 text-truncate">
               <ng-container i18n>Asset Performance</ng-container>
             </div>
             <div class="d-flex justify-content-end">
@@ -204,11 +204,11 @@
           </div>
           <div class="d-flex py-1">
             <div
-              class="align-items-center d-flex flex-grow-1 mr-2 text-truncate"
+              class="align-items-center d-flex flex-grow-1 me-2 text-truncate"
             >
               <span i18n>Absolute Currency Performance</span>
               @if (user?.subscription?.type === 'Basic') {
-                <gf-premium-indicator class="ml-1" />
+                <gf-premium-indicator class="ms-1" />
               }
             </div>
             <div class="d-flex justify-content-end">
@@ -229,8 +229,8 @@
               />
             </div>
           </div>
-          <div class="d-flex ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
+          <div class="d-flex ms-3 py-1">
+            <div class="flex-grow-1 me-2 text-truncate">
               <ng-container i18n>Currency Performance</ng-container>
             </div>
             <div class="d-flex justify-content-end">
@@ -253,7 +253,7 @@
           </div>
           <div><hr /></div>
           <div class="d-flex py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
+            <div class="flex-grow-1 me-2 text-truncate">
               <ng-container i18n>Absolute Net Performance</ng-container>
             </div>
             <div class="d-flex justify-content-end">
@@ -271,8 +271,8 @@
               />
             </div>
           </div>
-          <div class="d-flex ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
+          <div class="d-flex ms-3 py-1">
+            <div class="flex-grow-1 me-2 text-truncate">
               <ng-container i18n>Net Performance</ng-container>
             </div>
             <div class="d-flex justify-content-end">
@@ -304,7 +304,7 @@
           >
         </mat-card-header>
         <mat-card-content>
-          <ol class="mb-0 ml-1 pl-3">
+          <ol class="mb-0 ms-1 ps-3">
             @for (holding of top3; track holding) {
               <li class="py-1">
                 <a
@@ -316,7 +316,7 @@
                   }"
                   [routerLink]="[]"
                 >
-                  <div class="flex-grow-1 mr-2">
+                  <div class="flex-grow-1 me-2">
                     {{ holding.assetProfile.name }}
                   </div>
                   <div class="d-flex justify-content-end">
@@ -355,7 +355,7 @@
           >
         </mat-card-header>
         <mat-card-content>
-          <ol class="mb-0 ml-1 pl-3">
+          <ol class="mb-0 ms-1 ps-3">
             @for (holding of bottom3; track holding) {
               <li class="py-1">
                 <a
@@ -367,7 +367,7 @@
                   }"
                   [routerLink]="[]"
                 >
-                  <div class="flex-grow-1 mr-2">
+                  <div class="flex-grow-1 me-2">
                     {{ holding.assetProfile.name }}
                   </div>
                   <div class="d-flex justify-content-end">
@@ -408,7 +408,7 @@
         >
           <span i18n>Portfolio Evolution</span>
           @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
+            <gf-premium-indicator class="ms-1" />
           }
         </div>
       </div>
@@ -437,7 +437,7 @@
         >
           <span i18n>Investment Timeline</span>
           @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
+            <gf-premium-indicator class="ms-1" />
           }
         </div>
         <gf-toggle
@@ -496,7 +496,7 @@
         >
           <span i18n>Dividend Timeline</span>
           @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
+            <gf-premium-indicator class="ms-1" />
           }
         </div>
         <gf-toggle
