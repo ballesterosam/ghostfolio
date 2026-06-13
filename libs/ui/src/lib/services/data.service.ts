@@ -14,7 +14,8 @@ import {
   UpdateOwnAccessTokenDto,
   UpdatePropertyDto,
   UpdateTagDto,
-  UpdateUserSettingDto
+  UpdateUserSettingDto,
+  ConnectIntegrationDto
 } from '@ghostfolio/common/dtos';
 import { DATE_FORMAT } from '@ghostfolio/common/helper';
 import {
@@ -54,7 +55,9 @@ import {
   SymbolItem,
   User,
   UserItem,
-  WatchlistResponse
+  WatchlistResponse,
+  PlatformIntegrationDetails,
+  ConnectIntegrationResponse
 } from '@ghostfolio/common/interfaces';
 import { filterGlobalPermissions } from '@ghostfolio/common/permissions';
 import type {
@@ -320,8 +323,9 @@ export class DataService {
     return this.http.delete<AccessModel>(`/api/v1/access/${aId}`);
   }
 
-  public deleteAccount(aId: string) {
-    return this.http.delete<Account>(`/api/v1/account/${aId}`);
+  public deleteAccount(aId: string, cascade = false) {
+    const params = cascade ? { cascade: 'true' } : {};
+    return this.http.delete<Account>(`/api/v1/account/${aId}`, { params });
   }
 
   public deleteAccountBalance(aId: string) {
@@ -903,5 +907,31 @@ export class DataService {
 
       (window as any).info = info;
     });
+  }
+
+  public fetchPlatformIntegrations() {
+    return this.http.get<PlatformIntegrationDetails[]>(
+      '/api/v1/platform-integration'
+    );
+  }
+
+  public connectPlatformIntegration(aIntegration: ConnectIntegrationDto) {
+    return this.http.post<ConnectIntegrationResponse>(
+      '/api/v1/platform-integration/connect',
+      aIntegration
+    );
+  }
+
+  public syncPlatformIntegration(aId: string) {
+    return this.http.post<{ success: boolean }>(
+      `/api/v1/platform-integration/${aId}/sync`,
+      {}
+    );
+  }
+
+  public disconnectPlatformIntegration(aId: string) {
+    return this.http.delete<{ success: boolean }>(
+      `/api/v1/platform-integration/${aId}`
+    );
   }
 }

@@ -1,7 +1,5 @@
 import type { SectorName } from '@ghostfolio/common/types';
 
-import '@angular/localize/init';
-
 const locales = {
   ACCOUNT: $localize`Account`,
   'Asia-Pacific': $localize`Asia-Pacific`,

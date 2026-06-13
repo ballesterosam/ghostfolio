@@ -706,7 +706,7 @@ export class ActivitiesService {
               platform: true
             }
           },
-          // eslint-disable-next-line @typescript-eslint/naming-convention
+
           SymbolProfile: true,
           tags: true
         },

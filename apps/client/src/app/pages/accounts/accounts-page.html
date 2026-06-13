@@ -2,22 +2,153 @@
   <div class="row">
     <div class="col">
       <h1 class="d-none d-sm-block h3 mb-4 text-center" i18n>Accounts</h1>
-      <gf-accounts-table
-        [accounts]="accounts"
-        [activitiesCount]="activitiesCount"
-        [baseCurrency]="user?.settings?.baseCurrency"
-        [locale]="user?.settings?.locale"
-        [showActions]="
-          !hasImpersonationId &&
-          hasPermissionToUpdateAccount &&
-          !user.settings.isRestrictedView
-        "
-        [totalBalanceInBaseCurrency]="totalBalanceInBaseCurrency"
-        [totalValueInBaseCurrency]="totalValueInBaseCurrency"
-        (accountDeleted)="onDeleteAccount($event)"
-        (accountToUpdate)="onUpdateAccount($event)"
-        (transferBalance)="onTransferBalance()"
-      />
+
+      <mat-tab-group animationDuration="0ms">
+        <mat-tab i18n-label label="Accounts">
+          <div class="pt-4">
+            <gf-accounts-table
+              [accounts]="accounts"
+              [activitiesCount]="activitiesCount"
+              [baseCurrency]="user?.settings?.baseCurrency"
+              [locale]="user?.settings?.locale"
+              [showActions]="
+                !hasImpersonationId &&
+                hasPermissionToUpdateAccount &&
+                !user.settings.isRestrictedView
+              "
+              [totalBalanceInBaseCurrency]="totalBalanceInBaseCurrency"
+              [totalValueInBaseCurrency]="totalValueInBaseCurrency"
+              (accountDeleted)="onDeleteAccount($event, false)"
+              (accountDeletedWithActivities)="onDeleteAccount($event, true)"
+              (accountToUpdate)="onUpdateAccount($event)"
+              (transferBalance)="onTransferBalance()"
+            />
+          </div>
+        </mat-tab>
+
+        @if (!hasImpersonationId && !user.settings.isRestrictedView) {
+          <mat-tab i18n-label label="Integrations">
+            <div class="pt-4">
+              <div
+                class="d-flex justify-content-between align-items-center mb-4"
+              >
+                <p class="m-0 text-muted" i18n>
+                  Connect external APIs to automatically synchronize your
+                  accounts and transactions.
+                </p>
+                <button
+                  color="primary"
+                  mat-flat-button
+                  [queryParams]="{ addIntegrationDialog: true }"
+                  [routerLink]="[]"
+                >
+                  <span i18n>Add Integration</span>
+                </button>
+              </div>
+
+              @if (integrations?.length > 0) {
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle">
+                    <thead>
+                      <tr>
+                        <th i18n>Account</th>
+                        <th i18n>Provider</th>
+                        <th i18n>External ID</th>
+                        <th i18n>Last Sync</th>
+                        <th i18n>Status</th>
+                        <th class="text-end" i18n>Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (integration of integrations; track integration.id) {
+                        <tr>
+                          <td>
+                            <span class="font-weight-bold">{{
+                              integration.accountName
+                            }}</span>
+                          </td>
+                          <td>
+                            <span class="badge bg-light">{{
+                              integration.provider
+                            }}</span>
+                          </td>
+                          <td>{{ integration.externalAccountId }}</td>
+                          <td>
+                            @if (integration.lastSyncAt) {
+                              {{ integration.lastSyncAt | date: 'short' }}
+                            } @else {
+                              <span class="text-muted">-</span>
+                            }
+                          </td>
+                          <td>
+                            @switch (integration.lastSyncStatus) {
+                              @case ('SUCCESS') {
+                                <span class="badge bg-success" i18n
+                                  >Success</span
+                                >
+                              }
+                              @case ('SYNCING') {
+                                <span class="badge bg-warning text-dark" i18n
+                                  >Syncing...</span
+                                >
+                              }
+                              @case ('ERROR') {
+                                <span
+                                  class="badge bg-danger"
+                                  i18n
+                                  [title]="integration.lastSyncError || ''"
+                                  >Error</span
+                                >
+                              }
+                              @case ('PENDING') {
+                                <span class="badge bg-secondary" i18n
+                                  >Pending</span
+                                >
+                              }
+                            }
+                          </td>
+                          <td class="text-end">
+                            <button
+                              i18n-title
+                              mat-icon-button
+                              title="Sync now"
+                              [disabled]="
+                                integration.lastSyncStatus === 'SYNCING'
+                              "
+                              (click)="onSyncIntegration(integration.id)"
+                            >
+                              <ion-icon name="sync-outline"></ion-icon>
+                            </button>
+                            <button
+                              color="warn"
+                              i18n-title
+                              mat-icon-button
+                              title="Disconnect"
+                              (click)="onDisconnectIntegration(integration.id)"
+                            >
+                              <ion-icon
+                                class="text-danger"
+                                name="trash-outline"
+                              ></ion-icon>
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="empty-state-container">
+                  <p i18n>
+                    No active integrations. Click "Add Integration" to connect
+                    your first API account.
+                  </p>
+                </div>
+              }
+            </div>
+          </mat-tab>
+        }
+      </mat-tab-group>
     </div>
   </div>
 

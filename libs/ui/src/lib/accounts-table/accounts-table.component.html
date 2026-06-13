@@ -331,6 +331,15 @@
               <span i18n>Delete</span>
             </span>
           </button>
+          <button
+            mat-menu-item
+            (click)="onDeleteAccountWithActivities(element.id)"
+          >
+            <span class="align-items-center d-flex text-danger">
+              <ion-icon class="me-2 text-danger" name="trash-bin-outline" />
+              <span i18n>Delete All Activities and Investments</span>
+            </span>
+          </button>
         </mat-menu>
       </td>
       <td *matFooterCellDef class="px-1" mat-footer-cell></td>

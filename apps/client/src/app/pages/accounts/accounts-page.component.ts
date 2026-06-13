@@ -7,13 +7,16 @@ import {
   TransferBalanceDto,
   UpdateAccountDto
 } from '@ghostfolio/common/dtos';
+import { ConfirmationDialogType } from '@ghostfolio/common/enums';
 import { User } from '@ghostfolio/common/interfaces';
+import { PlatformIntegrationDetails } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { GfAccountsTableComponent } from '@ghostfolio/ui/accounts-table';
 import { GfFabComponent } from '@ghostfolio/ui/fab';
 import { NotificationService } from '@ghostfolio/ui/notifications';
 import { DataService } from '@ghostfolio/ui/services';
 
+import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
@@ -21,13 +24,19 @@ import {
   OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
+import { MatTabsModule } from '@angular/material/tabs';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { IonIcon } from '@ionic/angular/standalone';
 import { Account as AccountModel } from '@prisma/client';
+import { addIcons } from 'ionicons';
+import { syncOutline, trashOutline } from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { EMPTY, Subscription } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
+import { GfAddIntegrationDialogComponent } from './add-integration-dialog/add-integration-dialog.component';
 import { GfCreateOrUpdateAccountDialogComponent } from './create-or-update-account-dialog/create-or-update-account-dialog.component';
 import { CreateOrUpdateAccountDialogParams } from './create-or-update-account-dialog/interfaces/interfaces';
 import { TransferBalanceDialogParams } from './transfer-balance/interfaces/interfaces';
@@ -35,7 +44,15 @@ import { GfTransferBalanceDialogComponent } from './transfer-balance/transfer-ba
 
 @Component({
   host: { class: 'page' },
-  imports: [GfAccountsTableComponent, GfFabComponent, RouterModule],
+  imports: [
+    CommonModule,
+    GfAccountsTableComponent,
+    GfFabComponent,
+    MatTabsModule,
+    MatButtonModule,
+    IonIcon,
+    RouterModule
+  ],
   selector: 'gf-accounts-page',
   styleUrls: ['./accounts-page.scss'],
   templateUrl: './accounts-page.html'
@@ -51,6 +68,7 @@ export class GfAccountsPageComponent implements OnInit {
   public totalBalanceInBaseCurrency = 0;
   public totalValueInBaseCurrency = 0;
   public user: User;
+  public integrations: PlatformIntegrationDetails[] = [];
 
   public constructor(
     private changeDetectorRef: ChangeDetectorRef,
@@ -64,6 +82,8 @@ export class GfAccountsPageComponent implements OnInit {
     private router: Router,
     private userService: UserService
   ) {
+    addIcons({ syncOutline, trashOutline });
+
     this.route.queryParams
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((params) => {
@@ -86,6 +106,8 @@ export class GfAccountsPageComponent implements OnInit {
           }
         } else if (params['transferBalanceDialog']) {
           this.openTransferBalanceDialog();
+        } else if (params['addIntegrationDialog']) {
+          this.openAddIntegrationDialog();
         }
       });
   }
@@ -120,6 +142,7 @@ export class GfAccountsPageComponent implements OnInit {
       });
 
     this.fetchAccounts();
+    this.fetchIntegrations();
   }
 
   public fetchAccounts() {
@@ -147,11 +170,11 @@ export class GfAccountsPageComponent implements OnInit {
       );
   }
 
-  public onDeleteAccount(aId: string) {
+  public onDeleteAccount(aId: string, cascade = false) {
     this.reset();
 
     this.dataService
-      .deleteAccount(aId)
+      .deleteAccount(aId, cascade)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
         this.userService
@@ -160,6 +183,7 @@ export class GfAccountsPageComponent implements OnInit {
           .subscribe();
 
         this.fetchAccounts();
+        this.fetchIntegrations();
       });
   }
 
@@ -227,6 +251,60 @@ export class GfAccountsPageComponent implements OnInit {
 
         this.router.navigate(['.'], { relativeTo: this.route });
       });
+  }
+
+  public openAddIntegrationDialog() {
+    const dialogRef = this.dialog.open<GfAddIntegrationDialogComponent>(
+      GfAddIntegrationDialogComponent,
+      {
+        height: this.deviceType === 'mobile' ? '98vh' : '80vh',
+        width: this.deviceType === 'mobile' ? '100vw' : '55rem'
+      }
+    );
+
+    dialogRef
+      .afterClosed()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((success) => {
+        if (success) {
+          this.reset();
+          this.fetchAccounts();
+          this.fetchIntegrations();
+        }
+        this.router.navigate(['.'], { relativeTo: this.route });
+      });
+  }
+
+  public fetchIntegrations() {
+    this.dataService
+      .fetchPlatformIntegrations()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((integrations) => {
+        this.integrations = integrations;
+        this.changeDetectorRef.markForCheck();
+      });
+  }
+
+  public onSyncIntegration(id: string) {
+    this.dataService.syncPlatformIntegration(id).subscribe(() => {
+      this.notificationService.alert({
+        title: $localize`Sync job queued successfully.`
+      });
+      this.fetchIntegrations();
+    });
+  }
+
+  public onDisconnectIntegration(id: string) {
+    this.notificationService.confirm({
+      confirmFn: () => {
+        this.dataService.disconnectPlatformIntegration(id).subscribe(() => {
+          this.fetchAccounts();
+          this.fetchIntegrations();
+        });
+      },
+      confirmType: ConfirmationDialogType.Warn,
+      title: $localize`Do you really want to disconnect this integration? The historical account data will be preserved.`
+    });
   }
 
   private openAccountDetailDialog(aAccountId: string) {

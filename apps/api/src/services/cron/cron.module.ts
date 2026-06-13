@@ -3,6 +3,7 @@ import { ConfigurationModule } from '@ghostfolio/api/services/configuration/conf
 import { ExchangeRateDataModule } from '@ghostfolio/api/services/exchange-rate-data/exchange-rate-data.module';
 import { PropertyModule } from '@ghostfolio/api/services/property/property.module';
 import { DataGatheringQueueModule } from '@ghostfolio/api/services/queues/data-gathering/data-gathering.module';
+import { PlatformSyncQueueModule } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.module';
 import { StatisticsGatheringQueueModule } from '@ghostfolio/api/services/queues/statistics-gathering/statistics-gathering.module';
 import { TwitterBotModule } from '@ghostfolio/api/services/twitter-bot/twitter-bot.module';
 
@@ -15,6 +16,7 @@ import { CronService } from './cron.service';
     ConfigurationModule,
     DataGatheringQueueModule,
     ExchangeRateDataModule,
+    PlatformSyncQueueModule,
     PropertyModule,
     StatisticsGatheringQueueModule,
     TwitterBotModule,

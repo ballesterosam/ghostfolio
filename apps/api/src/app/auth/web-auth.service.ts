@@ -1,6 +1,7 @@
 import { AuthDeviceService } from '@ghostfolio/api/app/auth-device/auth-device.service';
 import { UserService } from '@ghostfolio/api/app/user/user.service';
 import { ConfigurationService } from '@ghostfolio/api/services/configuration/configuration.service';
+import { PlatformSyncQueueService } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.service';
 import { AuthDeviceDto } from '@ghostfolio/common/dtos';
 import {
   AssertionCredentialJSON,
@@ -39,6 +40,7 @@ export class WebAuthService {
     private readonly configurationService: ConfigurationService,
     private readonly deviceService: AuthDeviceService,
     private readonly jwtService: JwtService,
+    private readonly platformSyncQueueService: PlatformSyncQueueService,
     private readonly userService: UserService,
     @Inject(REQUEST) private readonly request: RequestWithUser
   ) {}
@@ -225,6 +227,11 @@ export class WebAuthService {
         data: device,
         where: { id: device.id }
       });
+
+      // Trigger platform sync asynchronously
+      this.platformSyncQueueService
+        .addSyncUserJob(user.id)
+        .catch(() => undefined);
 
       return this.jwtService.sign({
         id: user.id

@@ -6,9 +6,11 @@ import { CronModule } from '@ghostfolio/api/services/cron/cron.module';
 import { DataProviderModule } from '@ghostfolio/api/services/data-provider/data-provider.module';
 import { ExchangeRateDataModule } from '@ghostfolio/api/services/exchange-rate-data/exchange-rate-data.module';
 import { I18nService } from '@ghostfolio/api/services/i18n/i18n.service';
+import { PlatformIntegrationModule } from '@ghostfolio/api/services/platform-integration/platform-integration.module';
 import { PrismaModule } from '@ghostfolio/api/services/prisma/prisma.module';
 import { PropertyModule } from '@ghostfolio/api/services/property/property.module';
 import { DataGatheringQueueModule } from '@ghostfolio/api/services/queues/data-gathering/data-gathering.module';
+import { PlatformSyncQueueModule } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.module';
 import { PortfolioSnapshotQueueModule } from '@ghostfolio/api/services/queues/portfolio-snapshot/portfolio-snapshot.module';
 import {
   BULL_BOARD_ROUTE,
@@ -121,9 +123,11 @@ import { UserModule } from './user/user.module';
     LogoModule,
     MarketDataModule,
     PlatformModule,
+    PlatformIntegrationModule,
     PlatformsModule,
     PortfolioModule,
     PortfolioSnapshotQueueModule,
+    PlatformSyncQueueModule,
     PrismaModule,
     PropertyModule,
     PublicModule,

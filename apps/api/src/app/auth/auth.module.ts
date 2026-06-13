@@ -9,6 +9,7 @@ import { FetchModule } from '@ghostfolio/api/services/fetch/fetch.module';
 import { FetchService } from '@ghostfolio/api/services/fetch/fetch.service';
 import { PrismaModule } from '@ghostfolio/api/services/prisma/prisma.module';
 import { PropertyModule } from '@ghostfolio/api/services/property/property.module';
+import { PlatformSyncQueueModule } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.module';
 
 import { Logger, Module } from '@nestjs/common';
 import { JwtModule } from '@nestjs/jwt';
@@ -30,6 +31,7 @@ import { OidcStrategy } from './oidc.strategy';
       secret: process.env.JWT_SECRET_KEY,
       signOptions: { expiresIn: '180 days' }
     }),
+    PlatformSyncQueueModule,
     PrismaModule,
     PropertyModule,
     SubscriptionModule,

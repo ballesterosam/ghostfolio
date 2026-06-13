@@ -1,8 +1,14 @@
 import { CreatePlatformDto, UpdatePlatformDto } from '@ghostfolio/common/dtos';
+import { SUPPORTED_INTEGRATIONS } from '@ghostfolio/common/integration-registry';
 import { validateObjectForForm } from '@ghostfolio/common/utils';
 import { GfEntityLogoComponent } from '@ghostfolio/ui/entity-logo';
 
-import { ChangeDetectionStrategy, Component, Inject } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  Inject,
+  OnInit
+} from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -18,6 +24,7 @@ import {
 } from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatSelectModule } from '@angular/material/select';
 
 import { CreateOrUpdatePlatformDialogParams } from './interfaces/interfaces';
 
@@ -31,14 +38,17 @@ import { CreateOrUpdatePlatformDialogParams } from './interfaces/interfaces';
     MatDialogModule,
     MatFormFieldModule,
     MatInputModule,
+    MatSelectModule,
     ReactiveFormsModule
   ],
   selector: 'gf-create-or-update-platform-dialog',
   styleUrls: ['./create-or-update-platform-dialog.scss'],
   templateUrl: 'create-or-update-platform-dialog.html'
 })
-export class GfCreateOrUpdatePlatformDialogComponent {
+export class GfCreateOrUpdatePlatformDialogComponent implements OnInit {
   public platformForm: FormGroup;
+  public platformType: 'custom' | 'native' = 'custom';
+  public supportedIntegrations = SUPPORTED_INTEGRATIONS;
 
   public constructor(
     @Inject(MAT_DIALOG_DATA) public data: CreateOrUpdatePlatformDialogParams,
@@ -49,6 +59,42 @@ export class GfCreateOrUpdatePlatformDialogComponent {
       name: [this.data.platform?.name, Validators.required],
       url: [this.data.platform?.url ?? 'https://', Validators.required]
     });
+  }
+
+  public ngOnInit() {
+    // If updating, determine if it matches a native integration
+    if (this.data.platform?.id) {
+      const isNative = this.supportedIntegrations.some(
+        (integration) =>
+          integration.name.toLowerCase() ===
+            this.data.platform.name?.toLowerCase() ||
+          integration.url.toLowerCase() ===
+            this.data.platform.url?.toLowerCase()
+      );
+      if (isNative) {
+        this.platformType = 'native';
+      }
+    }
+  }
+
+  public onPlatformTypeChange(type: 'custom' | 'native') {
+    this.platformType = type;
+    if (type === 'custom') {
+      this.platformForm.patchValue({
+        name: '',
+        url: 'https://'
+      });
+    }
+  }
+
+  public onIntegrationChange(integration: any) {
+    if (integration) {
+      this.platformForm.patchValue({
+        name: integration.name,
+        url: integration.url
+      });
+      this.platformForm.markAsDirty();
+    }
   }
 
   public onCancel() {
