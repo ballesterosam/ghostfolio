@@ -1,4 +1,4 @@
-import { IntegrationProvider } from '@prisma/client';
+import { AssetClass, AssetSubClass, IntegrationProvider } from '@prisma/client';
 
 export interface ExternalAccount {
   id: string; // Número de cuenta (ej. AWIVYYQ9)
@@ -12,6 +12,8 @@ export interface ExternalPosition {
   quantity: number;
   unitPrice: number;
   currency: string;
+  assetClass?: AssetClass;
+  assetSubClass?: AssetSubClass;
 }
 
 export interface ExternalTransaction {
@@ -23,6 +25,8 @@ export interface ExternalTransaction {
   quantity: number;
   unitPrice: number;
   currency: string;
+  assetClass?: AssetClass;
+  assetSubClass?: AssetSubClass;
 }
 
 export interface IntegrationProviderInterface {

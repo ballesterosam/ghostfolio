@@ -392,6 +392,7 @@ model PlatformIntegration {
 
 enum IntegrationProvider {
   INDEXA_CAPITAL
+  ETORO
 }
 
 enum IntegrationSyncStatus {

@@ -118,61 +118,98 @@ export class PlatformSyncService {
         // Resolve SymbolProfile
         let profile = resolvedProfiles.get(tx.isin);
         if (!profile) {
-          // Check DB first
-          const dbProfile = await this.prismaService.symbolProfile.findFirst({
-            where: { isin: tx.isin }
-          });
-
-          if (dbProfile) {
-            profile = {
-              dataSource: dbProfile.dataSource,
-              id: dbProfile.id,
-              name: dbProfile.name,
-              symbol: dbProfile.symbol
-            };
-          } else {
-            // Check via search API
-            try {
-              const searchResult = await this.dataProviderService.search({
-                query: tx.isin,
-                user: {
-                  id: integration.userId,
-                  subscription: { type: 'Premium' }
-                } as any
-              });
-
-              const firstMatch = searchResult?.items?.[0];
-              if (firstMatch?.symbol && firstMatch?.dataSource) {
-                profile = {
-                  dataSource: firstMatch.dataSource,
-                  name: firstMatch.name,
-                  symbol: firstMatch.symbol
-                };
+          if (integration.provider === 'ETORO') {
+            const manualSymbol =
+              `ETORO_${tx.isin}_${integration.userId}`.toUpperCase();
+            const dbProfile = await this.prismaService.symbolProfile.findFirst({
+              where: {
+                dataSource: DataSource.MANUAL,
+                symbol: manualSymbol
               }
-            } catch (err) {
-              this.logger.error(
-                `Error searching symbol for ISIN ${tx.isin}: ${err.message}`
-              );
-            }
+            });
 
-            // Fallback: create manual profile
-            if (!profile) {
-              const uuid = randomUUID();
+            if (dbProfile) {
+              profile = {
+                dataSource: dbProfile.dataSource,
+                id: dbProfile.id,
+                name: dbProfile.name,
+                symbol: dbProfile.symbol
+              };
+            } else {
               profile = {
                 dataSource: DataSource.MANUAL,
                 name: tx.name,
-                symbol: uuid
+                symbol: manualSymbol
               };
+            }
+          } else {
+            // Check DB first
+            const dbProfile = await this.prismaService.symbolProfile.findFirst({
+              where: {
+                isin: tx.isin,
+                ...(tx.assetSubClass ? { assetSubClass: tx.assetSubClass } : {})
+              }
+            });
+
+            if (dbProfile) {
+              profile = {
+                dataSource: dbProfile.dataSource,
+                id: dbProfile.id,
+                name: dbProfile.name,
+                symbol: dbProfile.symbol
+              };
+            } else {
+              // Check via search API
+              try {
+                const searchResult = await this.dataProviderService.search({
+                  query: tx.isin,
+                  user: {
+                    id: integration.userId,
+                    subscription: { type: 'Premium' }
+                  } as any
+                });
+
+                let filteredItems = searchResult?.items || [];
+                if (tx.assetSubClass) {
+                  filteredItems = filteredItems.filter(
+                    (item) => item.assetSubClass === tx.assetSubClass
+                  );
+                }
+
+                const firstMatch = filteredItems?.[0];
+                if (firstMatch?.symbol && firstMatch?.dataSource) {
+                  profile = {
+                    dataSource: firstMatch.dataSource,
+                    name: firstMatch.name,
+                    symbol: firstMatch.symbol
+                  };
+                }
+              } catch (err) {
+                this.logger.error(
+                  `Error searching symbol for ISIN ${tx.isin}: ${err.message}`
+                );
+              }
+
+              // Fallback: create manual profile
+              if (!profile) {
+                const uuid = randomUUID();
+                profile = {
+                  dataSource: DataSource.MANUAL,
+                  name: tx.name,
+                  symbol: uuid
+                };
+              }
             }
           }
           resolvedProfiles.set(tx.isin, profile);
         }
 
         // Map asset class
-        const { assetClass, assetSubClass } = this.mapAssetClass(
-          tx.isin,
-          tx.name
-        );
+        const assetClass =
+          tx.assetClass ?? this.mapAssetClass(tx.isin, tx.name).assetClass;
+        const assetSubClass =
+          tx.assetSubClass ??
+          this.mapAssetClass(tx.isin, tx.name).assetSubClass;
 
         // Create the activity in Ghostfolio
         await this.activitiesService.createActivity({

@@ -51,7 +51,7 @@ import { alertCircleOutline, checkmarkCircleOutline } from 'ionicons/icons';
 export class GfAddIntegrationDialogComponent implements OnInit {
   protected step: 'select' | 'configure' | 'loading' | 'success' | 'error' =
     'select';
-  protected supportedIntegrations = SUPPORTED_INTEGRATIONS;
+  protected supportedIntegrations: IntegrationProviderInfo[] = [];
   protected selectedIntegration: IntegrationProviderInfo | null = null;
   protected integrationForm: FormGroup;
   protected connectionResult: ConnectIntegrationResponse | null = null;
@@ -69,13 +69,79 @@ export class GfAddIntegrationDialogComponent implements OnInit {
   }
 
   public ngOnInit() {
-    this.integrationForm = this.formBuilder.group({
-      credentials: ['', Validators.required]
+    this.integrationForm = this.formBuilder.group({});
+    this.supportedIntegrations = this.getLocalisedIntegrations();
+  }
+
+  private getLocalisedIntegrations(): IntegrationProviderInfo[] {
+    return SUPPORTED_INTEGRATIONS.map((integration) => {
+      let description = integration.description;
+      let setupSteps = integration.setupSteps;
+      const credentialFields = integration.credentialFields.map((field) => ({
+        ...field
+      }));
+
+      if (integration.provider === 'INDEXA_CAPITAL') {
+        description = $localize`Leading automated investment manager in Spain (index funds, pension plans, EPSV).`;
+        setupSteps = [
+          $localize`Access your private area at indexacapital.com`,
+          $localize`Go to User settings > API / Applications`,
+          $localize`Generate an API token with read permissions`,
+          $localize`Copy the token and paste it below`
+        ];
+        const tokenField = credentialFields.find((f) => f.key === 'apiToken');
+        if (tokenField) {
+          tokenField.label = $localize`API Token`;
+          tokenField.placeholder = $localize`Indexa Capital Token`;
+          tokenField.helpText = $localize`Your personal API token for read-only access.`;
+        }
+      } else if (integration.provider === 'ETORO') {
+        description = $localize`Leading global investment broker. Automatically sync your stock, ETF and cryptocurrency positions.`;
+        setupSteps = [
+          $localize`Log in to your eToro account.`,
+          $localize`Go to Settings > Trading.`,
+          $localize`Create a new API key (Create New Key).`,
+          $localize`Set the environment to "Real Portfolio" and copy your API Key and User Key.`
+        ];
+        const apiKeyField = credentialFields.find((f) => f.key === 'apiKey');
+        if (apiKeyField) {
+          apiKeyField.label = $localize`API Key (x-api-key)`;
+          apiKeyField.placeholder = $localize`Your public API key`;
+          apiKeyField.helpText = $localize`Public application key provided by eToro.`;
+        }
+        const userKeyField = credentialFields.find((f) => f.key === 'userKey');
+        if (userKeyField) {
+          userKeyField.label = $localize`User Key (x-user-key)`;
+          userKeyField.placeholder = $localize`Your user account key`;
+          userKeyField.helpText = $localize`Private key generated in your trading settings.`;
+        }
+      }
+
+      return {
+        ...integration,
+        description,
+        setupSteps,
+        credentialFields
+      };
     });
   }
 
   protected selectIntegration(integration: IntegrationProviderInfo) {
     this.selectedIntegration = integration;
+
+    // Clear old controls
+    Object.keys(this.integrationForm.controls).forEach((key) => {
+      this.integrationForm.removeControl(key);
+    });
+
+    // Add new controls dynamically
+    for (const field of integration.credentialFields) {
+      this.integrationForm.addControl(
+        field.key,
+        this.formBuilder.control('', Validators.required)
+      );
+    }
+
     this.step = 'configure';
   }
 
@@ -98,7 +164,18 @@ export class GfAddIntegrationDialogComponent implements OnInit {
     }
 
     this.step = 'loading';
-    const credentials = this.integrationForm.get('credentials')?.value;
+
+    let credentials = '';
+    const fields = this.selectedIntegration.credentialFields;
+    if (fields.length === 1) {
+      credentials = this.integrationForm.get(fields[0].key)?.value;
+    } else {
+      const credentialsObj: Record<string, string> = {};
+      for (const field of fields) {
+        credentialsObj[field.key] = this.integrationForm.get(field.key)?.value;
+      }
+      credentials = JSON.stringify(credentialsObj);
+    }
 
     this.dataService
       .connectPlatformIntegration({

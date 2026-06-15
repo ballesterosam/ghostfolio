@@ -25,5 +25,35 @@ export const SUPPORTED_INTEGRATIONS: IntegrationProviderInfo[] = [
         helpText: 'Tu token personal de API para acceso de sólo lectura.'
       }
     ]
+  },
+  {
+    provider: IntegrationProvider.ETORO,
+    name: 'eToro',
+    url: 'https://etoro.com',
+    description:
+      'Broker de inversión líder global. Sincroniza automáticamente tus posiciones de acciones, ETFs y criptomonedas.',
+    iconKey: 'etoro',
+    setupSteps: [
+      'Inicia sesión en tu cuenta de eToro.',
+      'Ve a Ajustes > Trading.',
+      'Crea una nueva clave de API (Create New Key).',
+      'Configura el entorno en "Real Portfolio" y copia tu API Key y tu User Key.'
+    ],
+    credentialFields: [
+      {
+        key: 'apiKey',
+        label: 'API Key (x-api-key)',
+        type: 'password',
+        placeholder: 'Tu clave de API pública',
+        helpText: 'Clave pública de la aplicación provista por eToro.'
+      },
+      {
+        key: 'userKey',
+        label: 'User Key (x-user-key)',
+        type: 'password',
+        placeholder: 'Tu clave de cuenta de usuario',
+        helpText: 'Clave privada generada en tus ajustes de trading.'
+      }
+    ]
   }
 ];

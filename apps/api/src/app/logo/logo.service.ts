@@ -43,9 +43,15 @@ export class LogoService {
   }
 
   public async getLogoByUrl(aUrl: string) {
-    if (aUrl === 'https://indexacapital.com') {
+    if (
+      aUrl === 'https://indexacapital.com' ||
+      aUrl === 'https://etoro.com' ||
+      aUrl === 'https://www.etoro.com'
+    ) {
       try {
-        let filePath = join(__dirname, 'assets', 'indexa-capital.png');
+        const isEtoro = aUrl.includes('etoro');
+        const filename = isEtoro ? 'etoro.png' : 'indexa-capital.png';
+        let filePath = join(__dirname, 'assets', filename);
         if (!existsSync(filePath)) {
           filePath = join(
             process.cwd(),
@@ -53,7 +59,7 @@ export class LogoService {
             'api',
             'src',
             'assets',
-            'indexa-capital.png'
+            filename
           );
         }
         const buffer = readFileSync(filePath);

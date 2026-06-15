@@ -48,8 +48,8 @@
         <mat-form-field appearance="outline" class="w-100">
           <mat-label>{{ field.label }}</mat-label>
           <input
-            formControlName="credentials"
             matInput
+            [formControlName]="field.key"
             [placeholder]="field.placeholder"
             [type]="field.type"
           />

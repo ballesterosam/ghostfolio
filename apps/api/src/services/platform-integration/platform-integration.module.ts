@@ -12,12 +12,14 @@ import { Module, forwardRef } from '@nestjs/common';
 
 import { IntegrationProviderRegistry } from './integration-provider.registry';
 import { PlatformSyncService } from './platform-sync.service';
+import { EtoroProvider } from './providers/etoro/etoro.provider';
 import { IndexaCapitalProvider } from './providers/indexa-capital/indexa-capital.provider';
 
 @Module({
   controllers: [PlatformIntegrationController],
   exports: [
     IndexaCapitalProvider,
+    EtoroProvider,
     IntegrationProviderRegistry,
     PlatformSyncService
   ],
@@ -33,6 +35,7 @@ import { IndexaCapitalProvider } from './providers/indexa-capital/indexa-capital
   ],
   providers: [
     IndexaCapitalProvider,
+    EtoroProvider,
     IntegrationProviderRegistry,
     PlatformSyncService
   ]

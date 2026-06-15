@@ -157,4 +157,60 @@ describe('PlatformSyncService', () => {
       where: { id: 'integration-1' }
     });
   });
+
+  it('should map eToro assets directly to isolated MANUAL symbol profiles without calling search API', async () => {
+    const mockIntegration = {
+      id: 'integration-1',
+      accountId: 'account-1',
+      credentialsIv: 'iv',
+      credentialsTag: 'tag',
+      encryptedCredentials: 'encrypted',
+      isActive: true,
+      provider: IntegrationProvider.ETORO,
+      userId: 'user-1'
+    };
+
+    mockPrismaService.platformIntegration.findUnique.mockResolvedValueOnce(
+      mockIntegration
+    );
+
+    mockProvider.getTransactions.mockResolvedValueOnce([
+      {
+        currency: 'USD',
+        date: new Date('2026-02-25'),
+        isin: 'ADA',
+        name: 'Cardano',
+        quantity: 100,
+        reference: 'etoro-pos-open-12345',
+        type: 'BUY',
+        unitPrice: 0.5,
+        assetClass: 'ALTERNATIVE_INVESTMENT',
+        assetSubClass: 'CRYPTOCURRENCY'
+      }
+    ]);
+
+    await syncService.syncIntegration('integration-1');
+
+    // Verify search API was NOT called
+    expect(mockDataProviderService.search).not.toHaveBeenCalled();
+
+    // Verify activity was created with the isolated MANUAL symbol profile format
+    expect(mockActivitiesService.createActivity).toHaveBeenCalledWith(
+      expect.objectContaining({
+        assetClass: 'ALTERNATIVE_INVESTMENT',
+        assetSubClass: 'CRYPTOCURRENCY',
+        SymbolProfile: expect.objectContaining({
+          connectOrCreate: expect.objectContaining({
+            create: expect.objectContaining({
+              dataSource: 'MANUAL',
+              symbol: 'ETORO_ADA_USER-1',
+              name: 'Cardano',
+              isin: 'ADA',
+              userId: 'user-1'
+            })
+          })
+        })
+      })
+    );
+  });
 });
