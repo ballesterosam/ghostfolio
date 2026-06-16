@@ -1,37 +1,219 @@
 :host {
   display: block;
 
+  // Table structure for separated card rows
+  table.gf-table {
+    border-collapse: separate !important;
+    border-spacing: 0 12px !important;
+    background: transparent !important;
+    border: none !important;
+
+    // Remove borders on default table headers
+    tr.mat-mdc-header-row {
+      background: transparent !important;
+
+      th {
+        border: none !important;
+        text-transform: uppercase;
+        font-size: 0.75rem !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.05em;
+        padding: 0.5rem 0.75rem !important;
+        color: rgba(var(--dark-primary-text), 0.6) !important;
+        background-color: transparent !important;
+      }
+    }
+
+    // Style the card rows
+    tr.mat-mdc-row {
+      background-color: var(--gf-card-bg-light);
+      transition:
+        transform 0.2s ease,
+        box-shadow 0.2s ease;
+
+      &:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+
+        td {
+          background-color: var(--gf-card-bg-light) !important;
+        }
+      }
+
+      td {
+        border-top: 1px solid rgba(var(--dark-dividers)) !important;
+        border-bottom: 1px solid rgba(var(--dark-dividers)) !important;
+        background-color: var(--gf-card-bg-light) !important;
+        padding: 1rem 0.75rem !important;
+        border-left: none !important;
+        border-right: none !important;
+        vertical-align: middle;
+
+        &:first-child {
+          border-left: 1px solid rgba(var(--dark-dividers)) !important;
+          border-top-left-radius: 16px;
+          border-bottom-left-radius: 16px;
+        }
+
+        &:last-child {
+          border-right: 1px solid rgba(var(--dark-dividers)) !important;
+          border-top-right-radius: 16px;
+          border-bottom-right-radius: 16px;
+        }
+
+        &.mat-mdc-table-sticky {
+          position: static !important; // disable sticky column positioning when separate
+        }
+
+        &.mat-column-dateOfFirstActivity,
+        &.mat-column-quantity,
+        &.mat-column-valueInBaseCurrency,
+        &.mat-column-allocationInPercentage,
+        &.mat-column-performance,
+        &.mat-column-performanceInPercentage {
+          font-size: 1.05rem;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+
+  // Round, larger asset type icon wrapper
+  .asset-icon-wrapper {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50% !important;
+    height: 2.25rem !important;
+    width: 2.25rem !important;
+    background-color: var(--gf-surface-light) !important;
+    border: 1px solid rgba(var(--dark-dividers)) !important;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+
+    ion-icon {
+      font-size: 1.25rem;
+      color: rgba(var(--dark-primary-text), 0.7);
+    }
+  }
+
+  .text-subtitle {
+    color: rgba(var(--dark-primary-text), 0.6) !important;
+  }
+
+  // Rectangular performance badges with solid backgrounds and white text
   .perf-badge {
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.65rem;
-    border-radius: 2rem;
-    font-size: 0.78rem;
-    font-weight: 700;
+    padding: 0.35rem 0.75rem;
+    border-radius: 8px;
+    font-size: 0.82rem;
+    font-weight: 600;
     white-space: nowrap;
+    color: #ffffff !important;
 
     &--positive {
-      background-color: rgba(22, 163, 74, 0.12);
-      color: #16a34a;
+      background-color: #22c55e;
     }
 
     &--negative {
-      background-color: rgba(220, 38, 38, 0.12);
-      color: #dc2626;
+      background-color: #f97316;
+    }
+  }
+
+  .text-main {
+    color: rgba(var(--dark-primary-text)) !important;
+  }
+
+  .mobile-detail-content {
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    .border-bottom-subtle {
+      border-bottom: 1px solid rgba(var(--dark-dividers), 0.5);
+    }
+  }
+
+  .transition-transform {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 300px;
     }
   }
 }
 
 :host-context(.theme-dark) {
-  .perf-badge {
-    &--positive {
-      background-color: rgba(74, 222, 128, 0.15);
-      color: #4ade80;
+  table.gf-table {
+    tr.mat-mdc-header-row {
+      th {
+        color: rgba(var(--light-primary-text), 0.6) !important;
+      }
     }
 
+    tr.mat-mdc-row {
+      background-color: rgb(48, 56, 72);
+
+      &:hover {
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+
+        td {
+          background-color: rgb(48, 56, 72) !important;
+        }
+      }
+
+      td {
+        border-top: 1px solid rgba(var(--light-dividers)) !important;
+        border-bottom: 1px solid rgba(var(--light-dividers)) !important;
+        background-color: rgb(48, 56, 72) !important;
+
+        &:first-child {
+          border-left: 1px solid rgba(var(--light-dividers)) !important;
+        }
+
+        &:last-child {
+          border-right: 1px solid rgba(var(--light-dividers)) !important;
+        }
+      }
+    }
+  }
+
+  .asset-icon-wrapper {
+    background-color: var(--gf-surface-dark) !important;
+    border: 1px solid rgba(var(--light-dividers)) !important;
+
+    ion-icon {
+      color: rgba(var(--light-primary-text), 0.7);
+    }
+  }
+
+  .text-subtitle {
+    color: rgba(var(--light-primary-text), 0.75) !important;
+  }
+
+  .perf-badge {
     &--negative {
-      background-color: rgba(248, 113, 113, 0.15);
-      color: #f87171;
+      background-color: #ea580c;
+    }
+  }
+
+  .text-main {
+    color: rgba(var(--light-primary-text)) !important;
+  }
+
+  .mobile-detail-content {
+    .border-bottom-subtle {
+      border-bottom: 1px solid rgba(var(--light-dividers), 0.5);
     }
   }
 }

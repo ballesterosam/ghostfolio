@@ -637,12 +637,27 @@ export class PortfolioService {
         }));
       }
 
+      const symbolActivities = activities.filter((act) => {
+        return (
+          act.SymbolProfile?.symbol === symbol &&
+          act.SymbolProfile?.dataSource === dataSource
+        );
+      });
+      const uniqueAccountNames = Array.from(
+        new Set(
+          symbolActivities
+            .map((act) => act.account?.name)
+            .filter((name) => !!name)
+        )
+      );
+
       holdings[symbol] = {
         activitiesCount,
         markets,
         marketsAdvanced,
         marketPrice,
         tags,
+        accountNames: uniqueAccountNames,
         allocationInPercentage: filteredValueInBaseCurrency.eq(0)
           ? 0
           : valueInBaseCurrency.div(filteredValueInBaseCurrency).toNumber(),
@@ -1558,6 +1573,15 @@ export class PortfolioService {
           currency: account.currency
         });
       }
+
+      if (!cashPositions[account.currency].accountNames) {
+        cashPositions[account.currency].accountNames = [];
+      }
+      if (
+        !cashPositions[account.currency].accountNames.includes(account.name)
+      ) {
+        cashPositions[account.currency].accountNames.push(account.name);
+      }
     }
 
     for (const symbol of Object.keys(cashPositions)) {
@@ -1700,6 +1724,7 @@ export class PortfolioService {
     return {
       activitiesCount: 0,
       allocationInPercentage: 0,
+      accountNames: [],
       assetProfile: {
         currency,
         assetClass: AssetClass.LIQUIDITY,

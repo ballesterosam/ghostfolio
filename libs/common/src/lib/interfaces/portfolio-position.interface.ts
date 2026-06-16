@@ -45,4 +45,5 @@ export interface PortfolioPosition {
   type?: string;
   valueInBaseCurrency?: number;
   valueInPercentage?: number;
+  accountNames?: string[];
 }

@@ -1,9 +1,21 @@
 :host {
   display: block;
 
+  .overview {
+    max-width: 100rem;
+    margin: 0 auto;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    opacity: 0.95;
+  }
+
   .mat-button-toggle-group {
     .mat-button-toggle-appearance-standard {
-      --mat-button-toggle-height: 1.5rem;
+      --mat-button-toggle-height: 2.1rem; // Align with the gf-toggle component height!
     }
   }
 }
