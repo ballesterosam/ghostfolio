@@ -252,13 +252,13 @@ export class GfLineChartComponent
               },
               tooltip: this.getTooltipPluginConfiguration(),
               verticalHoverLine: {
-                color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`
+                color: `rgba(${getTextColor(this.colorScheme)}, 0.2)`
               }
             },
             scales: {
               x: {
                 border: {
-                  color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`
+                  color: `rgba(${getTextColor(this.colorScheme)}, 0.2)`
                 },
                 display: this.showXAxis,
                 grid: {
@@ -284,7 +284,7 @@ export class GfLineChartComponent
                       tick.value === this.yMax ||
                       tick.value === this.yMin
                     ) {
-                      return `rgba(${getTextColor(this.colorScheme)}, 0.1)`;
+                      return `rgba(${getTextColor(this.colorScheme)}, 0.2)`;
                     }
 
                     return 'transparent';

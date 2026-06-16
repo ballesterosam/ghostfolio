@@ -242,7 +242,9 @@ export function getAssetProfileIdentifier({
 export function getBackgroundColor(aColorScheme: ColorScheme) {
   return getCssVariable(
     aColorScheme === 'DARK' ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      (aColorScheme !== 'LIGHT' &&
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ||
+          document.body.classList.contains('theme-dark')))
       ? '--dark-background'
       : '--light-background'
   );
@@ -412,7 +414,9 @@ export function getSum(aArray: Big[]) {
 export function getTextColor(aColorScheme: ColorScheme) {
   const cssVariable = getCssVariable(
     aColorScheme === 'DARK' ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      (aColorScheme !== 'LIGHT' &&
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ||
+          document.body.classList.contains('theme-dark')))
       ? '--light-primary-text'
       : '--dark-primary-text'
   );
