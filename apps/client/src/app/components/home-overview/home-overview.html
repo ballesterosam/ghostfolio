@@ -1,101 +1,262 @@
-<div
-  class="align-items-center container d-flex flex-column h-100 justify-content-center overview p-0 position-relative"
->
+<div class="overview p-3">
   @if (
     !hasImpersonationId() &&
     hasPermissionToCreateActivity() &&
     user()?.activitiesCount === 0
   ) {
-    <div class="justify-content-center row w-100">
-      <div class="col introduction">
-        <h4 i18n>Welcome to Ghostfolio</h4>
-        <p i18n>Ready to take control of your personal finances?</p>
-        <ol class="fw-bold">
-          <li class="mb-2" [class.text-muted]="user()?.accounts?.length > 1">
-            <a class="d-block" [routerLink]="routerLinkAccounts"
-              ><span i18n>Setup your accounts</span><br />
-              <span class="fw-normal" i18n
-                >Get a comprehensive financial overview by adding your bank and
-                brokerage accounts.</span
-              ></a
-            >
-          </li>
-          <li class="mb-2">
-            <a class="d-block" [routerLink]="routerLinkPortfolioActivities">
-              <span i18n>Capture your activities</span><br />
-              <span class="fw-normal" i18n
-                >Record your investment activities to keep your portfolio up to
-                date.</span
-              ></a
-            >
-          </li>
-          <li class="mb-2">
-            <a class="d-block" [routerLink]="routerLinkPortfolio">
-              <span i18n>Monitor and analyze your portfolio</span><br />
-              <span class="fw-normal" i18n
-                >Track your progress in real-time with comprehensive analysis
-                and insights.</span
+    <div
+      class="align-items-center d-flex flex-column h-100 justify-content-center"
+    >
+      <div class="justify-content-center row w-100">
+        <div class="col introduction">
+          <h4 i18n>Welcome to Ghostfolio</h4>
+          <p i18n>Ready to take control of your personal finances?</p>
+          <ol class="fw-bold">
+            <li class="mb-2" [class.text-muted]="user()?.accounts?.length > 1">
+              <a class="d-block" [routerLink]="routerLinkAccounts"
+                ><span i18n>Setup your accounts</span><br />
+                <span class="fw-normal" i18n
+                  >Get a comprehensive financial overview by adding your bank
+                  and brokerage accounts.</span
+                ></a
               >
-            </a>
-          </li>
-        </ol>
-        <div class="d-flex justify-content-center">
-          @if (user()?.accounts?.length === 1) {
-            <a
-              color="primary"
-              mat-flat-button
-              [routerLink]="routerLinkAccounts"
-            >
-              <ng-container i18n>Setup accounts</ng-container>
-            </a>
-          } @else if (user()?.accounts?.length > 1) {
-            <a
-              color="primary"
-              mat-flat-button
-              [routerLink]="routerLinkPortfolioActivities"
-            >
-              <ng-container i18n>Add activity</ng-container>
-            </a>
-          }
+            </li>
+            <li class="mb-2">
+              <a class="d-block" [routerLink]="routerLinkPortfolioActivities">
+                <span i18n>Capture your activities</span><br />
+                <span class="fw-normal" i18n
+                  >Record your investment activities to keep your portfolio up
+                  to date.</span
+                ></a
+              >
+            </li>
+            <li class="mb-2">
+              <a class="d-block" [routerLink]="routerLinkPortfolio">
+                <span i18n>Monitor and analyze your portfolio</span><br />
+                <span class="fw-normal" i18n
+                  >Track your progress in real-time with comprehensive analysis
+                  and insights.</span
+                >
+              </a>
+            </li>
+          </ol>
+          <div class="d-flex justify-content-center">
+            @if (user()?.accounts?.length === 1) {
+              <a
+                color="primary"
+                mat-flat-button
+                [routerLink]="routerLinkAccounts"
+              >
+                <ng-container i18n>Setup accounts</ng-container>
+              </a>
+            } @else if (user()?.accounts?.length > 1) {
+              <a
+                color="primary"
+                mat-flat-button
+                [routerLink]="routerLinkPortfolioActivities"
+              >
+                <ng-container i18n>Add activity</ng-container>
+              </a>
+            }
+          </div>
         </div>
       </div>
     </div>
   } @else {
-    <div class="row w-100">
-      <div class="col p-0">
-        <div class="chart-container mx-auto position-relative">
-          <gf-line-chart
-            class="position-absolute"
-            unit="%"
-            [class.pe-3]="deviceType() === 'mobile'"
-            [colorScheme]="user()?.settings?.colorScheme"
-            [hidden]="historicalDataItems()?.length === 0"
-            [historicalDataItems]="historicalDataItems()"
-            [isAnimated]="user()?.settings?.dateRange === '1d' ? false : true"
-            [label]="performanceLabel"
-            [locale]="user()?.settings?.locale"
-            [showGradient]="true"
-            [showLoader]="false"
-            [showXAxis]="false"
-            [showYAxis]="false"
-          />
+    <!-- PORTFOLIO SUMMARY section -->
+    <section class="dashboard-section mb-4">
+      <h2 class="section-title" i18n>Portfolio Summary</h2>
+      <div class="row g-3 align-items-stretch">
+        <!-- Hero card: portfolio value + chart -->
+        <div class="col-12 col-md-8">
+          <div class="hero-card">
+            <!-- Text overlay: top-left -->
+            <div class="hero-card__body">
+              <span class="hero-card__label" i18n>Total Portfolio Value</span>
+              <div class="hero-card__value-wrap">
+                <gf-portfolio-performance
+                  [deviceType]="deviceType()"
+                  [errors]="errors()"
+                  [isLoading]="isLoadingPerformance()"
+                  [locale]="user()?.settings?.locale"
+                  [performance]="performance()"
+                  [precision]="precision()"
+                  [showDetails]="false"
+                  [unit]="unit()"
+                />
+              </div>
+            </div>
+            <!-- YTD badge: top-right -->
+            @if (ytdPercent() !== null && !isLoadingPerformance()) {
+              <span
+                class="ytd-badge"
+                [class.ytd-badge--negative]="!ytdPositive()"
+                [class.ytd-badge--positive]="ytdPositive()"
+              >
+                <ion-icon
+                  [name]="
+                    ytdPositive()
+                      ? 'trending-up-outline'
+                      : 'trending-down-outline'
+                  "
+                />
+                {{ ytdPercentFormatted() }}
+              </span>
+            }
+            <!-- Full-height background chart -->
+            <div class="hero-card__chart">
+              <gf-line-chart
+                tooltipPosition="nearest"
+                unit="%"
+                [colorScheme]="user()?.settings?.colorScheme"
+                [hidden]="historicalDataItems()?.length === 0"
+                [historicalDataItems]="historicalDataItems()"
+                [isAnimated]="false"
+                [label]="performanceLabel"
+                [locale]="user()?.settings?.locale"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+                [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+                [overrideLineWidth]="2"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI cards column -->
+        <div class="col-12 col-md-4 d-flex flex-column gap-3">
+          <!-- Net Return YTD -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Net Return (YTD)</span>
+            <div
+              class="kpi-card__value"
+              [class.kpi-negative]="
+                (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                  0) < 0
+              "
+              [class.kpi-positive]="
+                (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                  0) >= 0
+              "
+            >
+              @if (isLoadingPerformance()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '8rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [colorizeSign]="true"
+                  [isPercent]="true"
+                  [locale]="user()?.settings?.locale"
+                  [value]="
+                    performance()?.netPerformancePercentageWithCurrencyEffect
+                  "
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Annual Dividends -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Annual Dividends</span>
+            <div class="kpi-card__value">
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '7rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [isCurrency]="true"
+                  [locale]="user()?.settings?.locale"
+                  [unit]="user()?.settings?.baseCurrency"
+                  [value]="summary()?.dividendInBaseCurrency"
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Available Cash -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Available Cash</span>
+            <div class="kpi-card__value">
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '7rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [isCurrency]="true"
+                  [locale]="user()?.settings?.locale"
+                  [unit]="user()?.settings?.baseCurrency"
+                  [value]="summary()?.cash"
+                />
+              }
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="overview-container row mt-1">
-      <div class="col">
-        <gf-portfolio-performance
-          class="pb-4"
-          [deviceType]="deviceType()"
-          [errors]="errors()"
-          [isLoading]="isLoadingPerformance()"
-          [locale]="user()?.settings?.locale"
-          [performance]="performance()"
-          [precision]="precision()"
-          [showDetails]="showDetails()"
-          [unit]="unit()"
-        />
+    </section>
+
+    <!-- ASSET ALLOCATION section -->
+    <section class="dashboard-section">
+      <h2 class="section-title" i18n>Asset Allocation</h2>
+      <div class="row g-3 align-items-stretch">
+        <!-- Donut chart with legend -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="allocation-chart-wrap">
+              <div class="donut-container">
+                <gf-portfolio-proportion-chart
+                  [baseCurrency]="user()?.settings?.baseCurrency"
+                  [colorScheme]="user()?.settings?.colorScheme"
+                  [data]="holdingsMap()"
+                  [glow]="true"
+                  [hollow]="true"
+                  [isInPercentage]="true"
+                  [keys]="['assetClass']"
+                  [locale]="user()?.settings?.locale"
+                  [separateSegments]="isDarkMode()"
+                  [showLabels]="false"
+                />
+              </div>
+              <div class="donut-legend">
+                @for (item of holdingsLegend(); track item.key) {
+                  <div class="legend-item">
+                    <span
+                      class="legend-dot"
+                      [style.background-color]="item.color"
+                    ></span>
+                    <span class="legend-name">{{ item.name }}</span>
+                    <span class="legend-pct">{{ item.pct }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- World map -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card map-card">
+            <gf-world-map-chart
+              format="{0}%"
+              [countries]="countriesMap()"
+              [isInPercentage]="true"
+              [locale]="user()?.settings?.locale"
+            />
+          </div>
+        </div>
       </div>
-    </div>
+    </section>
   }
 </div>

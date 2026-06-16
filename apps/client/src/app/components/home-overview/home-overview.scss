@@ -1,36 +1,275 @@
 :host {
   display: block;
-  height: 100%;
 
-  .chart-container {
-    aspect-ratio: 16 / 9;
-    height: auto;
-    max-width: 50rem;
-
-    // Fallback for aspect-ratio (using padding hack)
-    @supports not (aspect-ratio: 16 / 9) {
-      &::before {
-        float: left;
-        padding-top: 56.25%;
-        content: '';
-      }
-
-      &::after {
-        display: block;
-        content: '';
-        clear: both;
-      }
-    }
-
-    gf-line-chart {
-      bottom: 0;
-      left: 0;
-      right: 0;
-      top: 0;
-    }
+  .overview {
+    max-width: 100rem;
+    margin: 0 auto;
   }
 
   .introduction {
     max-width: 50rem;
+  }
+
+  .section-title {
+    font-size: 1.55rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    opacity: 0.95;
+    margin-bottom: 1.25rem;
+  }
+
+  // ─── Hero card ────────────────────────────────────────────────────────────
+  .hero-card {
+    background: linear-gradient(160deg, #5d8ab9 0%, #304f75 100%);
+    border-radius: 16px;
+    color: #fff;
+    overflow: hidden;
+    position: relative;
+    height: 100%;
+    min-height: 17rem;
+
+    // Text overlay (top-left, above chart)
+    &__body {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.75rem;
+      z-index: 2;
+      max-width: 70%;
+    }
+
+    &__label {
+      display: block;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      opacity: 0.82;
+      margin-bottom: 0.35rem;
+    }
+
+    &__value-wrap {
+      ::ng-deep {
+        .container {
+          padding: 0 !important;
+
+          .row {
+            flex-wrap: nowrap;
+            align-items: baseline;
+          }
+
+          .status-container {
+            display: none;
+          }
+
+          .value-container {
+            text-align: left !important;
+            font-size: 2.6rem !important;
+            line-height: 1 !important;
+            font-weight: 700 !important;
+            color: #fff !important;
+            padding: 0 !important;
+          }
+
+          .currency-container {
+            flex-grow: 0 !important;
+            font-size: 1.1rem !important;
+            color: rgba(255, 255, 255, 0.75) !important;
+            padding-left: 0.5rem !important;
+          }
+        }
+      }
+    }
+
+    // YTD badge (top-right, absolute)
+    // (rules below inside .hero-card scope)
+
+    // Full-height background chart
+    &__chart {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 100%;
+      pointer-events: auto;
+
+      gf-line-chart {
+        display: block;
+        width: 100%;
+        height: 100%;
+      }
+    }
+  }
+
+  // YTD badge (positioned absolute inside hero-card)
+  .ytd-badge {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    z-index: 2;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
+    padding: 0.25rem 0.75rem;
+    border-radius: 2rem;
+    font-size: 0.8rem;
+    font-weight: 700;
+    backdrop-filter: blur(4px);
+
+    ion-icon {
+      font-size: 0.9rem;
+    }
+
+    &--positive {
+      background: rgba(74, 222, 128, 0.15);
+      color: #a7f3d0;
+    }
+
+    &--negative {
+      background: rgba(248, 113, 113, 0.15);
+      color: #fca5a5;
+    }
+  }
+
+  // ─── KPI cards ────────────────────────────────────────────────────────────
+  .kpi-card {
+    background: var(--gf-card-bg-light);
+    border-radius: 16px;
+    padding: 1.25rem 1.5rem;
+    min-height: 5rem;
+
+    &__label {
+      display: block;
+      font-size: 1.2rem;
+      opacity: 0.6;
+      margin-bottom: 0.4rem;
+    }
+
+    &__value {
+      ::ng-deep {
+        .value,
+        .h2 {
+          font-size: 2.7rem !important;
+          font-weight: 700 !important;
+          line-height: 1.2 !important;
+        }
+      }
+
+      &.kpi-positive ::ng-deep .value {
+        color: #16a34a !important;
+      }
+
+      &.kpi-negative ::ng-deep .value {
+        color: #dc2626 !important;
+      }
+    }
+  }
+
+  // ─── Asset Allocation cards ───────────────────────────────────────────────
+  .dashboard-card {
+    background: var(--gf-card-bg-light);
+    border-radius: 16px;
+    padding: 1.25rem;
+    height: 100%;
+  }
+
+  .allocation-chart-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1.5rem;
+    height: 100%;
+    min-height: 14rem;
+    padding: 0.5rem 0;
+
+    @media (min-width: 576px) {
+      flex-direction: row;
+      justify-content: space-around;
+      gap: 2rem;
+    }
+  }
+
+  .donut-container {
+    flex: 0 0 auto;
+    width: 12rem;
+    height: 12rem;
+
+    @media (min-width: 576px) {
+      flex: 0 0 50%;
+      width: auto;
+      height: auto;
+      //max-width: 18rem;
+      aspect-ratio: 1;
+    }
+
+    gf-portfolio-proportion-chart {
+      display: block;
+      width: 100%;
+      height: 100%;
+    }
+  }
+
+  .donut-legend {
+    flex: 1;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    font-size: 0.9rem;
+  }
+
+  .legend-dot {
+    display: inline-block;
+    width: 0.75rem;
+    height: 0.75rem;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .legend-name {
+    flex: 1;
+    font-weight: 500;
+  }
+
+  .legend-pct {
+    font-weight: 700;
+    min-width: 2.5rem;
+    text-align: right;
+    opacity: 0.85;
+  }
+
+  .map-card {
+    padding: 0.5rem;
+    min-height: 14rem;
+    overflow: hidden;
+  }
+}
+
+// ─── Dark mode overrides ────────────────────────────────────────────────────
+:host-context(.theme-dark) {
+  .kpi-card {
+    background: rgb(48, 56, 72);
+  }
+
+  .dashboard-card {
+    background: rgb(48, 56, 72);
+  }
+
+  .hero-card {
+    background: linear-gradient(160deg, #3a5f8a 0%, #1e334d 100%);
+  }
+
+  .kpi-card__value {
+    &.kpi-positive ::ng-deep .value {
+      color: #4ade80 !important;
+    }
+
+    &.kpi-negative ::ng-deep .value {
+      color: #f87171 !important;
+    }
   }
 }

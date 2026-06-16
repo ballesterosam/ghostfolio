@@ -3,9 +3,21 @@
   z-index: 999;
 
   .mat-toolbar {
-    background-color: var(--light-background);
+    background-color: var(--gf-card-bg-light);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    display: flex !important;
+    align-items: center !important;
+
+    @media (min-width: 576px) {
+      height: 76px !important;
+      min-height: 76px !important;
+      padding: 0 1.5rem !important;
+    }
 
     .logo-container {
+      display: flex;
+      align-items: center;
+
       &.filled {
         background: linear-gradient(
           to bottom,
@@ -16,20 +28,164 @@
 
       @media (min-width: 576px) {
         width: 14rem;
+        height: 100%;
+      }
+    }
+
+    // Centered main navigation
+    .nav-center {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      display: flex;
+      align-items: center;
+
+      @media (max-width: 575px) {
+        display: none;
       }
     }
 
     .list-inline-item {
-      margin: 0;
+      margin: 0 6px !important;
+    }
+
+    .nav-item-dropdown {
+      position: relative;
+      // Hover bridge spacing (ensures no gap causes mouseleave event to trigger)
+      padding-bottom: 12px;
+      margin-bottom: -12px;
+
+      &:hover {
+        .contextual-dropdown {
+          opacity: 1;
+          visibility: visible;
+          transform: translateX(-50%) translateY(0);
+        }
+      }
+    }
+
+    .contextual-dropdown {
+      position: absolute;
+      top: 100%;
+      left: 50%;
+      transform: translateX(-50%) translateY(8px);
+      min-width: 190px;
+      background-color: var(--gf-card-bg-light);
+      border: 1px solid rgba(0, 0, 0, 0.07);
+      border-radius: 12px;
+      box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.08),
+        0 8px 16px -6px rgba(0, 0, 0, 0.05);
+      opacity: 0;
+      visibility: hidden;
+      transition:
+        opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        transform 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+        visibility 0.2s;
+      z-index: 1000;
+      padding: 6px;
+      margin-top: 4px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+
+      // Invisible bridge to keep hover alive
+      &::after {
+        content: '';
+        position: absolute;
+        top: -16px;
+        left: 0;
+        right: 0;
+        height: 16px;
+        background: transparent;
+      }
+
+      // Dropdown arrow indicator
+      &::before {
+        content: '';
+        position: absolute;
+        top: -5px;
+        left: 50%;
+        transform: translateX(-50%) rotate(45deg);
+        width: 10px;
+        height: 10px;
+        background-color: var(--gf-card-bg-light);
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
+        border-left: 1px solid rgba(0, 0, 0, 0.07);
+      }
+
+      .dropdown-link {
+        display: flex;
+        align-items: center;
+        padding: 8px 12px;
+        color: var(--mdc-text-button-label-text-color);
+        text-decoration: none;
+        font-size: 0.85rem;
+        border-radius: 8px;
+        transition:
+          background-color 0.15s ease,
+          color 0.15s ease;
+        margin-bottom: 2px;
+        white-space: nowrap;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+
+        ion-icon {
+          font-size: 1.15rem !important;
+          margin-right: 10px;
+          opacity: 0.7;
+          transition: opacity 0.15s ease;
+        }
+
+        &:hover {
+          background-color: rgba(var(--palette-foreground-base), 0.06);
+          color: var(--mdc-text-button-label-text-color);
+
+          ion-icon {
+            opacity: 1;
+          }
+        }
+
+        &.active {
+          background-color: rgba(var(--palette-foreground-base), 0.09);
+          font-weight: 600;
+          color: var(--mdc-text-button-label-text-color);
+
+          ion-icon {
+            opacity: 1;
+          }
+        }
+      }
     }
 
     .mdc-button {
       color: var(--mdc-text-button-label-text-color);
+      border-radius: 8px !important;
+      padding: 0 1.25rem !important;
+      height: 38px !important;
+      font-size: 1.2rem !important;
+      font-weight: 200 !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
 
       &:not(.mat-primary) {
         background-color: transparent;
-        text-decoration-color: rgba(var(--palette-primary-500), 1) !important;
-        text-underline-offset: 0.25rem;
+      }
+
+      &.nav-pill-active {
+        background-color: rgba(0, 0, 0, 0.06);
+        font-weight: 600;
+        color: var(--mdc-text-button-label-text-color);
+      }
+
+      ::ng-deep .mdc-button__label {
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        height: 100% !important;
       }
 
       ion-icon {
@@ -45,7 +201,8 @@
 
 :host-context(.theme-dark) {
   .mat-toolbar {
-    background-color: var(--dark-background);
+    background-color: var(--gf-card-bg-dark);
+    border-bottom-color: rgba(255, 255, 255, 0.07);
 
     .logo-container {
       &.filled {
@@ -54,6 +211,33 @@
           transparent,
           rgba(var(--palette-foreground-base-dark), 0.02)
         );
+      }
+    }
+
+    .mdc-button.nav-pill-active {
+      background-color: rgba(255, 255, 255, 0.1) !important;
+    }
+
+    .contextual-dropdown {
+      background-color: rgba(30, 30, 30, 0.92);
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow:
+        0 10px 25px -5px rgba(0, 0, 0, 0.4),
+        0 8px 16px -6px rgba(0, 0, 0, 0.3);
+
+      &::before {
+        background-color: rgba(30, 30, 30, 0.92);
+        border-color: rgba(255, 255, 255, 0.08);
+      }
+
+      .dropdown-link {
+        &:hover {
+          background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        &.active {
+          background-color: rgba(255, 255, 255, 0.12);
+        }
       }
     }
   }

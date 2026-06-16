@@ -75,6 +75,9 @@ export class GfPortfolioProportionChartComponent
   @Input() keys: string[] = [];
   @Input() locale = getLocale();
   @Input() maxItems?: number;
+  @Input() glow = false;
+  @Input() hollow = false;
+  @Input() separateSegments = false;
   @Input() showLabels = false;
 
   public chart: Chart<'doughnut'>;
@@ -292,13 +295,26 @@ export class GfPortfolioProportionChartComponent
 
     const datasets: ChartDataset<'doughnut'>[] = [
       {
-        backgroundColor: chartDataSorted.map(([, item]) => {
-          return item.color;
-        }),
-        borderWidth: 0,
+        backgroundColor: this.hollow
+          ? chartDataSorted.map(([, item]) => {
+              try {
+                return Color(item.color).alpha(0.08).string();
+              } catch {
+                return 'transparent';
+              }
+            })
+          : chartDataSorted.map(([, item]) => {
+              return item.color;
+            }),
+        borderWidth: this.hollow ? 2 : this.separateSegments ? 3 : 0,
+        borderColor: this.hollow
+          ? chartDataSorted.map(([, item]) => item.color)
+          : ('transparent' as any),
+        borderRadius: this.hollow || this.separateSegments ? 4 : 0,
         data: chartDataSorted.map(([, item]) => {
           return item.value.toNumber();
-        })
+        }),
+        ...(this.hollow || this.separateSegments ? { spacing: 4 } : {})
       }
     ];
 
@@ -342,6 +358,36 @@ export class GfPortfolioProportionChartComponent
 
         this.chart.update();
       } else {
+        const plugins = [ChartDataLabels];
+
+        if (this.glow) {
+          plugins.push({
+            id: 'shadowPlugin',
+            beforeDatasetDraw: (chart, args) => {
+              const { ctx } = chart;
+              const meta = chart.getDatasetMeta(args.index);
+              meta.data.forEach((element) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const arcElement = element as any;
+                if (!arcElement._originalDraw) {
+                  arcElement._originalDraw = arcElement.draw;
+                  arcElement.draw = function (context: any) {
+                    const drawCtx = context || ctx;
+                    drawCtx.save();
+                    drawCtx.shadowBlur = 15;
+                    drawCtx.shadowColor =
+                      this.options?.borderColor || 'transparent';
+                    drawCtx.shadowOffsetX = 0;
+                    drawCtx.shadowOffsetY = 0;
+                    arcElement._originalDraw.call(this, drawCtx);
+                    drawCtx.restore();
+                  };
+                }
+              });
+            }
+          });
+        }
+
         this.chart = new Chart<'doughnut'>(this.chartCanvas().nativeElement, {
           data,
           options: {
@@ -399,7 +445,7 @@ export class GfPortfolioProportionChartComponent
               tooltip: this.getTooltipPluginConfiguration(data)
             }
           },
-          plugins: [ChartDataLabels],
+          plugins,
           type: 'doughnut'
         });
       }

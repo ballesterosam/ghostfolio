@@ -1,5 +1,5 @@
-<header>
-  @if (canCreateAccount || user?.systemMessage) {
+@if (canCreateAccount || user?.systemMessage) {
+  <header class="demo-banner-header">
     <div class="info-message-container">
       <div class="info-message-inner-container position-fixed w-100">
         <div class="align-items-center d-flex h-100 justify-content-center">
@@ -25,29 +25,36 @@
         </div>
       </div>
     </div>
-  }
-
-  <gf-header
-    class="position-fixed w-100"
-    [currentRoute]="currentRoute"
-    [deviceType]="deviceType"
-    [hasPermissionToChangeDateRange]="hasPermissionToChangeDateRange"
-    [hasPermissionToChangeFilters]="hasPermissionToChangeFilters"
-    [hasPromotion]="hasPromotion"
-    [hasTabs]="hasTabs"
-    [info]="info"
-    [pageTitle]="pageTitle"
-    [user]="user"
-    (signOut)="onSignOut()"
-  />
-</header>
-
-<main role="main">
-  <router-outlet />
-</main>
-
-@if (showFooter) {
-  <footer class="justify-content-center overflow-hidden w-100">
-    <gf-footer class="py-4" [info]="info" [user]="user" />
-  </footer>
+  </header>
 }
+
+<div class="app-window-wrapper">
+  <div class="app-rounded-container">
+    <header class="main-header">
+      <gf-header
+        [class.position-fixed]="deviceType === 'mobile'"
+        [class.w-100]="deviceType === 'mobile'"
+        [currentRoute]="currentRoute"
+        [deviceType]="deviceType"
+        [hasPermissionToChangeDateRange]="hasPermissionToChangeDateRange"
+        [hasPermissionToChangeFilters]="hasPermissionToChangeFilters"
+        [hasPromotion]="hasPromotion"
+        [hasTabs]="hasTabs"
+        [info]="info"
+        [pageTitle]="pageTitle"
+        [user]="user"
+        (signOut)="onSignOut()"
+      />
+    </header>
+
+    <main role="main">
+      <router-outlet />
+    </main>
+
+    @if (showFooter) {
+      <footer class="justify-content-center overflow-hidden w-100">
+        <gf-footer class="py-4" [info]="info" [user]="user" />
+      </footer>
+    }
+  </div>
+</div>

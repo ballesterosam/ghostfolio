@@ -8,9 +8,13 @@
 @use 'svgmap/style.min';
 
 :root {
-  --dark-background: rgb(25, 25, 25);
+  --dark-background: rgb(22, 24, 39);
   --font-family-sans-serif: 'Inter', Roboto, 'Helvetica Neue', sans-serif;
   --light-background: rgb(255, 255, 255);
+  --gf-surface-light: rgb(242, 244, 243);
+  --gf-surface-dark: rgb(22, 24, 39);
+  --gf-card-bg-light: rgb(255, 255, 255);
+  --gf-card-bg-dark: rgb(30, 34, 55);
 
   --dark-primary-text:
     #{color.channel(variables.$dark-primary-text, 'red')},
@@ -203,6 +207,7 @@ body {
   font-family: var(--font-family-sans-serif);
   margin: 0;
   min-height: 100%;
+  background: var(--gf-surface-light);
 
   // Table styling variables (Light Mode)
   --table-bg: var(--light-background);
@@ -239,12 +244,12 @@ body {
     color: rgba(var(--light-primary-text));
 
     // Table styling variables (Dark Mode)
-    --table-bg: #1e1e1e;
+    --table-bg: var(--gf-card-bg-dark);
     --table-text: rgba(var(--light-primary-text));
     --table-border: rgba(var(--light-dividers));
-    --table-header-bg: #252525;
+    --table-header-bg: rgb(26, 30, 50);
     --table-header-text: rgba(var(--light-secondary-text));
-    --table-hover-bg: #2d2d2d;
+    --table-hover-bg: rgb(38, 42, 65);
 
     a {
       color: var(--light-primary-text);
@@ -626,4 +631,12 @@ ngx-skeleton-loader {
   padding: 0.4em 0.8em !important;
   border-radius: 50px !important;
   font-size: 0.75rem !important;
+}
+
+@media (min-width: 576px) {
+  html,
+  body {
+    overflow: hidden !important;
+    height: 100% !important;
+  }
 }

@@ -1,4 +1,5 @@
 import {
+  getCurrencySymbolInfo,
   getLocale,
   getNumberFormatDecimal,
   getNumberFormatGroup
@@ -57,12 +58,27 @@ export class GfPortfolioPerformanceComponent implements OnChanges {
       }
     } else {
       if (isNumber(this.performance?.currentValueInBaseCurrency)) {
-        new CountUp('value', this.performance?.currentValueInBaseCurrency, {
+        const countUpOptions: any = {
           decimal: getNumberFormatDecimal(this.locale),
           decimalPlaces: this.precision,
           duration: 1,
           separator: getNumberFormatGroup(this.locale)
-        }).start();
+        };
+
+        if (this.unit) {
+          const currencyInfo = getCurrencySymbolInfo(this.locale, this.unit);
+          if (currencyInfo.position === 'prefix') {
+            countUpOptions.prefix = currencyInfo.symbol;
+          } else {
+            countUpOptions.suffix = ' ' + currencyInfo.symbol;
+          }
+        }
+
+        new CountUp(
+          'value',
+          this.performance?.currentValueInBaseCurrency,
+          countUpOptions
+        ).start();
       } else if (this.showDetails === false) {
         new CountUp(
           'value',
@@ -71,7 +87,8 @@ export class GfPortfolioPerformanceComponent implements OnChanges {
             decimal: getNumberFormatDecimal(this.locale),
             decimalPlaces: 2,
             duration: 1,
-            separator: getNumberFormatGroup(this.locale)
+            separator: getNumberFormatGroup(this.locale),
+            suffix: ' %'
           }
         ).start();
       } else {
