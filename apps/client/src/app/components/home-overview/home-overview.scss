@@ -247,6 +247,115 @@
     min-height: 14rem;
     overflow: hidden;
   }
+
+  // Activities Section Styles
+  .dashboard-card {
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+    }
+
+    &.flex-row {
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+    }
+  }
+
+  .card-text-block {
+    flex: 1;
+  }
+
+  .card-sparkline {
+    width: 35%;
+    height: 3.5rem;
+    align-self: center;
+
+    gf-line-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  .card-chart-bars {
+    display: flex;
+    align-items: flex-end;
+    gap: 0.3rem;
+    margin-left: 0.5rem;
+    flex-shrink: 0;
+    height: 4rem;
+    width: 2.25rem;
+
+    .bar {
+      width: 0.75rem;
+      border-radius: 3px 3px 0 0;
+      transition: height 0.3s ease;
+
+      &--buy {
+        background-color: #22c55e;
+      }
+
+      &--sell {
+        background-color: #ef4444; // red
+      }
+    }
+  }
+
+  .badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.1rem;
+    height: 1.1rem;
+    border-radius: 50%;
+  }
+
+  .info-tooltip {
+    color: rgba(var(--dark-primary-text), 0.4);
+    font-size: 1rem;
+
+    &:hover {
+      color: rgba(var(--dark-primary-text), 0.7);
+    }
+  }
+
+  .card-icon-aside {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    ion-icon {
+      font-size: 2.2rem;
+    }
+  }
+
+  // Utilities
+  .font-weight-bold {
+    font-weight: 700;
+  }
+
+  .font-size-xl {
+    font-size: 1.6rem;
+  }
+
+  .font-size-large {
+    font-size: 1.15rem;
+  }
+
+  .font-size-medium {
+    font-size: 0.9rem;
+  }
+
+  .font-size-lg {
+    font-size: 1.4rem;
+  }
+
+  .font-size-xxxl {
+    font-size: 2.2rem;
+  }
 }
 
 // ─── Dark mode overrides ────────────────────────────────────────────────────
@@ -257,6 +366,10 @@
 
   .dashboard-card {
     background: rgb(48, 56, 72);
+
+    &:hover {
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
   }
 
   .hero-card {
@@ -270,6 +383,14 @@
 
     &.kpi-negative ::ng-deep .value {
       color: #f87171 !important;
+    }
+  }
+
+  .info-tooltip {
+    color: rgba(255, 255, 255, 0.4);
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.7);
     }
   }
 }

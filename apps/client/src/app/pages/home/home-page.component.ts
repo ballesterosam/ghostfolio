@@ -20,8 +20,7 @@ import {
   albumsOutline,
   analyticsOutline,
   bookmarkOutline,
-  newspaperOutline,
-  readerOutline
+  newspaperOutline
 } from 'ionicons/icons';
 
 @Component({
@@ -60,11 +59,6 @@ export class GfHomePageComponent implements OnInit {
               routerLink: internalRoutes.home.subRoutes.holdings.routerLink
             },
             {
-              iconName: 'reader-outline',
-              label: internalRoutes.home.subRoutes.summary.title,
-              routerLink: internalRoutes.home.subRoutes.summary.routerLink
-            },
-            {
               iconName: 'bookmark-outline',
               label: internalRoutes.home.subRoutes.watchlist.title,
               routerLink: internalRoutes.home.subRoutes.watchlist.routerLink
@@ -94,8 +88,7 @@ export class GfHomePageComponent implements OnInit {
       albumsOutline,
       analyticsOutline,
       bookmarkOutline,
-      newspaperOutline,
-      readerOutline
+      newspaperOutline
     });
   }
 

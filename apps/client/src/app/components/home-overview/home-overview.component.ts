@@ -8,7 +8,7 @@ import {
   NUMERICAL_PRECISION_THRESHOLD_6_FIGURES,
   UNKNOWN_KEY
 } from '@ghostfolio/common/config';
-import { getCountryName } from '@ghostfolio/common/helper';
+import { getCountryName, getDateFnsLocale } from '@ghostfolio/common/helper';
 import {
   AssetProfileIdentifier,
   LineChartItem,
@@ -21,6 +21,8 @@ import {
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { internalRoutes } from '@ghostfolio/common/routes/routes';
 import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
+import { translate } from '@ghostfolio/ui/i18n';
+import { NotificationService } from '@ghostfolio/ui/notifications';
 import { GfPortfolioProportionChartComponent } from '@ghostfolio/ui/portfolio-proportion-chart';
 import { DataService } from '@ghostfolio/ui/services';
 import { GfValueComponent } from '@ghostfolio/ui/value';
@@ -37,13 +39,26 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { AssetClass, AssetSubClass } from '@prisma/client';
+import { formatDistanceToNow } from 'date-fns';
 import { addIcons } from 'ionicons';
-import { trendingDownOutline, trendingUpOutline } from 'ionicons/icons';
+import {
+  addCircleOutline,
+  cashOutline,
+  ellipsisHorizontalCircleOutline,
+  eyeOffOutline,
+  informationCircleOutline,
+  removeCircleOutline,
+  shieldCheckmarkOutline,
+  trendingDownOutline,
+  trendingUpOutline
+} from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { switchMap } from 'rxjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -55,6 +70,7 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
     GfWorldMapChartComponent,
     IonIcon,
     MatButtonModule,
+    MatTooltipModule,
     NgxSkeletonLoaderModule,
     RouterModule
   ],
@@ -70,6 +86,9 @@ export class GfHomeOverviewComponent implements OnInit {
   protected readonly isLoadingDetails = signal(true);
   protected readonly performance = signal<PortfolioPerformance | null>(null);
   protected readonly performanceLabel = $localize`Performance`;
+  protected readonly buyAndSellActivitiesTooltip = translate(
+    'BUY_AND_SELL_ACTIVITIES_TOOLTIP'
+  );
   protected readonly precision = signal(2);
   protected readonly user = signal<User | null>(null);
   protected readonly summary = signal<PortfolioSummary | null>(null);
@@ -89,6 +108,14 @@ export class GfHomeOverviewComponent implements OnInit {
 
   protected readonly hasPermissionToCreateActivity = computed(() => {
     return hasPermission(this.user()?.permissions, permissions.createActivity);
+  });
+
+  protected readonly hasPermissionToUpdateUserSettings = computed(() => {
+    const user = this.user();
+
+    return user
+      ? hasPermission(user.permissions, permissions.updateUserSettings)
+      : false;
   });
 
   protected readonly showDetails = computed(() => {
@@ -128,6 +155,59 @@ export class GfHomeOverviewComponent implements OnInit {
     }
     const sign = ytd > 0 ? '+' : ytd < 0 ? '-' : '';
     return `${sign}${Math.abs(ytd).toFixed(1)}%`;
+  });
+
+  protected readonly timeInMarket = computed(() => {
+    const sum = this.summary();
+    const lang = this.user()?.settings?.language;
+    if (sum?.dateOfFirstActivity) {
+      return formatDistanceToNow(
+        new Date(sum.dateOfFirstActivity),
+        {
+          locale: getDateFnsLocale(lang)
+        }
+      );
+    }
+    return '-';
+  });
+
+  protected readonly buyBarHeight = computed(() => {
+    const sum = this.summary();
+    if (!sum?.totalBuy && !sum?.totalSell) {
+      return 0;
+    }
+    const max = Math.max(sum.totalBuy || 0, sum.totalSell || 0);
+    return max ? ((sum.totalBuy || 0) / max) * 100 : 0;
+  });
+
+  protected readonly sellBarHeight = computed(() => {
+    const sum = this.summary();
+    if (!sum?.totalBuy && !sum?.totalSell) {
+      return 0;
+    }
+    const max = Math.max(sum.totalBuy || 0, sum.totalSell || 0);
+    return max ? ((sum.totalSell || 0) / max) * 100 : 0;
+  });
+
+  protected readonly buyingPowerPercentage = computed(() => {
+    const sum = this.summary();
+    return sum?.totalValueInBaseCurrency
+      ? sum.cash / sum.totalValueInBaseCurrency
+      : 0;
+  });
+
+  protected readonly emergencyFundPercentage = computed(() => {
+    const sum = this.summary();
+    return sum?.totalValueInBaseCurrency
+      ? (sum.emergencyFund?.total || 0) / sum.totalValueInBaseCurrency
+      : 0;
+  });
+
+  protected readonly excludedFromAnalysisPercentage = computed(() => {
+    const sum = this.summary();
+    return sum?.totalValueInBaseCurrency
+      ? sum.excludedAccountsAndActivities / sum.totalValueInBaseCurrency
+      : 0;
   });
 
   // Color palette matching GfPortfolioProportionChartComponent order
@@ -179,10 +259,21 @@ export class GfHomeOverviewComponent implements OnInit {
     ImpersonationStorageService
   );
   private readonly layoutService = inject(LayoutService);
+  private readonly notificationService = inject(NotificationService);
   private readonly userService = inject(UserService);
 
   public constructor() {
-    addIcons({ trendingDownOutline, trendingUpOutline });
+    addIcons({
+      addCircleOutline,
+      cashOutline,
+      ellipsisHorizontalCircleOutline,
+      eyeOffOutline,
+      informationCircleOutline,
+      removeCircleOutline,
+      shieldCheckmarkOutline,
+      trendingDownOutline,
+      trendingUpOutline
+    });
 
     this.userService.stateChanged
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -192,6 +283,32 @@ export class GfHomeOverviewComponent implements OnInit {
           this.update();
         }
       });
+  }
+
+  protected onChangeEmergencyFund(emergencyFund: number) {
+    this.dataService
+      .putUserSetting({ emergencyFund })
+      .pipe(
+        switchMap(() => this.userService.get(true)),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe((user) => {
+        this.user.set(user);
+        this.update();
+      });
+  }
+
+  public onEditEmergencyFund() {
+    this.notificationService.prompt({
+      confirmFn: (value) => {
+        const emergencyFund = parseFloat(value.trim()) || 0;
+
+        this.onChangeEmergencyFund(emergencyFund);
+      },
+      confirmLabel: $localize`Save`,
+      defaultValue: this.summary()?.emergencyFund?.total?.toString() ?? '0',
+      title: $localize`Please set the amount of your emergency fund.`
+    });
   }
 
   public ngOnInit() {

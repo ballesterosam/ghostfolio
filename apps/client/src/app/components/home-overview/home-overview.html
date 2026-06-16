@@ -162,6 +162,39 @@
             </div>
           </div>
 
+          <!-- Annualized Performance -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Annualized Performance</span>
+            <div
+              class="kpi-card__value"
+              [class.kpi-negative]="
+                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                  0) < 0
+              "
+              [class.kpi-positive]="
+                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                  0) >= 0
+              "
+            >
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '8rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [colorizeSign]="true"
+                  [isPercent]="true"
+                  [locale]="user()?.settings?.locale"
+                  [value]="
+                    summary()?.annualizedPerformancePercentWithCurrencyEffect
+                  "
+                />
+              }
+            </div>
+          </div>
+
           <!-- Annual Dividends -->
           <div class="kpi-card flex-fill">
             <span class="kpi-card__label" i18n>Annual Dividends</span>
@@ -208,9 +241,9 @@
     </section>
 
     <!-- ASSET ALLOCATION section -->
-    <section class="dashboard-section">
+    <section class="dashboard-section mb-4">
       <h2 class="section-title" i18n>Asset Allocation</h2>
-      <div class="row g-3 align-items-stretch">
+      <div class="row g-3 align-items-stretch mb-3">
         <!-- Donut chart with legend -->
         <div class="col-12 col-md-6">
           <div class="dashboard-card">
@@ -254,6 +287,260 @@
               [isInPercentage]="true"
               [locale]="user()?.settings?.locale"
             />
+          </div>
+        </div>
+      </div>
+
+      <!-- Detail widgets: Buying Power, Emergency Fund, Excluded -->
+      <div class="row g-3 align-items-stretch">
+        <!-- Buying Power -->
+        <div class="col-12 col-md-4">
+          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+            <div class="card-text-block">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="kpi-card__label mb-0" i18n>Buying Power (Cash)</span>
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="buyingPowerPercentage()"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.cash"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-success opacity-75">
+              <ion-icon name="cash-outline" class="font-size-xxxl" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Fund -->
+        <div class="col-12 col-md-4">
+          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+            <div class="card-text-block">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="kpi-card__label mb-0" i18n>Emergency Fund</span>
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="emergencyFundPercentage()"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1 d-flex align-items-center">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  @if (
+                    hasPermissionToUpdateUserSettings() &&
+                    !user()?.settings?.isRestrictedView &&
+                    user()?.subscription?.type !== 'Basic'
+                  ) {
+                    <ion-icon
+                      class="me-2 cursor-pointer text-muted font-size-medium"
+                      name="ellipsis-horizontal-circle-outline"
+                      (click)="onEditEmergencyFund()"
+                    />
+                  }
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.emergencyFund?.total"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-info opacity-75">
+              <ion-icon name="shield-checkmark-outline" class="font-size-xxxl" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Excluded from Analysis -->
+        <div class="col-12 col-md-4">
+          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+            <div class="card-text-block">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="kpi-card__label mb-0" i18n>Excluded from Analysis</span>
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="excludedFromAnalysisPercentage()"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.excludedAccountsAndActivities"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-warning opacity-75">
+              <ion-icon name="eye-off-outline" class="font-size-xxxl" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVITIES section -->
+    <section class="dashboard-section">
+      <h2 class="section-title" i18n>Activities</h2>
+      <div class="row g-3 align-items-stretch">
+        <!-- Row 1: Time in Market -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card flex-row align-items-center justify-content-between p-4">
+            <div class="card-text-block">
+              <span class="kpi-card__label mb-1 block" i18n>Time in Market: {{ timeInMarket() }}</span>
+              <h3 class="card-value d-flex align-items-center mb-0 mt-1 font-weight-bold font-size-xl">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '6rem' }"
+                  />
+                } @else {
+                  {{ summary()?.activityCount }}
+                  <span class="ms-1 font-size-medium font-weight-normal text-muted">
+                    <ng-container i18n>{summary()?.activityCount, plural,
+                      =1 {activity}
+                      other {activities}
+                    }</ng-container>
+                  </span>
+                  <span
+                    class="info-tooltip ms-2 align-items-center d-inline-flex cursor-pointer"
+                    matTooltipPosition="above"
+                    [matTooltip]="buyAndSellActivitiesTooltip"
+                  >
+                    <ion-icon name="information-circle-outline" />
+                  </span>
+                }
+              </h3>
+            </div>
+            <div class="card-sparkline">
+              <gf-line-chart
+                [hidden]="!historicalDataItems() || historicalDataItems().length === 0"
+                [historicalDataItems]="historicalDataItems()"
+                [isAnimated]="false"
+                [colorScheme]="user()?.settings?.colorScheme"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
+                [overrideLineColor]="'rgba(59, 130, 246, 1)'"
+                [overrideLineWidth]="1.5"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 1: Buy / Sell Comparison -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card flex-row align-items-center justify-content-between p-4">
+            <div class="card-text-block w-75 pr-3 d-flex flex-column gap-2">
+              <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
+                <span class="kpi-card__label mb-0 d-flex align-items-center text-success" i18n>
+                  Buy
+                  <span class="badge-icon badge-icon--buy ms-1 text-success">
+                    <ion-icon name="add-circle-outline" />
+                  </span>
+                </span>
+                <span class="card-sub-value text-success font-weight-bold font-size-large">
+                  @if (isLoadingDetails()) {
+                    <ngx-skeleton-loader
+                      animation="pulse"
+                      [theme]="{ height: '1.5rem', width: '5rem' }"
+                    />
+                  } @else {
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="user()?.settings?.locale"
+                      [precision]="precision()"
+                      [unit]="user()?.settings?.baseCurrency"
+                      [value]="summary()?.totalBuy"
+                    />
+                  }
+                </span>
+              </div>
+              <div class="d-flex justify-content-between align-items-center pt-1">
+                <span class="kpi-card__label mb-0 d-flex align-items-center text-danger" i18n>
+                  Sell
+                  <span class="badge-icon badge-icon--sell ms-1 text-danger">
+                    <ion-icon name="remove-circle-outline" />
+                  </span>
+                </span>
+                <span class="card-sub-value text-danger font-weight-bold font-size-large">
+                  @if (isLoadingDetails()) {
+                    <ngx-skeleton-loader
+                      animation="pulse"
+                      [theme]="{ height: '1.5rem', width: '5rem' }"
+                    />
+                  } @else {
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="user()?.settings?.locale"
+                      [precision]="precision()"
+                      [unit]="user()?.settings?.baseCurrency"
+                      [value]="summary()?.totalSell"
+                    />
+                  }
+                </span>
+              </div>
+            </div>
+            <div class="card-chart-bars d-flex align-items-end gap-2 w-25 justify-content-center">
+              <div class="bar bar--buy" [style.height.%]="buyBarHeight()" matTooltip="Buy" matTooltipPosition="above"></div>
+              <div class="bar bar--sell" [style.height.%]="sellBarHeight()" matTooltip="Sell" matTooltipPosition="above"></div>
+            </div>
           </div>
         </div>
       </div>
