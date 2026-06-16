@@ -295,10 +295,16 @@
       <div class="row g-3 align-items-stretch">
         <!-- Buying Power -->
         <div class="col-12 col-md-4">
-          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
             <div class="card-text-block">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="kpi-card__label mb-0" i18n>Buying Power (Cash)</span>
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <span class="kpi-card__label mb-0" i18n
+                  >Buying Power (Cash)</span
+                >
                 @if (
                   !hasImpersonationId() &&
                   summary()?.totalValueInBaseCurrency > 0 &&
@@ -330,16 +336,20 @@
               </h3>
             </div>
             <div class="card-icon-aside ms-3 text-success opacity-75">
-              <ion-icon name="cash-outline" class="font-size-xxxl" />
+              <ion-icon class="font-size-xxxl" name="cash-outline" />
             </div>
           </div>
         </div>
 
         <!-- Emergency Fund -->
         <div class="col-12 col-md-4">
-          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
             <div class="card-text-block">
-              <div class="d-flex justify-content-between align-items-center mb-1">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
                 <span class="kpi-card__label mb-0" i18n>Emergency Fund</span>
                 @if (
                   !hasImpersonationId() &&
@@ -354,7 +364,9 @@
                   />
                 }
               </div>
-              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1 d-flex align-items-center">
+              <h3
+                class="card-value mb-0 font-weight-bold font-size-lg mt-1 d-flex align-items-center"
+              >
                 @if (isLoadingDetails()) {
                   <ngx-skeleton-loader
                     animation="pulse"
@@ -383,17 +395,26 @@
               </h3>
             </div>
             <div class="card-icon-aside ms-3 text-info opacity-75">
-              <ion-icon name="shield-checkmark-outline" class="font-size-xxxl" />
+              <ion-icon
+                class="font-size-xxxl"
+                name="shield-checkmark-outline"
+              />
             </div>
           </div>
         </div>
 
         <!-- Excluded from Analysis -->
         <div class="col-12 col-md-4">
-          <div class="dashboard-card p-4 d-flex justify-content-between align-items-center">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
             <div class="card-text-block">
-              <div class="d-flex justify-content-between align-items-center mb-1">
-                <span class="kpi-card__label mb-0" i18n>Excluded from Analysis</span>
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <span class="kpi-card__label mb-0" i18n
+                  >Excluded from Analysis</span
+                >
                 @if (
                   !hasImpersonationId() &&
                   summary()?.totalValueInBaseCurrency > 0 &&
@@ -425,7 +446,7 @@
               </h3>
             </div>
             <div class="card-icon-aside ms-3 text-warning opacity-75">
-              <ion-icon name="eye-off-outline" class="font-size-xxxl" />
+              <ion-icon class="font-size-xxxl" name="eye-off-outline" />
             </div>
           </div>
         </div>
@@ -438,10 +459,16 @@
       <div class="row g-3 align-items-stretch">
         <!-- Row 1: Time in Market -->
         <div class="col-12 col-md-6">
-          <div class="dashboard-card flex-row align-items-center justify-content-between p-4">
+          <div
+            class="dashboard-card flex-row align-items-center justify-content-between p-4"
+          >
             <div class="card-text-block">
-              <span class="kpi-card__label mb-1 block" i18n>Time in Market: {{ timeInMarket() }}</span>
-              <h3 class="card-value d-flex align-items-center mb-0 mt-1 font-weight-bold font-size-xl">
+              <span class="kpi-card__label mb-1 block" i18n
+                >Time in Market: {{ timeInMarket() }}</span
+              >
+              <h3
+                class="card-value d-flex align-items-center mb-0 mt-1 font-weight-bold font-size-xl"
+              >
                 @if (isLoadingDetails()) {
                   <ngx-skeleton-loader
                     animation="pulse"
@@ -449,7 +476,9 @@
                   />
                 } @else {
                   {{ summary()?.activityCount }}
-                  <span class="ms-1 font-size-medium font-weight-normal text-muted">
+                  <span
+                    class="ms-1 font-size-medium font-weight-normal text-muted"
+                  >
                     <ng-container i18n>{summary()?.activityCount, plural,
                       =1 {activity}
                       other {activities}
@@ -467,10 +496,12 @@
             </div>
             <div class="card-sparkline">
               <gf-line-chart
-                [hidden]="!historicalDataItems() || historicalDataItems().length === 0"
+                [colorScheme]="user()?.settings?.colorScheme"
+                [hidden]="
+                  !historicalDataItems() || historicalDataItems().length === 0
+                "
                 [historicalDataItems]="historicalDataItems()"
                 [isAnimated]="false"
-                [colorScheme]="user()?.settings?.colorScheme"
                 [maintainAspectRatio]="false"
                 [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
                 [overrideLineColor]="'rgba(59, 130, 246, 1)'"
@@ -486,16 +517,25 @@
 
         <!-- Row 1: Buy / Sell Comparison -->
         <div class="col-12 col-md-6">
-          <div class="dashboard-card flex-row align-items-center justify-content-between p-4">
+          <div
+            class="dashboard-card flex-row align-items-center justify-content-between p-4"
+          >
             <div class="card-text-block w-75 pr-3 d-flex flex-column gap-2">
-              <div class="d-flex justify-content-between align-items-center border-bottom pb-2">
-                <span class="kpi-card__label mb-0 d-flex align-items-center text-success" i18n>
+              <div
+                class="d-flex justify-content-between align-items-center border-bottom pb-2"
+              >
+                <span
+                  class="kpi-card__label mb-0 d-flex align-items-center text-success"
+                  i18n
+                >
                   Buy
                   <span class="badge-icon badge-icon--buy ms-1 text-success">
                     <ion-icon name="add-circle-outline" />
                   </span>
                 </span>
-                <span class="card-sub-value text-success font-weight-bold font-size-large">
+                <span
+                  class="card-sub-value text-success font-weight-bold font-size-large"
+                >
                   @if (isLoadingDetails()) {
                     <ngx-skeleton-loader
                       animation="pulse"
@@ -512,14 +552,21 @@
                   }
                 </span>
               </div>
-              <div class="d-flex justify-content-between align-items-center pt-1">
-                <span class="kpi-card__label mb-0 d-flex align-items-center text-danger" i18n>
+              <div
+                class="d-flex justify-content-between align-items-center pt-1"
+              >
+                <span
+                  class="kpi-card__label mb-0 d-flex align-items-center text-danger"
+                  i18n
+                >
                   Sell
                   <span class="badge-icon badge-icon--sell ms-1 text-danger">
                     <ion-icon name="remove-circle-outline" />
                   </span>
                 </span>
-                <span class="card-sub-value text-danger font-weight-bold font-size-large">
+                <span
+                  class="card-sub-value text-danger font-weight-bold font-size-large"
+                >
                   @if (isLoadingDetails()) {
                     <ngx-skeleton-loader
                       animation="pulse"
@@ -537,9 +584,21 @@
                 </span>
               </div>
             </div>
-            <div class="card-chart-bars d-flex align-items-end gap-2 w-25 justify-content-center">
-              <div class="bar bar--buy" [style.height.%]="buyBarHeight()" matTooltip="Buy" matTooltipPosition="above"></div>
-              <div class="bar bar--sell" [style.height.%]="sellBarHeight()" matTooltip="Sell" matTooltipPosition="above"></div>
+            <div
+              class="card-chart-bars d-flex align-items-end gap-2 w-25 justify-content-center"
+            >
+              <div
+                class="bar bar--buy"
+                matTooltip="Buy"
+                matTooltipPosition="above"
+                [style.height.%]="buyBarHeight()"
+              ></div>
+              <div
+                class="bar bar--sell"
+                matTooltip="Sell"
+                matTooltipPosition="above"
+                [style.height.%]="sellBarHeight()"
+              ></div>
             </div>
           </div>
         </div>

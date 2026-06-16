@@ -20,8 +20,8 @@ import {
 } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { internalRoutes } from '@ghostfolio/common/routes/routes';
-import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
 import { translate } from '@ghostfolio/ui/i18n';
+import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
 import { NotificationService } from '@ghostfolio/ui/notifications';
 import { GfPortfolioProportionChartComponent } from '@ghostfolio/ui/portfolio-proportion-chart';
 import { DataService } from '@ghostfolio/ui/services';
@@ -161,12 +161,9 @@ export class GfHomeOverviewComponent implements OnInit {
     const sum = this.summary();
     const lang = this.user()?.settings?.language;
     if (sum?.dateOfFirstActivity) {
-      return formatDistanceToNow(
-        new Date(sum.dateOfFirstActivity),
-        {
-          locale: getDateFnsLocale(lang)
-        }
-      );
+      return formatDistanceToNow(new Date(sum.dateOfFirstActivity), {
+        locale: getDateFnsLocale(lang)
+      });
     }
     return '-';
   });

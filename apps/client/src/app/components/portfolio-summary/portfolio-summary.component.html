@@ -1,15 +1,19 @@
 <div class="summary-dashboard container-fluid p-0">
   <div class="summary-header text-center mb-4">
     <h1 class="summary-title" i18n>Summary</h1>
-    <p class="summary-subtitle" *ngIf="dateRangeText">{{ dateRangeText }}</p>
+    <p *ngIf="dateRangeText" class="summary-subtitle">{{ dateRangeText }}</p>
   </div>
 
   <div class="row g-3">
     <!-- Card 1: Time in Market -->
     <div class="col-12 col-md-6">
-      <div class="summary-card flex-row align-items-center justify-content-between">
+      <div
+        class="summary-card flex-row align-items-center justify-content-between"
+      >
         <div class="card-text-block">
-          <span class="card-label" i18n>Time in Market: {{ timeInMarket }}</span>
+          <span class="card-label" i18n
+            >Time in Market: {{ timeInMarket }}</span
+          >
           <h3 class="card-value d-flex align-items-center mb-0 mt-1">
             {{ summary?.activityCount }}
             <span class="ms-1">
@@ -29,10 +33,10 @@
         </div>
         <div class="card-sparkline">
           <gf-line-chart
+            [colorScheme]="user?.settings?.colorScheme"
             [hidden]="!historicalDataItems || historicalDataItems.length === 0"
             [historicalDataItems]="historicalDataItems"
             [isAnimated]="false"
-            [colorScheme]="user?.settings?.colorScheme"
             [maintainAspectRatio]="false"
             [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
             [overrideLineColor]="'rgba(59, 130, 246, 1)'"
@@ -48,9 +52,13 @@
 
     <!-- Card 3: Buy & Sell Comparison -->
     <div class="col-12 col-md-6">
-      <div class="summary-card flex-row align-items-center justify-content-between">
+      <div
+        class="summary-card flex-row align-items-center justify-content-between"
+      >
         <div class="card-text-block w-50">
-          <div class="mb-2 d-flex align-items-center justify-content-between border-bottom pb-1">
+          <div
+            class="mb-2 d-flex align-items-center justify-content-between border-bottom pb-1"
+          >
             <span class="card-label d-flex align-items-center" i18n>
               Buy
               <span class="badge-icon badge-icon--buy ms-1">
@@ -86,8 +94,18 @@
           </div>
         </div>
         <div class="card-chart-bars d-flex align-items-end gap-2">
-          <div class="bar bar--buy" [style.height.%]="buyBarHeight" matTooltip="Buy" matTooltipPosition="above"></div>
-          <div class="bar bar--sell" [style.height.%]="sellBarHeight" matTooltip="Sell" matTooltipPosition="above"></div>
+          <div
+            class="bar bar--buy"
+            matTooltip="Buy"
+            matTooltipPosition="above"
+            [style.height.%]="buyBarHeight"
+          ></div>
+          <div
+            class="bar bar--sell"
+            matTooltip="Sell"
+            matTooltipPosition="above"
+            [style.height.%]="sellBarHeight"
+          ></div>
         </div>
       </div>
     </div>
@@ -123,7 +141,11 @@
             [locale]="locale"
             [precision]="precision"
             [unit]="baseCurrency"
-            [value]="isLoading ? undefined : summary?.totalInvestmentValueWithCurrencyEffect"
+            [value]="
+              isLoading
+                ? undefined
+                : summary?.totalInvestmentValueWithCurrencyEffect
+            "
           />
         </h2>
       </div>
@@ -142,7 +164,9 @@
                 [locale]="locale"
                 [precision]="precision"
                 [unit]="baseCurrency"
-                [value]="isLoading ? undefined : summary?.dividendInBaseCurrency"
+                [value]="
+                  isLoading ? undefined : summary?.dividendInBaseCurrency
+                "
               />
             </span>
           </div>
@@ -154,7 +178,9 @@
                 [locale]="locale"
                 [precision]="precision"
                 [unit]="baseCurrency"
-                [value]="isLoading ? undefined : summary?.interestInBaseCurrency"
+                [value]="
+                  isLoading ? undefined : summary?.interestInBaseCurrency
+                "
               />
             </span>
           </div>
@@ -168,13 +194,21 @@
         <div class="d-flex justify-content-between align-items-start">
           <div class="card-text-block">
             <span class="card-label" i18n>Absolute Gross Performance</span>
-            <h2 class="card-value my-1" [class.text-success]="grossPerformancePositive" [class.text-danger]="!grossPerformancePositive">
+            <h2
+              class="card-value my-1"
+              [class.text-danger]="!grossPerformancePositive"
+              [class.text-success]="grossPerformancePositive"
+            >
               <gf-value
                 [isCurrency]="true"
                 [locale]="locale"
                 [precision]="precision"
                 [unit]="baseCurrency"
-                [value]="isLoading ? undefined : summary?.grossPerformanceWithCurrencyEffect"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.grossPerformanceWithCurrencyEffect
+                "
               />
             </h2>
             <div class="d-flex align-items-center mt-1">
@@ -195,13 +229,23 @@
           </div>
           <div class="card-sparkline-small">
             <gf-line-chart
-              [hidden]="!historicalDataItems || historicalDataItems.length === 0"
+              [colorScheme]="user?.settings?.colorScheme"
+              [hidden]="
+                !historicalDataItems || historicalDataItems.length === 0
+              "
               [historicalDataItems]="historicalDataItems"
               [isAnimated]="false"
-              [colorScheme]="user?.settings?.colorScheme"
               [maintainAspectRatio]="false"
-              [overrideGradientColor]="grossPerformancePositive ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
-              [overrideLineColor]="grossPerformancePositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'"
+              [overrideGradientColor]="
+                grossPerformancePositive
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)'
+              "
+              [overrideLineColor]="
+                grossPerformancePositive
+                  ? 'rgba(34, 197, 94, 1)'
+                  : 'rgba(239, 68, 68, 1)'
+              "
               [overrideLineWidth]="1.5"
               [showGradient]="true"
               [showLoader]="false"
@@ -212,10 +256,12 @@
         </div>
         <div class="progress-bar-container mt-3">
           <div class="progress-bar-track">
-            <div class="progress-bar-fill"
-                 [class.progress-bar-fill--positive]="grossPerformancePositive"
-                 [class.progress-bar-fill--negative]="!grossPerformancePositive"
-                 [style.width.%]="grossPerformanceProgressWidth"></div>
+            <div
+              class="progress-bar-fill"
+              [class.progress-bar-fill--negative]="!grossPerformancePositive"
+              [class.progress-bar-fill--positive]="grossPerformancePositive"
+              [style.width.%]="grossPerformanceProgressWidth"
+            ></div>
           </div>
         </div>
       </div>
@@ -223,8 +269,12 @@
 
     <!-- Card 6: Net Performance (ROAI) & Absolute Net Performance -->
     <div class="col-12 col-md-6">
-      <div class="summary-card flex-row justify-content-between align-items-stretch">
-        <div class="card-text-block d-flex flex-column justify-content-between w-50">
+      <div
+        class="summary-card flex-row justify-content-between align-items-stretch"
+      >
+        <div
+          class="card-text-block d-flex flex-column justify-content-between w-50"
+        >
           <div>
             <span class="card-label" i18n>Net Performance (ROAI)</span>
             <h2 class="card-value my-1">
@@ -232,32 +282,50 @@
                 [colorizeSign]="true"
                 [isPercent]="true"
                 [locale]="locale"
-                [value]="isLoading ? undefined : summary?.netPerformancePercentageWithCurrencyEffect"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.netPerformancePercentageWithCurrencyEffect
+                "
               />
             </h2>
           </div>
           <div class="mt-2 pt-2 border-top">
-            <span class="card-label sub-label-small" i18n>Absolute Net Performance</span>
+            <span class="card-label sub-label-small" i18n
+              >Absolute Net Performance</span
+            >
             <h3 class="card-value mb-0 mt-1">
               <gf-value
                 [isCurrency]="true"
                 [locale]="locale"
                 [precision]="precision"
                 [unit]="baseCurrency"
-                [value]="isLoading ? undefined : summary?.netPerformanceWithCurrencyEffect"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.netPerformanceWithCurrencyEffect
+                "
               />
             </h3>
           </div>
         </div>
         <div class="card-sparkline-large w-50">
           <gf-line-chart
+            [colorScheme]="user?.settings?.colorScheme"
             [hidden]="!historicalDataItems || historicalDataItems.length === 0"
             [historicalDataItems]="historicalDataItems"
             [isAnimated]="false"
-            [colorScheme]="user?.settings?.colorScheme"
             [maintainAspectRatio]="false"
-            [overrideGradientColor]="(summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0 ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
-            [overrideLineColor]="(summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0 ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'"
+            [overrideGradientColor]="
+              (summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0
+                ? 'rgba(34, 197, 94, 0.15)'
+                : 'rgba(239, 68, 68, 0.15)'
+            "
+            [overrideLineColor]="
+              (summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0
+                ? 'rgba(34, 197, 94, 1)'
+                : 'rgba(239, 68, 68, 1)'
+            "
             [overrideLineWidth]="2"
             [showGradient]="true"
             [showLoader]="false"
@@ -270,7 +338,9 @@
 
     <!-- Card 7: Net Worth & Balance Sheet -->
     <div class="col-12 col-md-8">
-      <div class="summary-card summary-card--hero flex-row justify-content-between align-items-center">
+      <div
+        class="summary-card summary-card--hero flex-row justify-content-between align-items-center"
+      >
         <div class="card-text-block">
           <span class="card-label label-hero" i18n>Net Worth</span>
           <h1 class="card-value value-hero mb-3 mt-1">
@@ -279,7 +349,9 @@
               [locale]="locale"
               [precision]="precision"
               [unit]="baseCurrency"
-              [value]="isLoading ? undefined : summary?.totalValueInBaseCurrency"
+              [value]="
+                isLoading ? undefined : summary?.totalValueInBaseCurrency
+              "
             />
           </h1>
           <div class="balance-sheet-grid d-flex gap-4 border-top pt-2">
@@ -291,14 +363,19 @@
                   [locale]="locale"
                   [precision]="precision"
                   [unit]="baseCurrency"
-                  [value]="isLoading ? undefined : summary?.currentValueInBaseCurrency"
+                  [value]="
+                    isLoading ? undefined : summary?.currentValueInBaseCurrency
+                  "
                 />
               </div>
             </div>
             <div>
               <span class="sub-text text-muted" i18n>Liabilities</span>
               <div class="sub-value fw-semibold text-danger mt-1">
-                @if (summary?.liabilitiesInBaseCurrency || summary?.liabilitiesInBaseCurrency === 0) {
+                @if (
+                  summary?.liabilitiesInBaseCurrency ||
+                  summary?.liabilitiesInBaseCurrency === 0
+                ) {
                   <span class="me-1">-</span>
                 }
                 <gf-value
@@ -306,14 +383,16 @@
                   [locale]="locale"
                   [precision]="precision"
                   [unit]="baseCurrency"
-                  [value]="isLoading ? undefined : summary?.liabilitiesInBaseCurrency"
+                  [value]="
+                    isLoading ? undefined : summary?.liabilitiesInBaseCurrency
+                  "
                 />
               </div>
             </div>
           </div>
         </div>
         <div class="card-icon-overlay d-none d-sm-block">
-          <ion-icon name="wallet-outline" class="hero-bg-icon" />
+          <ion-icon class="hero-bg-icon" name="wallet-outline" />
         </div>
       </div>
     </div>
@@ -324,24 +403,42 @@
         <div class="d-flex justify-content-between align-items-start">
           <div>
             <span class="card-label" i18n>Annualized Performance</span>
-            <h2 class="card-value my-1" [class.text-success]="annualizedPerformancePositive" [class.text-danger]="!annualizedPerformancePositive">
+            <h2
+              class="card-value my-1"
+              [class.text-danger]="!annualizedPerformancePositive"
+              [class.text-success]="annualizedPerformancePositive"
+            >
               <gf-value
                 [colorizeSign]="true"
                 [isPercent]="true"
                 [locale]="locale"
-                [value]="isLoading ? undefined : summary?.annualizedPerformancePercentWithCurrencyEffect"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.annualizedPerformancePercentWithCurrencyEffect
+                "
               />
             </h2>
           </div>
           <div class="card-sparkline-extra-small">
             <gf-line-chart
-              [hidden]="!historicalDataItems || historicalDataItems.length === 0"
+              [colorScheme]="user?.settings?.colorScheme"
+              [hidden]="
+                !historicalDataItems || historicalDataItems.length === 0
+              "
               [historicalDataItems]="historicalDataItems"
               [isAnimated]="false"
-              [colorScheme]="user?.settings?.colorScheme"
               [maintainAspectRatio]="false"
-              [overrideGradientColor]="annualizedPerformancePositive ? 'rgba(34, 197, 94, 0.15)' : 'rgba(239, 68, 68, 0.15)'"
-              [overrideLineColor]="annualizedPerformancePositive ? 'rgba(34, 197, 94, 1)' : 'rgba(239, 68, 68, 1)'"
+              [overrideGradientColor]="
+                annualizedPerformancePositive
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)'
+              "
+              [overrideLineColor]="
+                annualizedPerformancePositive
+                  ? 'rgba(34, 197, 94, 1)'
+                  : 'rgba(239, 68, 68, 1)'
+              "
               [overrideLineWidth]="1.5"
               [showGradient]="true"
               [showLoader]="false"
@@ -352,10 +449,16 @@
         </div>
         <div class="progress-bar-container mt-3">
           <div class="progress-bar-track">
-            <div class="progress-bar-fill"
-                 [class.progress-bar-fill--positive]="annualizedPerformancePositive"
-                 [class.progress-bar-fill--negative]="!annualizedPerformancePositive"
-                 [style.width.%]="annualizedPerformanceProgressWidth"></div>
+            <div
+              class="progress-bar-fill"
+              [class.progress-bar-fill--negative]="
+                !annualizedPerformancePositive
+              "
+              [class.progress-bar-fill--positive]="
+                annualizedPerformancePositive
+              "
+              [style.width.%]="annualizedPerformanceProgressWidth"
+            ></div>
           </div>
         </div>
       </div>
@@ -369,8 +472,12 @@
           <!-- Emergency Fund -->
           <div class="col-12 col-md-4">
             <div class="sub-card-funds p-3 rounded">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="card-label sub-label-small" i18n>Emergency Fund</span>
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Emergency Fund</span
+                >
                 @if (
                   !hasImpersonationId &&
                   summary?.totalValueInBaseCurrency > 0 &&
@@ -403,12 +510,16 @@
                     [locale]="locale"
                     [precision]="precision"
                     [unit]="baseCurrency"
-                    [value]="isLoading ? undefined : summary?.emergencyFund?.total"
+                    [value]="
+                      isLoading ? undefined : summary?.emergencyFund?.total
+                    "
                   />
                 </h3>
               </div>
               <!-- Desglose Cash / Assets -->
-              <div class="mt-2 pt-2 border-top d-flex justify-content-between gap-3 sub-text-small text-muted">
+              <div
+                class="mt-2 pt-2 border-top d-flex justify-content-between gap-3 sub-text-small text-muted"
+              >
                 <div>
                   <span i18n>Cash:</span>
                   <strong class="text-reset ms-1">
@@ -417,7 +528,9 @@
                       [locale]="locale"
                       [precision]="precision"
                       [unit]="baseCurrency"
-                      [value]="isLoading ? undefined : summary?.emergencyFund?.cash"
+                      [value]="
+                        isLoading ? undefined : summary?.emergencyFund?.cash
+                      "
                     />
                   </strong>
                 </div>
@@ -429,7 +542,9 @@
                       [locale]="locale"
                       [precision]="precision"
                       [unit]="baseCurrency"
-                      [value]="isLoading ? undefined : summary?.emergencyFund?.assets"
+                      [value]="
+                        isLoading ? undefined : summary?.emergencyFund?.assets
+                      "
                     />
                   </strong>
                 </div>
@@ -439,9 +554,15 @@
 
           <!-- Buying Power -->
           <div class="col-12 col-md-4">
-            <div class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="card-label sub-label-small" i18n>Buying Power (Cash)</span>
+            <div
+              class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Buying Power (Cash)</span
+                >
                 @if (
                   !hasImpersonationId &&
                   summary?.totalValueInBaseCurrency > 0 &&
@@ -469,9 +590,15 @@
 
           <!-- Excluded from Analysis -->
           <div class="col-12 col-md-4">
-            <div class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between">
-              <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="card-label sub-label-small" i18n>Excluded from Analysis</span>
+            <div
+              class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Excluded from Analysis</span
+                >
                 @if (
                   !hasImpersonationId &&
                   summary?.totalValueInBaseCurrency > 0 &&
@@ -481,7 +608,9 @@
                     class="badge bg-light small"
                     [isPercent]="true"
                     [locale]="locale"
-                    [value]="isLoading ? undefined : excludedFromAnalysisPercentage"
+                    [value]="
+                      isLoading ? undefined : excludedFromAnalysisPercentage
+                    "
                   />
                 }
               </div>
@@ -491,7 +620,11 @@
                   [locale]="locale"
                   [precision]="precision"
                   [unit]="baseCurrency"
-                  [value]="isLoading ? undefined : summary?.excludedAccountsAndActivities"
+                  [value]="
+                    isLoading
+                      ? undefined
+                      : summary?.excludedAccountsAndActivities
+                  "
                 />
               </h3>
             </div>

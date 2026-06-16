@@ -1,6 +1,10 @@
 import { NUMERICAL_PRECISION_THRESHOLD_6_FIGURES } from '@ghostfolio/common/config';
 import { getDateFnsLocale, getLocale } from '@ghostfolio/common/helper';
-import { LineChartItem, PortfolioSummary, User } from '@ghostfolio/common/interfaces';
+import {
+  LineChartItem,
+  PortfolioSummary,
+  User
+} from '@ghostfolio/common/interfaces';
 import { translate } from '@ghostfolio/ui/i18n';
 import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
 import { NotificationService } from '@ghostfolio/ui/notifications';
@@ -78,7 +82,10 @@ export class GfPortfolioSummaryComponent implements OnChanges {
     if (!this.summary?.totalBuy && !this.summary?.totalSell) {
       return 0;
     }
-    const max = Math.max(this.summary.totalBuy || 0, this.summary.totalSell || 0);
+    const max = Math.max(
+      this.summary.totalBuy || 0,
+      this.summary.totalSell || 0
+    );
     return max ? ((this.summary.totalBuy || 0) / max) * 100 : 0;
   }
 
@@ -86,7 +93,10 @@ export class GfPortfolioSummaryComponent implements OnChanges {
     if (!this.summary?.totalBuy && !this.summary?.totalSell) {
       return 0;
     }
-    const max = Math.max(this.summary.totalBuy || 0, this.summary.totalSell || 0);
+    const max = Math.max(
+      this.summary.totalBuy || 0,
+      this.summary.totalSell || 0
+    );
     return max ? ((this.summary.totalSell || 0) / max) * 100 : 0;
   }
 
@@ -105,17 +115,24 @@ export class GfPortfolioSummaryComponent implements OnChanges {
   }
 
   public get annualizedPerformanceProgressWidth(): number {
-    const value = Math.abs(this.summary?.annualizedPerformancePercentWithCurrencyEffect ?? 0) * 100;
+    const value =
+      Math.abs(
+        this.summary?.annualizedPerformancePercentWithCurrencyEffect ?? 0
+      ) * 100;
     return Math.min(value, 100);
   }
 
   public get annualizedPerformancePositive(): boolean {
-    return (this.summary?.annualizedPerformancePercentWithCurrencyEffect ?? 0) >= 0;
+    return (
+      (this.summary?.annualizedPerformancePercentWithCurrencyEffect ?? 0) >= 0
+    );
   }
 
   public get dateRangeText(): string {
     const dateRange = this.user?.settings?.dateRange ?? 'max';
-    const firstActivity = this.summary?.dateOfFirstActivity ? new Date(this.summary.dateOfFirstActivity) : null;
+    const firstActivity = this.summary?.dateOfFirstActivity
+      ? new Date(this.summary.dateOfFirstActivity)
+      : null;
     let startDate: Date | null = null;
     let endDate = new Date();
 
@@ -145,7 +162,11 @@ export class GfPortfolioSummaryComponent implements OnChanges {
     }
 
     if (startDate) {
-      const options: Intl.DateTimeFormatOptions = { day: 'numeric', month: 'long', year: 'numeric' };
+      const options: Intl.DateTimeFormatOptions = {
+        day: 'numeric',
+        month: 'long',
+        year: 'numeric'
+      };
       const startStr = startDate.toLocaleDateString(this.locale, options);
       const endStr = endDate.toLocaleDateString(this.locale, options);
       return $localize`from ${startStr} to ${endStr}`;

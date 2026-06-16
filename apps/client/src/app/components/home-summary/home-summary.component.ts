@@ -2,7 +2,11 @@ import { GfPortfolioSummaryComponent } from '@ghostfolio/client/components/portf
 import { ImpersonationStorageService } from '@ghostfolio/client/services/impersonation-storage.service';
 import { UserService } from '@ghostfolio/client/services/user/user.service';
 import { DEFAULT_DATE_RANGE } from '@ghostfolio/common/config';
-import { LineChartItem, PortfolioSummary, User } from '@ghostfolio/common/interfaces';
+import {
+  LineChartItem,
+  PortfolioSummary,
+  User
+} from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { DataService } from '@ghostfolio/ui/services';
 
