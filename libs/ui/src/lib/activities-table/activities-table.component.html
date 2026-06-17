@@ -148,11 +148,9 @@
     <ng-container matColumnDef="icon" sticky>
       <th *matHeaderCellDef class="px-1" mat-header-cell></th>
       <td *matCellDef="let element" class="px-1 text-center" mat-cell>
-        <gf-entity-logo
-          [dataSource]="element.SymbolProfile?.dataSource"
-          [symbol]="element.SymbolProfile?.symbol"
-          [tooltip]="element.SymbolProfile?.name"
-        />
+        <div class="asset-icon-wrapper" [title]="element.SymbolProfile?.name">
+          <ion-icon [name]="getAssetIcon(element)" />
+        </div>
       </td>
     </ng-container>
 
@@ -160,25 +158,35 @@
       <th *matHeaderCellDef class="px-1" mat-header-cell>
         <ng-container i18n>Name</ng-container>
       </th>
-      <td *matCellDef="let element" class="px-1" mat-cell>
-        <div class="align-items-center d-flex line-height-1">
-          <div>
-            <span class="text-truncate">{{ element.SymbolProfile?.name }}</span>
-            @if (element.isDraft) {
-              <span class="badge text-bg-secondary ms-1" i18n>Draft</span>
-            }
+      <td *matCellDef="let element" class="line-height-1 px-1" mat-cell>
+        <div class="align-items-center d-flex text-truncate">
+          <div class="text-truncate fw-semibold text-main">
+            {{ element.SymbolProfile?.name }}
           </div>
+          @if (element.isDraft) {
+            <span class="badge text-bg-secondary ms-1" i18n>Draft</span>
+          }
         </div>
-        @if (
-          element.SymbolProfile?.dataSource !== 'MANUAL' &&
-          !isUUID(element.SymbolProfile?.symbol)
-        ) {
-          <div>
-            <small class="text-muted">{{
-              element.SymbolProfile?.symbol | gfSymbol
-            }}</small>
-          </div>
-        }
+        <div class="text-subtitle small mt-1">
+          @if (showAccountColumn()) {
+            @if (element.account?.name) {
+              {{ element.account.name }}
+            } @else {
+              <ng-container i18n>Unlinked</ng-container>
+            }
+          }
+          @if (
+            element.SymbolProfile?.symbol &&
+            element.SymbolProfile?.name !== element.SymbolProfile?.symbol &&
+            element.SymbolProfile?.dataSource !== 'MANUAL' &&
+            !isUUID(element.SymbolProfile?.symbol)
+          ) {
+            @if (showAccountColumn()) {
+              ·
+            }
+            {{ element.SymbolProfile?.symbol | gfSymbol }}
+          }
+        </div>
       </td>
     </ng-container>
 
@@ -330,24 +338,6 @@
             [locale]="locale"
             [value]="isLoading() ? undefined : element.valueInBaseCurrency"
           />
-        </div>
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="account">
-      <th *matHeaderCellDef class="px-1" mat-header-cell>
-        <span class="d-none d-lg-block" i18n>Account</span>
-      </th>
-      <td *matCellDef="let element" class="px-1" mat-cell>
-        <div class="d-flex">
-          @if (element.account?.platform?.url) {
-            <gf-entity-logo
-              class="me-1"
-              [tooltip]="element.account?.platform?.name"
-              [url]="element.account?.platform?.url"
-            />
-          }
-          <span class="d-none d-lg-block">{{ element.account?.name }}</span>
         </div>
       </td>
     </ng-container>
