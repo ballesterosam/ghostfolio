@@ -4,7 +4,7 @@
       <h2 class="section-title" i18n>Allocations</h2>
     </div>
   </div>
-  <div class="row">
+  <div class="row mb-3">
     <div class="col">
       <div class="dashboard-card mb-3">
         <div
@@ -40,9 +40,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="platforms"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['id']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -58,9 +61,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="holdings"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['currency']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -76,9 +82,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="holdings"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['assetClassLabel', 'assetSubClassLabel']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -93,9 +102,13 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="symbols"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['symbol']"
           [locale]="user?.settings?.locale"
+          [maxItems]="20"
+          [separateSegments]="isDarkMode()"
           [showLabels]="deviceType !== 'mobile'"
           (proportionChartClicked)="onSymbolChartClicked($event)"
         />
@@ -113,10 +126,13 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="sectors"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['name']"
           [locale]="user?.settings?.locale"
           [maxItems]="10"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -132,9 +148,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="continents"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['name']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -150,8 +169,11 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="marketsAdvanced"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -229,10 +251,13 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="countries"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['name']"
           [locale]="user?.settings?.locale"
           [maxItems]="10"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>
@@ -244,9 +269,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="accounts"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['id']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
           (proportionChartClicked)="onAccountChartClicked($event)"
         />
       </div>
@@ -263,9 +291,12 @@
           [baseCurrency]="user?.settings?.baseCurrency"
           [colorScheme]="user?.settings?.colorScheme"
           [data]="holdings"
+          [glow]="true"
+          [hollow]="true"
           [isInPercentage]="showValuesInPercentage()"
           [keys]="['etfProvider']"
           [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
         />
       </div>
     </div>

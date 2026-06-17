@@ -427,9 +427,15 @@ export class GfPortfolioProportionChartComponent
                     align: 'end',
                     anchor: 'end',
                     formatter: (value, context) => {
-                      const symbol = context.chart.data.labels?.[
+                      let symbol = context.chart.data.labels?.[
                         context.dataIndex
                       ] as string;
+
+                      if (symbol === 'Commodity') {
+                        symbol = $localize`Commodity`;
+                      } else if (symbol === 'Cryptocurrency') {
+                        symbol = $localize`Cryptocurrency`;
+                      }
 
                       return value > 0
                         ? isUUID(symbol)
@@ -494,6 +500,10 @@ export class GfPortfolioProportionChartComponent
             symbol = $localize`Other`;
           } else if (symbol === UNKNOWN_KEY) {
             symbol = $localize`No data available`;
+          } else if (symbol === 'Commodity') {
+            symbol = $localize`Commodity`;
+          } else if (symbol === 'Cryptocurrency') {
+            symbol = $localize`Cryptocurrency`;
           }
 
           const name = this.data[symbol]?.name;

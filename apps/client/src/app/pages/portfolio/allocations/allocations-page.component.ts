@@ -185,6 +185,10 @@ export class GfAllocationsPageComponent implements OnInit {
     this.initialize();
   }
 
+  public isDarkMode() {
+    return this.user?.settings?.colorScheme === 'DARK';
+  }
+
   public onAccountChartClicked({ symbol }: AssetProfileIdentifier) {
     if (symbol && symbol !== UNKNOWN_KEY) {
       this.router.navigate([], {
@@ -210,12 +214,12 @@ export class GfAllocationsPageComponent implements OnInit {
     assetSubClass: PortfolioPosition['assetProfile']['assetSubClass'];
     currency?: PortfolioPosition['assetProfile']['currency'];
   }) {
-    if (
-      assetClass === AssetClass.COMMODITY ||
-      assetSubClass === AssetSubClass.CRYPTOCURRENCY
-    ) {
-      // Commodities and cryptocurrencies have no meaningful currency exposure
-      return UNKNOWN_KEY;
+    if (assetClass === AssetClass.COMMODITY) {
+      return 'Commodity';
+    }
+
+    if (assetSubClass === AssetSubClass.CRYPTOCURRENCY) {
+      return 'Cryptocurrency';
     }
 
     return currency;
