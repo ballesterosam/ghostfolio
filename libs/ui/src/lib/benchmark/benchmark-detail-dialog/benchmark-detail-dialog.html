@@ -6,31 +6,129 @@
 />
 
 <div class="flex-grow-1" mat-dialog-content>
-  <div class="container p-0">
-    <div class="row">
-      <div class="col-12 d-flex justify-content-center mb-3">
-        <gf-value
-          size="large"
-          [locale]="data.locale"
-          [precision]="2"
-          [value]="value"
-        />
+  @if (assetProfile) {
+    <div class="container p-0">
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="dashboard-card text-center">
+            <div
+              class="asset-icon-wrapper mx-auto mb-3"
+              [title]="assetProfile?.name ?? assetProfile?.symbol"
+            >
+              @if (data.dataSource === 'MANUAL') {
+                <ion-icon
+                  [name]="
+                    getAssetIcon(
+                      assetProfile?.assetSubClass,
+                      assetProfile?.assetClass
+                    )
+                  "
+                />
+              } @else {
+                <gf-entity-logo
+                  [dataSource]="data.dataSource"
+                  [size]="'large'"
+                  [symbol]="data.symbol"
+                  [tooltip]="assetProfile?.name"
+                />
+              }
+            </div>
+            <gf-value
+              size="large"
+              [isCurrency]="true"
+              [locale]="data.locale"
+              [unit]="assetProfile?.currency"
+              [value]="value"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="row mb-4">
+        <div class="col-12">
+          <div class="dashboard-card">
+            <gf-line-chart
+              benchmarkLabel="Average Unit Price"
+              [colorScheme]="data.colorScheme"
+              [historicalDataItems]="historicalDataItems"
+              [isAnimated]="false"
+              [label]="data.symbol"
+              [locale]="data.locale"
+              [maintainAspectRatio]="false"
+              [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+              [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+              [overrideLineWidth]="2"
+              [showGradient]="true"
+              [showXAxis]="true"
+              [showYAxis]="true"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        @if (assetProfile?.symbol) {
+          <div class="col-6 col-md-4 mb-3">
+            <div class="kpi-card">
+              <div class="kpi-card__label" i18n>Symbol</div>
+              <div class="kpi-card__value">
+                <gf-value size="medium" [value]="assetProfile.symbol" />
+              </div>
+            </div>
+          </div>
+        }
+        @if (assetProfile?.isin) {
+          <div class="col-6 col-md-4 mb-3">
+            <div class="kpi-card">
+              <div class="kpi-card__label" i18n>ISIN</div>
+              <div class="kpi-card__value">
+                <gf-value size="medium" [value]="assetProfile.isin" />
+              </div>
+            </div>
+          </div>
+        }
+        @if (assetProfile?.assetClass) {
+          <div class="col-6 col-md-4 mb-3">
+            <div class="kpi-card">
+              <div class="kpi-card__label" i18n>Asset Class</div>
+              <div class="kpi-card__value">
+                <gf-value size="medium" [value]="assetProfile.assetClass" />
+              </div>
+            </div>
+          </div>
+        }
+        @if (assetProfile?.assetSubClass) {
+          <div class="col-6 col-md-4 mb-3">
+            <div class="kpi-card">
+              <div class="kpi-card__label" i18n>Asset Sub Class</div>
+              <div class="kpi-card__value">
+                <gf-value size="medium" [value]="assetProfile.assetSubClass" />
+              </div>
+            </div>
+          </div>
+        }
       </div>
     </div>
-
-    <gf-line-chart
-      benchmarkLabel="Average Unit Price"
-      class="mb-4"
-      [colorScheme]="data.colorScheme"
-      [historicalDataItems]="historicalDataItems"
-      [isAnimated]="true"
-      [label]="data.symbol"
-      [locale]="data.locale"
-      [showGradient]="true"
-      [showXAxis]="true"
-      [showYAxis]="true"
-    />
-  </div>
+  } @else {
+    <div class="p-4">
+      <ngx-skeleton-loader
+        animation="pulse"
+        [theme]="{
+          height: '2rem',
+          width: '100%',
+          'margin-bottom': '1rem'
+        }"
+      />
+      <ngx-skeleton-loader
+        animation="pulse"
+        [theme]="{
+          height: '200px',
+          width: '100%',
+          'margin-bottom': '1rem'
+        }"
+      />
+    </div>
+  }
 </div>
 
 <gf-dialog-footer

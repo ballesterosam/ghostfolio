@@ -194,6 +194,13 @@
     overflow: hidden;
   }
 
+  .dashboard-card {
+    &.flex-row {
+      display: flex !important;
+      min-height: 9rem;
+    }
+  }
+
   .card-text-block {
     flex: 1;
   }
@@ -216,7 +223,7 @@
     gap: 0.3rem;
     margin-left: 0.5rem;
     flex-shrink: 0;
-    height: 4rem;
+    height: 100%;
     width: 2.25rem;
 
     .bar {

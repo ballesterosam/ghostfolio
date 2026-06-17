@@ -273,8 +273,17 @@ body {
     .mat-mdc-dialog-container {
       --mat-dialog-container-color: var(--dark-background);
 
+      .mdc-dialog__surface {
+        border-color: rgba(var(--light-dividers), 0.15) !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
+      }
+
       .mdc-dialog__content {
         --mat-dialog-supporting-text-color: rgba(var(--light-primary-text));
+      }
+
+      .mat-mdc-dialog-title {
+        color: rgba(var(--light-primary-text), 0.9);
       }
     }
 
@@ -449,8 +458,28 @@ ngx-skeleton-loader {
 }
 
 .mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border-radius: 20px !important;
+    padding: 1.5rem !important;
+    border: 1px solid rgba(var(--dark-dividers), 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+  }
+
   .mdc-dialog__content {
     --mat-dialog-supporting-text-color: rgba(var(--dark-primary-text));
+    padding: 0 1rem 1.5rem !important;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 1rem 1rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.02em;
+    color: rgba(var(--dark-primary-text), 0.9);
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0.5rem 1rem 1rem !important;
   }
 }
 

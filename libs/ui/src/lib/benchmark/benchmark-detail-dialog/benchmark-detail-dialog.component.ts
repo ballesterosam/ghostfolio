@@ -18,12 +18,28 @@ import {
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  MAT_DIALOG_DATA,
   MatDialogModule,
-  MatDialogRef
+  MatDialogRef,
+  MAT_DIALOG_DATA
 } from '@angular/material/dialog';
+import { IonIcon } from '@ionic/angular/standalone';
 import { format } from 'date-fns';
+import { addIcons } from 'ionicons';
+import {
+  businessOutline,
+  close,
+  helpCircleOutline,
+  layersOutline,
+  leafOutline,
+  logoBitcoin,
+  pieChartOutline,
+  readerOutline,
+  receiptOutline,
+  walletOutline
+} from 'ionicons/icons';
+import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
+import { GfEntityLogoComponent } from '../../entity-logo/entity-logo.component';
 import { GfLineChartComponent } from '../../line-chart/line-chart.component';
 import { GfValueComponent } from '../../value/value.component';
 import { BenchmarkDetailDialogParams } from './interfaces/interfaces';
@@ -34,9 +50,12 @@ import { BenchmarkDetailDialogParams } from './interfaces/interfaces';
   imports: [
     GfDialogFooterComponent,
     GfDialogHeaderComponent,
+    GfEntityLogoComponent,
     GfLineChartComponent,
     GfValueComponent,
-    MatDialogModule
+    IonIcon,
+    MatDialogModule,
+    NgxSkeletonLoaderModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'gf-benchmark-detail-dialog',
@@ -54,7 +73,20 @@ export class GfBenchmarkDetailDialogComponent implements OnInit {
     private destroyRef: DestroyRef,
     public dialogRef: MatDialogRef<GfBenchmarkDetailDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: BenchmarkDetailDialogParams
-  ) {}
+  ) {
+    addIcons({
+      businessOutline,
+      close,
+      helpCircleOutline,
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
+      readerOutline,
+      receiptOutline,
+      walletOutline
+    });
+  }
 
   public ngOnInit() {
     this.dataService
@@ -81,6 +113,35 @@ export class GfBenchmarkDetailDialogComponent implements OnInit {
 
         this.changeDetectorRef.markForCheck();
       });
+  }
+
+  public getAssetIcon(assetSubClass: string, assetClass: string): string {
+    const subClass = assetSubClass?.toUpperCase();
+    const aClass = assetClass?.toUpperCase();
+
+    switch (subClass) {
+      case 'CRYPTOCURRENCY':
+        return 'logo-bitcoin';
+      case 'ETF':
+        return 'pie-chart-outline';
+      case 'MUTUALFUND':
+      case 'MUTUAL_FUND':
+        return 'layers-outline';
+      case 'BOND':
+        return 'receipt-outline';
+      case 'PRECIOUS_METAL':
+        return 'leaf-outline';
+    }
+
+    switch (aClass) {
+      case 'CASH':
+      case 'LIQUIDITY':
+        return 'wallet-outline';
+      case 'EQUITY':
+        return 'business-outline';
+    }
+
+    return 'help-circle-outline';
   }
 
   public onClose() {

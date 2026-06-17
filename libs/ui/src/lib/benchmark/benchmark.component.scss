@@ -1,3 +1,26 @@
+@use '../shared/table';
+
 :host {
   display: block;
+
+  // Table structure for separated card rows
+  table.gf-table {
+    @include table.gf-table-cards;
+
+    tr.mat-mdc-row {
+      td.mat-column-trend50d,
+      td.mat-column-trend200d,
+      td.mat-column-date,
+      td.mat-column-change {
+        font-size: 1.05rem;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+:host-context(.theme-dark) {
+  table.gf-table {
+    @include table.gf-table-cards(true);
+  }
 }
