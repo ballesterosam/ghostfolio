@@ -914,6 +914,8 @@ export class DataService {
       );
 
       (window as any).info = info;
+
+      this.infoSubject.next(info);
     });
   }
 

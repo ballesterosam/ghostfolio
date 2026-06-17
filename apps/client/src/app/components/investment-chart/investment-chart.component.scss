@@ -1,7 +1,18 @@
 :host {
   display: block;
+  height: 100%;
+  width: 100%;
+  position: relative;
 
   ngx-skeleton-loader {
     height: 100%;
+    width: 100%;
+    display: block;
+  }
+
+  canvas {
+    display: block;
+    width: 100% !important;
+    height: 100% !important;
   }
 }

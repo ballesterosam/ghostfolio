@@ -2,12 +2,10 @@ import {
   getTooltipOptions,
   getVerticalHoverLinePlugin
 } from '@ghostfolio/common/chart-helper';
-import { primaryColorRgb, secondaryColorRgb } from '@ghostfolio/common/config';
 import {
   getBackgroundColor,
   getDateFormatString,
   getLocale,
-  getTextColor,
   parseDate
 } from '@ghostfolio/common/helper';
 import { LineChartItem, User } from '@ghostfolio/common/interfaces';
@@ -72,6 +70,7 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
   public readonly isLoading = input<boolean>();
   public readonly locale = input(getLocale());
   public readonly performanceDataItems = input.required<LineChartItem[]>();
+  public readonly showGradient = input<boolean>(true);
   public readonly user = input<User>();
 
   public readonly benchmarkChanged = output<string>();
@@ -129,28 +128,57 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
     const data: ChartData<'line'> = {
       datasets: [
         {
-          backgroundColor: `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`,
-          borderColor: `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`,
-          borderWidth: 2,
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return undefined;
+            const gradient = ctx.createLinearGradient(
+              0,
+              chartArea.top,
+              0,
+              chartArea.bottom
+            );
+            gradient.addColorStop(0, 'rgba(147, 197, 253, 0.5)');
+            gradient.addColorStop(1, 'rgba(147, 197, 253, 0)');
+            return gradient;
+          },
+          borderColor: 'rgb(147, 197, 253)',
+          borderWidth: 3,
           data: this.performanceDataItems().map(({ date, value }) => {
             return {
               x: parseDate(date)?.getTime() ?? null,
               y: value * 100
             };
           }),
+          fill: this.showGradient() ? 'origin' : false,
           label: $localize`Portfolio`
         },
         {
-          backgroundColor: `rgb(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b})`,
-          borderColor: `rgb(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b})`,
-          borderWidth: 2,
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return undefined;
+            const gradient = ctx.createLinearGradient(
+              0,
+              chartArea.top,
+              0,
+              chartArea.bottom
+            );
+            // Alternative slate color for benchmark
+            gradient.addColorStop(0, 'rgba(148, 163, 184, 0.3)');
+            gradient.addColorStop(1, 'rgba(148, 163, 184, 0)');
+            return gradient;
+          },
+          borderColor: 'rgb(148, 163, 184)',
+          borderWidth: 3,
           data: this.performanceDataItems().map(({ date }) => {
             return {
               x: parseDate(date)?.getTime() ?? null,
               y: benchmarkDataValues[date]
             };
           }),
-          label: this.benchmark?.name ?? $localize`Benchmark`
+          fill: this.showGradient() ? 'origin' : false,
+          label: this.benchmark()?.name ?? $localize`Benchmark`
         }
       ]
     };
@@ -170,21 +198,21 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
             animation: false,
             elements: {
               line: {
-                tension: 0
+                tension: 0.1
               },
               point: {
                 hoverBackgroundColor: getBackgroundColor(this.colorScheme()),
-                hoverRadius: 2,
+                hoverRadius: 5,
                 radius: 0
               }
             },
             interaction: { intersect: false, mode: 'index' },
-            maintainAspectRatio: true,
+            maintainAspectRatio: false,
             plugins: {
               annotation: {
                 annotations: {
                   yAxis: {
-                    borderColor: `rgba(${getTextColor(this.colorScheme())}, 0.1)`,
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
                     borderWidth: 1,
                     scaleID: 'y',
                     type: 'line',
@@ -197,19 +225,25 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
               },
               tooltip: this.getTooltipPluginConfiguration(),
               verticalHoverLine: {
-                color: `rgba(${getTextColor(this.colorScheme())}, 0.1)`
+                color: 'rgba(255, 255, 255, 0.3)'
               }
             },
             responsive: true,
             scales: {
               x: {
                 border: {
-                  color: `rgba(${getTextColor(this.colorScheme())}, 0.1)`,
+                  color: 'rgba(255, 255, 255, 0.3)',
                   width: 1
                 },
                 display: true,
                 grid: {
                   display: false
+                },
+                ticks: {
+                  color: 'rgba(255, 255, 255, 0.7)',
+                  font: {
+                    size: 11
+                  }
                 },
                 type: 'time',
                 time: {
@@ -223,16 +257,8 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
                 },
                 display: true,
                 grid: {
-                  color: ({ scale, tick }) => {
-                    if (
-                      tick.value === 0 ||
-                      tick.value === scale.max ||
-                      tick.value === scale.min
-                    ) {
-                      return `rgba(${getTextColor(this.colorScheme())}, 0.1)`;
-                    }
-
-                    return 'transparent';
+                  color: () => {
+                    return 'rgba(255, 255, 255, 0.2)';
                   }
                 },
                 position: 'right',
@@ -240,7 +266,11 @@ export class GfBenchmarkComparatorComponent implements OnChanges, OnDestroy {
                   callback: (value: number) => {
                     return `${value.toFixed(2)} %`;
                   },
+                  color: 'rgba(255, 255, 255, 0.7)',
                   display: true,
+                  font: {
+                    size: 11
+                  },
                   mirror: true,
                   z: 1
                 }

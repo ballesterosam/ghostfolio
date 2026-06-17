@@ -37,14 +37,22 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatMenuModule, MatMenuTrigger } from '@angular/material/menu';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { SymbolProfile } from '@prisma/client';
 import { addIcons } from 'ionicons';
-import { copyOutline, ellipsisVertical } from 'ionicons/icons';
+import {
+  barChartOutline,
+  copyOutline,
+  ellipsisVertical,
+  globeOutline,
+  trendingUpOutline
+} from 'ionicons/icons';
 import { isNumber, sortBy } from 'lodash';
 import ms from 'ms';
 import { DeviceDetectorService } from 'ngx-device-detector';
@@ -60,8 +68,10 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
     IonIcon,
     MatButtonModule,
     MatCardModule,
+    MatFormFieldModule,
     MatMenuModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
     NgxSkeletonLoaderModule,
     RouterModule
   ],
@@ -124,7 +134,13 @@ export class GfAnalysisPageComponent implements OnInit {
     const { benchmarks } = this.dataService.fetchInfo();
     this.benchmarks = benchmarks;
 
-    addIcons({ copyOutline, ellipsisVertical });
+    addIcons({
+      barChartOutline,
+      copyOutline,
+      ellipsisVertical,
+      globeOutline,
+      trendingUpOutline
+    });
   }
 
   get savingsRate() {
@@ -285,6 +301,10 @@ export class GfAnalysisPageComponent implements OnInit {
   }
 
   private update() {
+    if (this.isLoadingInvestmentChart) {
+      return;
+    }
+
     this.isLoadingInvestmentChart = true;
 
     this.dataService
@@ -344,11 +364,16 @@ export class GfAnalysisPageComponent implements OnInit {
 
         this.isLoadingInvestmentChart = false;
 
+        // Sequence secondary requests
         this.updateBenchmarkDataItems();
+        this.fetchPortfolioHoldings();
+        this.fetchDividendsAndInvestments();
 
         this.changeDetectorRef.markForCheck();
       });
+  }
 
+  private fetchPortfolioHoldings() {
     this.dataService
       .fetchPortfolioHoldings({
         filters: this.userService.getFilters(),
@@ -380,9 +405,6 @@ export class GfAnalysisPageComponent implements OnInit {
 
         this.changeDetectorRef.markForCheck();
       });
-
-    this.fetchDividendsAndInvestments();
-    this.changeDetectorRef.markForCheck();
   }
 
   private updateBenchmarkDataItems() {
