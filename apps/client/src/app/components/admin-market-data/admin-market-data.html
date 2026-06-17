@@ -1,4 +1,4 @@
-<div class="container">
+<div class="overview p-3">
   <div class="row">
     <div class="col">
       <gf-activities-filter
@@ -20,6 +20,15 @@
           matSortDirection="asc"
           [dataSource]="dataSource"
         >
+          <ng-container matColumnDef="icon" sticky>
+            <th *matHeaderCellDef class="px-1" mat-header-cell></th>
+            <td *matCellDef="let element" class="px-1 text-center" mat-cell>
+              <div class="asset-icon-wrapper" [title]="element.name">
+                <ion-icon [name]="getAssetIcon(element)" />
+              </div>
+            </td>
+          </ng-container>
+
           <ng-container matColumnDef="status">
             <th
               *matHeaderCellDef
@@ -41,15 +50,17 @@
                 </div>
               }
             </td>
-            <td
-              *matFooterCellDef
-              class="d-none d-lg-table-cell px-1"
-              mat-footer-cell
-            ></td>
           </ng-container>
 
           <ng-container matColumnDef="select">
-            <th *matHeaderCellDef class="px-1" mat-header-cell></th>
+            <th *matHeaderCellDef class="px-1" mat-header-cell>
+              <mat-checkbox
+                color="primary"
+                [checked]="selection.hasValue() && isAllSelected()"
+                [indeterminate]="selection.hasValue() && !isAllSelected()"
+                (change)="$event ? masterToggle() : null"
+              />
+            </th>
             <td *matCellDef="let element" class="px-1" mat-cell>
               @if (
                 canDeleteAssetProfile({
@@ -69,15 +80,6 @@
             </td>
           </ng-container>
 
-          <ng-container matColumnDef="symbol">
-            <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
-              <ng-container i18n>Symbol</ng-container>
-            </th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
-              {{ element.symbol }}
-            </td>
-          </ng-container>
-
           <ng-container matColumnDef="nameWithSymbol">
             <th
               *matHeaderCellDef
@@ -88,41 +90,108 @@
               <ng-container i18n>Name</ng-container>
             </th>
             <td *matCellDef="let element" class="line-height-1 px-1" mat-cell>
-              <div class="text-truncate">{{ element.name }}</div>
-              @if (!isUUID(element.symbol)) {
-                <div>
-                  <small class="text-muted">{{
-                    element.symbol | gfSymbol
-                  }}</small>
+              <div
+                class="d-flex align-items-center justify-content-between w-100"
+              >
+                <div class="d-flex align-items-center text-truncate">
+                  <div class="text-truncate fw-semibold text-main">
+                    {{ element.name }}
+                  </div>
+                </div>
+                <ion-icon
+                  class="d-block d-sm-none text-muted ms-2 transition-transform flex-shrink-0"
+                  name="chevron-down-outline"
+                  [class.rotate-180]="isExpanded(element)"
+                  (click)="toggleExpand(element, $event)"
+                />
+              </div>
+              <div class="text-subtitle small mt-1">
+                @if (!isUUID(element.symbol)) {
+                  {{ element.symbol | gfSymbol }}
+                }
+              </div>
+
+              @if (isExpanded(element)) {
+                <div class="mobile-detail-content d-block d-sm-none mt-3">
+                  <div
+                    class="d-flex justify-content-between py-1 border-bottom-subtle"
+                  >
+                    <span class="text-muted small" i18n>Data Source</span>
+                    <span class="small fw-semibold">{{
+                      element.dataSource
+                    }}</span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between py-1 border-bottom-subtle"
+                  >
+                    <span class="text-muted small" i18n>Asset Class</span>
+                    <span class="small fw-semibold">{{
+                      element.assetClass
+                    }}</span>
+                  </div>
+                  <div
+                    class="d-flex justify-content-between py-1 border-bottom-subtle"
+                  >
+                    <span class="text-muted small" i18n>Activities</span>
+                    <span class="small fw-semibold">{{
+                      element.activitiesCount
+                    }}</span>
+                  </div>
                 </div>
               }
             </td>
-            <td *matFooterCellDef class="px-1" mat-footer-cell></td>
           </ng-container>
 
           <ng-container matColumnDef="dataSource">
-            <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
+            <th
+              *matHeaderCellDef
+              class="d-none d-sm-table-cell px-1"
+              mat-header-cell
+              mat-sort-header
+            >
               <ng-container i18n>Data Source</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-sm-table-cell px-1"
+              mat-cell
+            >
               {{ element.dataSource }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="assetClass">
-            <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+              mat-sort-header
+            >
               <ng-container i18n>Asset Class</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1"
+              mat-cell
+            >
               {{ element.assetClass }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="assetSubClass">
-            <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+              mat-sort-header
+            >
               <ng-container i18n>Asset Sub Class</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1"
+              mat-cell
+            >
               {{ element.assetSubClass }}
             </td>
           </ng-container>
@@ -143,53 +212,102 @@
           </ng-container>
 
           <ng-container matColumnDef="date">
-            <th *matHeaderCellDef class="px-1" mat-header-cell>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            >
               <ng-container i18n>First Activity</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1"
+              mat-cell
+            >
               {{ (element.date | date: defaultDateFormat) ?? '' }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="activitiesCount">
-            <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
-              <ng-container i18n>Activities Count</ng-container>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+              mat-sort-header
+            >
+              <ng-container i18n>Activities</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1 text-end" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1 text-end"
+              mat-cell
+            >
               {{ element.activitiesCount }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="marketDataItemCount">
-            <th *matHeaderCellDef class="px-1" mat-header-cell>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            >
               <ng-container i18n>Historical Data</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1 text-end" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1 text-end"
+              mat-cell
+            >
               {{ element.marketDataItemCount }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="sectorsCount">
-            <th *matHeaderCellDef class="px-1" mat-header-cell>
-              <ng-container i18n>Sectors Count</ng-container>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            >
+              <ng-container i18n>Sectors</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1 text-end" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1 text-end"
+              mat-cell
+            >
               {{ element.sectorsCount }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="countriesCount">
-            <th *matHeaderCellDef class="px-1" mat-header-cell>
-              <ng-container i18n>Countries Count</ng-container>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            >
+              <ng-container i18n>Countries</ng-container>
             </th>
-            <td *matCellDef="let element" class="px-1 text-end" mat-cell>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1 text-end"
+              mat-cell
+            >
               {{ element.countriesCount }}
             </td>
           </ng-container>
 
           <ng-container matColumnDef="isUsedByUsersWithSubscription">
-            <th *matHeaderCellDef class="px-1" mat-header-cell></th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            ></th>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1"
+              mat-cell
+            >
               @if (element.isUsedByUsersWithSubscription) {
                 <gf-premium-indicator [enableLink]="false" />
               }
@@ -197,8 +315,16 @@
           </ng-container>
 
           <ng-container matColumnDef="comment">
-            <th *matHeaderCellDef class="px-1" mat-header-cell></th>
-            <td *matCellDef="let element" class="px-1" mat-cell>
+            <th
+              *matHeaderCellDef
+              class="d-none d-lg-table-cell px-1"
+              mat-header-cell
+            ></th>
+            <td
+              *matCellDef="let element"
+              class="d-none d-lg-table-cell px-1"
+              mat-cell
+            >
               @if (element.comment) {
                 <ion-icon class="d-block" name="document-text-outline" />
               }
@@ -293,16 +419,19 @@
             </td>
           </ng-container>
 
-          <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+          <tr *matHeaderRowDef="displayedColumns()" mat-header-row></tr>
           <tr
-            *matRowDef="let row; columns: displayedColumns"
+            *matRowDef="let row; columns: displayedColumns()"
             class="cursor-pointer"
             mat-row
+            [class.expanded]="isExpanded(row)"
             (click)="
-              onOpenAssetProfileDialog({
-                dataSource: row.dataSource,
-                symbol: row.symbol
-              })
+              isMobile()
+                ? toggleExpand(row, $event)
+                : onOpenAssetProfileDialog({
+                    dataSource: row.dataSource,
+                    symbol: row.symbol
+                  })
             "
           ></tr>
         </table>

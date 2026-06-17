@@ -159,6 +159,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
       csvString: ''
     }),
     isActive: [true],
+    isBenchmark: [false],
     name: ['', Validators.required],
     scraperConfiguration: this.formBuilder.group<
       Omit<ScraperConfiguration, 'headers'> & {
@@ -407,6 +408,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
           isActive: isBoolean(this.assetProfile?.isActive)
             ? this.assetProfile.isActive
             : null,
+          isBenchmark: this.isBenchmark,
           name: this.assetProfile.name ?? this.assetProfile.symbol ?? null,
           scraperConfiguration: {
             defaultMarketPrice:
@@ -485,19 +487,6 @@ export class GfAssetProfileDialogComponent implements OnInit {
     if (withRefresh) {
       this.initialize();
     }
-  }
-
-  protected onSetBenchmark({ dataSource, symbol }: AssetProfileIdentifier) {
-    this.dataService
-      .postBenchmark({ dataSource, symbol })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.dataService.updateInfo();
-
-        this.isBenchmark = true;
-
-        this.changeDetectorRef.markForCheck();
-      });
   }
 
   protected onSetEditAssetProfileIdentifierMode() {
@@ -608,6 +597,30 @@ export class GfAssetProfileDialogComponent implements OnInit {
       );
 
       return;
+    }
+
+    if (this.assetProfileForm.controls.isBenchmark.dirty) {
+      if (this.assetProfileForm.controls.isBenchmark.value) {
+        this.dataService
+          .postBenchmark({
+            dataSource: this.data.dataSource,
+            symbol: this.data.symbol
+          })
+          .subscribe(() => {
+            this.dataService.updateInfo();
+            this.isBenchmark = true;
+          });
+      } else {
+        this.dataService
+          .deleteBenchmark({
+            dataSource: this.data.dataSource,
+            symbol: this.data.symbol
+          })
+          .subscribe(() => {
+            this.dataService.updateInfo();
+            this.isBenchmark = false;
+          });
+      }
     }
 
     this.adminService
@@ -756,30 +769,8 @@ export class GfAssetProfileDialogComponent implements OnInit {
   }
 
   protected onToggleIsActive({ checked }: MatCheckboxChange) {
-    if (checked) {
-      this.assetProfileForm.controls.isActive.setValue(true);
-    } else {
-      this.assetProfileForm.controls.isActive.setValue(false);
-    }
-
-    if (checked === this.assetProfile.isActive) {
-      this.assetProfileForm.controls.isActive.markAsPristine();
-    } else {
-      this.assetProfileForm.controls.isActive.markAsDirty();
-    }
-  }
-
-  protected onUnsetBenchmark({ dataSource, symbol }: AssetProfileIdentifier) {
-    this.dataService
-      .deleteBenchmark({ dataSource, symbol })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.dataService.updateInfo();
-
-        this.isBenchmark = false;
-
-        this.changeDetectorRef.markForCheck();
-      });
+    this.assetProfileForm.controls.isActive.setValue(checked);
+    this.assetProfileForm.controls.isActive.markAsDirty();
   }
 
   protected onTriggerSubmitAssetProfileForm() {

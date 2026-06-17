@@ -84,14 +84,22 @@ import {
 } from '@prisma/client';
 import { format, parseISO } from 'date-fns';
 import { cloneDeep, groupBy, isNumber } from 'lodash';
-import { Observable } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { BehaviorSubject, map, Observable } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
 })
 export class DataService {
+  public info$: Observable<InfoItem>;
+
+  private readonly infoSubject = new BehaviorSubject<InfoItem>(
+    (window as any).info
+  );
   private readonly http = inject(HttpClient);
+
+  public constructor() {
+    this.info$ = this.infoSubject.asObservable();
+  }
 
   public buildFiltersAsQueryParams({ filters }: { filters?: Filter[] }) {
     let params = new HttpParams();

@@ -62,11 +62,19 @@ import { addIcons } from 'ionicons';
 import {
   addOutline,
   banOutline,
+  businessOutline,
+  chevronDownOutline,
   createOutline,
   documentTextOutline,
   ellipsisHorizontal,
   ellipsisVertical,
-  trashOutline
+  layersOutline,
+  leafOutline,
+  logoBitcoin,
+  pieChartOutline,
+  receiptOutline,
+  trashOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
@@ -154,9 +162,42 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
   protected readonly canDeleteAssetProfile = canDeleteAssetProfile;
   protected dataSource = new MatTableDataSource<AdminMarketDataItem>();
   protected defaultDateFormat: string;
-  protected readonly displayedColumns: string[] = [];
+  protected readonly displayedColumns = computed(() => {
+    const columns = [
+      'icon',
+      'status',
+      'select',
+      'nameWithSymbol',
+      'dataSource',
+      'assetClass',
+      'assetSubClass',
+      'lastMarketPrice',
+      'date',
+      'activitiesCount',
+      'marketDataItemCount',
+      'sectorsCount',
+      'countriesCount'
+    ];
+
+    if (this.hasPermissionForSubscription) {
+      columns.push('isUsedByUsersWithSubscription');
+    }
+
+    columns.push('comment');
+    columns.push('actions');
+
+    if (this.isMobile()) {
+      return ['icon', 'nameWithSymbol', 'lastMarketPrice', 'actions'];
+    }
+
+    return columns;
+  });
+  protected expandedElement: AdminMarketDataItem | null;
   protected readonly filters$ = new Subject<Filter[]>();
   protected isLoading = true;
+  protected readonly isMobile = computed(
+    () => this.deviceDetectorService.deviceInfo().deviceType === 'mobile'
+  );
   protected readonly isUUID = isUUID;
   protected pageSize = DEFAULT_PAGE_SIZE;
   protected placeholder = '';
@@ -165,7 +206,7 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
   protected user: User;
 
   private activeFilters: Filter[] = [];
-  private benchmarks: Partial<SymbolProfile>[];
+  private benchmarks: Partial<SymbolProfile>[] = [];
   private readonly deviceType = computed(
     () => this.deviceDetectorService.deviceInfo().deviceType
   );
@@ -191,28 +232,6 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
       this.info?.globalPermissions,
       permissions.enableSubscription
     );
-
-    this.displayedColumns = [
-      'status',
-      'select',
-      'nameWithSymbol',
-      'dataSource',
-      'assetClass',
-      'assetSubClass',
-      'lastMarketPrice',
-      'date',
-      'activitiesCount',
-      'marketDataItemCount',
-      'sectorsCount',
-      'countriesCount'
-    ];
-
-    if (this.hasPermissionForSubscription) {
-      this.displayedColumns.push('isUsedByUsersWithSubscription');
-    }
-
-    this.displayedColumns.push('comment');
-    this.displayedColumns.push('actions');
 
     this.route.queryParams
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -254,11 +273,19 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
     addIcons({
       addOutline,
       banOutline,
+      businessOutline,
+      chevronDownOutline,
       createOutline,
       documentTextOutline,
       ellipsisHorizontal,
       ellipsisVertical,
-      trashOutline
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
+      receiptOutline,
+      trashOutline,
+      walletOutline
     });
   }
 
@@ -277,9 +304,79 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
   }
 
   public ngOnInit() {
-    const { benchmarks } = this.dataService.fetchInfo();
+    this.dataService.info$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ benchmarks }) => {
+        this.benchmarks = benchmarks;
 
-    this.benchmarks = benchmarks;
+        this.loadData({
+          pageIndex: this.paginator().pageIndex,
+          sortColumn: this.sort().active,
+          sortDirection: this.sort().direction
+        });
+      });
+  }
+
+  protected getAssetIcon(element: AdminMarketDataItem) {
+    switch (element.assetSubClass) {
+      case 'CRYPTOCURRENCY':
+        return 'logo-bitcoin';
+      case 'CASH':
+        return 'wallet-outline';
+      case 'BOND':
+      case 'LOAN':
+        return 'receipt-outline';
+      case 'ETF':
+        return 'pie-chart-outline';
+      case 'MUTUALFUND':
+        return 'layers-outline';
+      case 'PRECIOUS_METAL':
+        return 'leaf-outline';
+      default:
+        return 'business-outline';
+    }
+  }
+
+  protected isExpanded(element: AdminMarketDataItem): boolean {
+    return this.expandedElement?.id === element.id;
+  }
+
+  protected toggleExpand(element: AdminMarketDataItem, event: Event) {
+    event.stopPropagation();
+    this.expandedElement = this.isExpanded(element) ? null : element;
+  }
+
+  protected isAllSelected() {
+    const numSelected = this.selection.selected.length;
+    const numRows = this.dataSource.data.filter((element) => {
+      return this.canDeleteAssetProfile({
+        activitiesCount: element.activitiesCount,
+        isBenchmark: element.isBenchmark,
+        symbol: element.symbol,
+        watchedByCount: element.watchedByCount
+      });
+    }).length;
+
+    return numSelected === numRows;
+  }
+
+  protected masterToggle() {
+    if (this.isAllSelected()) {
+      this.selection.clear();
+    } else {
+      this.dataSource.data.forEach((row) => {
+        if (
+          this.canDeleteAssetProfile({
+            activitiesCount: row.activitiesCount,
+            isBenchmark: row.isBenchmark,
+            symbol: row.symbol,
+            watchedByCount: row.watchedByCount
+          })
+        ) {
+          this.selection.select(row);
+        }
+      });
+    }
   }
 
   protected onChangePage(page: PageEvent) {
