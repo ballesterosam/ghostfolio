@@ -1,3 +1,26 @@
+@use '../shared/table';
+
 :host {
   display: block;
+
+  table.gf-table {
+    @include table.gf-table-cards;
+
+    tr.mat-mdc-row {
+      td.mat-column-activitiesCount,
+      td.mat-column-balance,
+      td.mat-column-value,
+      td.mat-column-valueInBaseCurrency,
+      td.mat-column-allocation {
+        font-size: 1.05rem;
+        font-weight: 500;
+      }
+    }
+  }
+}
+
+:host-context(.theme-dark) {
+  table.gf-table {
+    @include table.gf-table-cards(true);
+  }
 }

@@ -1,11 +1,24 @@
+@use '../../../styles/table';
+
 :host {
   display: block;
 
-  a {
-    color: rgba(var(--palette-primary-500), 1);
+  table.gf-table {
+    @include table.gf-table-cards;
 
-    &:hover {
-      color: rgba(var(--palette-primary-300), 1);
+    tr.mat-mdc-row {
+      td.mat-column-alias,
+      td.mat-column-grantee,
+      td.mat-column-type {
+        font-size: 1.05rem;
+        font-weight: 500;
+      }
     }
+  }
+}
+
+:host-context(.theme-dark) {
+  table.gf-table {
+    @include table.gf-table-cards(true);
   }
 }

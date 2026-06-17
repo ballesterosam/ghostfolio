@@ -133,7 +133,7 @@
           <div class="kpi-card flex-fill">
             <span class="kpi-card__label" i18n>Net Return (YTD)</span>
             <div
-              class="kpi-card__value"
+              class="kpi-card__value kpi-large"
               [class.kpi-negative]="
                 (performance()?.netPerformancePercentageWithCurrencyEffect ??
                   0) < 0
@@ -166,7 +166,7 @@
           <div class="kpi-card flex-fill">
             <span class="kpi-card__label" i18n>Annualized Performance</span>
             <div
-              class="kpi-card__value"
+              class="kpi-card__value kpi-large"
               [class.kpi-negative]="
                 (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
                   0) < 0
@@ -198,7 +198,7 @@
           <!-- Annual Dividends -->
           <div class="kpi-card flex-fill">
             <span class="kpi-card__label" i18n>Annual Dividends</span>
-            <div class="kpi-card__value">
+            <div class="kpi-card__value kpi-large">
               @if (isLoadingDetails()) {
                 <ngx-skeleton-loader
                   animation="pulse"
@@ -219,7 +219,7 @@
           <!-- Available Cash -->
           <div class="kpi-card flex-fill">
             <span class="kpi-card__label" i18n>Available Cash</span>
-            <div class="kpi-card__value">
+            <div class="kpi-card__value kpi-large">
               @if (isLoadingDetails()) {
                 <ngx-skeleton-loader
                   animation="pulse"

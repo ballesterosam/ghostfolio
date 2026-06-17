@@ -1,127 +1,23 @@
+@use '../shared/table';
+
 :host {
   display: block;
 
   // Table structure for separated card rows
   table.gf-table {
-    border-collapse: separate !important;
-    border-spacing: 0 12px !important;
-    background: transparent !important;
-    border: none !important;
+    @include table.gf-table-cards;
 
-    // Remove borders on default table headers
-    tr.mat-mdc-header-row {
-      background: transparent !important;
-
-      th {
-        border: none !important;
-        text-transform: uppercase;
-        font-size: 0.75rem !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.05em;
-        padding: 0.5rem 0.75rem !important;
-        color: rgba(var(--dark-primary-text), 0.6) !important;
-        background-color: transparent !important;
-      }
-    }
-
-    // Style the card rows
     tr.mat-mdc-row {
-      background-color: var(--gf-card-bg-light);
-      transition:
-        transform 0.2s ease,
-        box-shadow 0.2s ease;
-
-      &:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
-
-        td {
-          background-color: var(--gf-card-bg-light) !important;
-        }
-      }
-
-      td {
-        border-top: 1px solid rgba(var(--dark-dividers)) !important;
-        border-bottom: 1px solid rgba(var(--dark-dividers)) !important;
-        background-color: var(--gf-card-bg-light) !important;
-        padding: 1rem 0.75rem !important;
-        border-left: none !important;
-        border-right: none !important;
-        vertical-align: middle;
-
-        &:first-child {
-          border-left: 1px solid rgba(var(--dark-dividers)) !important;
-          border-top-left-radius: 16px;
-          border-bottom-left-radius: 16px;
-        }
-
-        &:last-child {
-          border-right: 1px solid rgba(var(--dark-dividers)) !important;
-          border-top-right-radius: 16px;
-          border-bottom-right-radius: 16px;
-        }
-
-        &.mat-mdc-table-sticky {
-          position: static !important; // disable sticky column positioning when separate
-        }
-
-        &.mat-column-dateOfFirstActivity,
-        &.mat-column-quantity,
-        &.mat-column-valueInBaseCurrency,
-        &.mat-column-allocationInPercentage,
-        &.mat-column-performance,
-        &.mat-column-performanceInPercentage {
-          font-size: 1.05rem;
-          font-weight: 500;
-        }
+      td.mat-column-dateOfFirstActivity,
+      td.mat-column-quantity,
+      td.mat-column-valueInBaseCurrency,
+      td.mat-column-allocationInPercentage,
+      td.mat-column-performance,
+      td.mat-column-performanceInPercentage {
+        font-size: 1.05rem;
+        font-weight: 500;
       }
     }
-  }
-
-  // Round, larger asset type icon wrapper
-  .asset-icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50% !important;
-    height: 2.25rem !important;
-    width: 2.25rem !important;
-    background-color: var(--gf-surface-light) !important;
-    border: 1px solid rgba(var(--dark-dividers)) !important;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-
-    ion-icon {
-      font-size: 1.25rem;
-      color: rgba(var(--dark-primary-text), 0.7);
-    }
-  }
-
-  .text-subtitle {
-    color: rgba(var(--dark-primary-text), 0.6) !important;
-  }
-
-  // Rectangular performance badges with solid backgrounds and white text
-  .perf-badge {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.35rem 0.75rem;
-    border-radius: 8px;
-    font-size: 0.82rem;
-    font-weight: 600;
-    white-space: nowrap;
-    color: #ffffff !important;
-
-    &--positive {
-      background-color: #22c55e;
-    }
-
-    &--negative {
-      background-color: #f97316;
-    }
-  }
-
-  .text-main {
-    color: rgba(var(--dark-primary-text)) !important;
   }
 
   .mobile-detail-content {
@@ -155,60 +51,7 @@
 
 :host-context(.theme-dark) {
   table.gf-table {
-    tr.mat-mdc-header-row {
-      th {
-        color: rgba(var(--light-primary-text), 0.6) !important;
-      }
-    }
-
-    tr.mat-mdc-row {
-      background-color: rgb(48, 56, 72);
-
-      &:hover {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
-
-        td {
-          background-color: rgb(48, 56, 72) !important;
-        }
-      }
-
-      td {
-        border-top: 1px solid rgba(var(--light-dividers)) !important;
-        border-bottom: 1px solid rgba(var(--light-dividers)) !important;
-        background-color: rgb(48, 56, 72) !important;
-
-        &:first-child {
-          border-left: 1px solid rgba(var(--light-dividers)) !important;
-        }
-
-        &:last-child {
-          border-right: 1px solid rgba(var(--light-dividers)) !important;
-        }
-      }
-    }
-  }
-
-  .asset-icon-wrapper {
-    background-color: var(--gf-surface-dark) !important;
-    border: 1px solid rgba(var(--light-dividers)) !important;
-
-    ion-icon {
-      color: rgba(var(--light-primary-text), 0.7);
-    }
-  }
-
-  .text-subtitle {
-    color: rgba(var(--light-primary-text), 0.75) !important;
-  }
-
-  .perf-badge {
-    &--negative {
-      background-color: #ea580c;
-    }
-  }
-
-  .text-main {
-    color: rgba(var(--light-primary-text)) !important;
+    @include table.gf-table-cards(true);
   }
 
   .mobile-detail-content {

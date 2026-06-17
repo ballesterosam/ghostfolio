@@ -1,18 +1,18 @@
-<div class="container">
+<div class="overview p-3">
   <div class="row">
     <div class="col">
-      <h1 class="d-none d-sm-block h3 mb-3 text-center" i18n>Allocations</h1>
+      <h2 class="section-title" i18n>Allocations</h2>
     </div>
   </div>
   <div class="row">
     <div class="col">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="mb-2 overflow-hidden w-100">
-          <mat-card-title class="m-0 text-truncate" i18n
-            >Proportion of Net Worth</mat-card-title
-          >
+      <div class="dashboard-card mb-3">
+        <div
+          class="d-flex justify-content-between align-items-center mb-2 overflow-hidden w-100"
+        >
+          <h3 class="h5 m-0 text-truncate" i18n>Proportion of Net Worth</h3>
           <gf-value
-            class="justify-content-end l-2"
+            class="justify-content-end"
             size="medium"
             [isPercent]="true"
             [value]="
@@ -21,330 +21,280 @@
                 : portfolioDetails?.summary?.filteredValueInPercentage
             "
           />
-        </mat-card-header>
-        <mat-card-content>
-          <mat-progress-bar
-            mode="determinate"
-            [title]="`${(
-              portfolioDetails?.summary?.filteredValueInPercentage * 100
-            ).toFixed(2)}%`"
-            [value]="portfolioDetails?.summary?.filteredValueInPercentage * 100"
-          />
-        </mat-card-content>
-      </mat-card>
+        </div>
+        <mat-progress-bar
+          mode="determinate"
+          [title]="`${(
+            portfolioDetails?.summary?.filteredValueInPercentage * 100
+          ).toFixed(2)}%`"
+          [value]="portfolioDetails?.summary?.filteredValueInPercentage * 100"
+        />
+      </div>
     </div>
   </div>
   <div class="proportion-charts row">
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="text-truncate" i18n
-            >By Platform</mat-card-title
-          >
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="platforms"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['id']"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 text-truncate" i18n>By Platform</h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="platforms"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['id']"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Currency</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="holdings"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['currency']"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Currency</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="holdings"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['currency']"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Asset Class</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="holdings"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['assetClassLabel', 'assetSubClassLabel']"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Asset Class</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="holdings"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['assetClassLabel', 'assetSubClassLabel']"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
-    <div class="col-md-12 allocations-by-symbol">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <ng-container i18n>By Holding</ng-container>
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            class="mx-auto"
-            cursor="pointer"
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="symbols"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['symbol']"
-            [locale]="user?.settings?.locale"
-            [showLabels]="deviceType !== 'mobile'"
-            (proportionChartClicked)="onSymbolChartClicked($event)"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-12 allocations-by-symbol mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <ng-container i18n>By Holding</ng-container>
+        </h3>
+        <gf-portfolio-proportion-chart
+          class="mx-auto"
+          cursor="pointer"
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="symbols"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['symbol']"
+          [locale]="user?.settings?.locale"
+          [showLabels]="deviceType !== 'mobile'"
+          (proportionChartClicked)="onSymbolChartClicked($event)"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Sector</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="sectors"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['name']"
-            [locale]="user?.settings?.locale"
-            [maxItems]="10"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Sector</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="sectors"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['name']"
+          [locale]="user?.settings?.locale"
+          [maxItems]="10"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Continent</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="continents"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['name']"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Continent</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="continents"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['name']"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Market</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="marketsAdvanced"
-            [isInPercentage]="showValuesInPercentage()"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Market</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="marketsAdvanced"
+          [isInPercentage]="showValuesInPercentage()"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
   </div>
-  <div class="row world-map-chart">
+  <div class="row world-map-chart mb-3">
     <div class="col-lg">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>Regions</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <div class="world-map-chart-container">
-            <gf-world-map-chart
-              [countries]="countries"
-              [format]="worldMapChartFormat"
-              [isInPercentage]="showValuesInPercentage()"
-              [locale]="user?.settings?.locale"
-            />
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>Regions</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <div class="world-map-chart-container">
+          <gf-world-map-chart
+            [countries]="countries"
+            [format]="worldMapChartFormat"
+            [isInPercentage]="showValuesInPercentage()"
+            [locale]="user?.settings?.locale"
+          />
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-md my-2">
+            <gf-value
+              i18n
+              size="large"
+              [isPercent]="true"
+              [value]="markets?.developedMarkets?.valueInPercentage"
+              >Developed Markets</gf-value
+            >
           </div>
-          <div class="row">
-            <div class="col-xs-12 col-md my-2">
-              <gf-value
-                i18n
-                size="large"
-                [isPercent]="true"
-                [value]="markets?.developedMarkets?.valueInPercentage"
-                >Developed Markets</gf-value
-              >
-            </div>
-            <div class="col-xs-12 col-md my-2">
-              <gf-value
-                i18n
-                size="large"
-                [isPercent]="true"
-                [value]="markets?.emergingMarkets?.valueInPercentage"
-                >Emerging Markets</gf-value
-              >
-            </div>
-            <div class="col-xs-12 col-md my-2">
-              <gf-value
-                i18n
-                size="large"
-                [isPercent]="true"
-                [value]="markets?.otherMarkets?.valueInPercentage"
-                >Other Markets</gf-value
-              >
-            </div>
-            @if (markets?.[UNKNOWN_KEY]?.valueInPercentage > 0) {
-              <div class="col-xs-12 col-md my-2">
-                <gf-value
-                  i18n
-                  size="large"
-                  [isPercent]="true"
-                  [value]="markets?.[UNKNOWN_KEY]?.valueInPercentage"
-                  >No data available</gf-value
-                >
-              </div>
-            }
+          <div class="col-xs-12 col-md my-2">
+            <gf-value
+              i18n
+              size="large"
+              [isPercent]="true"
+              [value]="markets?.emergingMarkets?.valueInPercentage"
+              >Emerging Markets</gf-value
+            >
           </div>
-        </mat-card-content>
-      </mat-card>
+          <div class="col-xs-12 col-md my-2">
+            <gf-value
+              i18n
+              size="large"
+              [isPercent]="true"
+              [value]="markets?.otherMarkets?.valueInPercentage"
+              >Other Markets</gf-value
+            >
+          </div>
+          @if (markets?.[UNKNOWN_KEY]?.valueInPercentage > 0) {
+            <div class="col-xs-12 col-md my-2">
+              <gf-value
+                i18n
+                size="large"
+                [isPercent]="true"
+                [value]="markets?.[UNKNOWN_KEY]?.valueInPercentage"
+                >No data available</gf-value
+              >
+            </div>
+          }
+        </div>
+      </div>
     </div>
   </div>
   <div class="row">
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By Country</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="countries"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['name']"
-            [locale]="user?.settings?.locale"
-            [maxItems]="10"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By Country</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="countries"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['name']"
+          [locale]="user?.settings?.locale"
+          [maxItems]="10"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="text-truncate" i18n>By Account</mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            cursor="pointer"
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="accounts"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['id']"
-            [locale]="user?.settings?.locale"
-            (proportionChartClicked)="onAccountChartClicked($event)"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 text-truncate" i18n>By Account</h3>
+        <gf-portfolio-proportion-chart
+          cursor="pointer"
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="accounts"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['id']"
+          [locale]="user?.settings?.locale"
+          (proportionChartClicked)="onAccountChartClicked($event)"
+        />
+      </div>
     </div>
-    <div class="col-md-4">
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
-            <span i18n>By ETF Provider</span>
-            @if (user?.subscription?.type === 'Basic') {
-              <gf-premium-indicator class="ms-1" />
-            }
-          </mat-card-title>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-portfolio-proportion-chart
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [colorScheme]="user?.settings?.colorScheme"
-            [data]="holdings"
-            [isInPercentage]="showValuesInPercentage()"
-            [keys]="['etfProvider']"
-            [locale]="user?.settings?.locale"
-          />
-        </mat-card-content>
-      </mat-card>
+    <div class="col-md-4 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 align-items-center d-flex text-truncate">
+          <span i18n>By ETF Provider</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="holdings"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['etfProvider']"
+          [locale]="user?.settings?.locale"
+        />
+      </div>
     </div>
     <div
-      class="col-md-12"
+      class="col-md-12 mb-3"
       [class.d-none]="!user?.settings?.isExperimentalFeatures"
     >
-      <mat-card appearance="outlined" class="mb-3">
-        <mat-card-header class="overflow-hidden w-100">
-          <mat-card-title class="align-items-center d-flex text-truncate">
+      <div class="dashboard-card">
+        <div class="mb-3 overflow-hidden w-100">
+          <h3 class="h5 m-0 align-items-center d-flex text-truncate">
             <span i18n>By ETF Holding</span>
             @if (user?.subscription?.type === 'Basic') {
               <gf-premium-indicator class="ms-1" />
             }
-          </mat-card-title>
-          <mat-card-subtitle>
+          </h3>
+          <p class="text-muted small m-0">
             <ng-container i18n
               >Approximation based on the top holdings of each ETF</ng-container
             >
-          </mat-card-subtitle>
-        </mat-card-header>
-        <mat-card-content>
-          <gf-top-holdings
-            [baseCurrency]="user?.settings?.baseCurrency"
-            [locale]="user?.settings?.locale"
-            [pageSize]="10"
-            [topHoldings]="topHoldings"
-            (holdingClicked)="onSymbolChartClicked($event)"
-          />
-        </mat-card-content>
-      </mat-card>
+          </p>
+        </div>
+        <gf-top-holdings
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [locale]="user?.settings?.locale"
+          [pageSize]="10"
+          [topHoldings]="topHoldings"
+          (holdingClicked)="onSymbolChartClicked($event)"
+        />
+      </div>
     </div>
   </div>
 </div>

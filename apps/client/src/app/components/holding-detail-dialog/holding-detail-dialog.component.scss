@@ -1,3 +1,5 @@
+@use '../../../styles/table';
+
 :host {
   display: block;
 
@@ -15,124 +17,14 @@
     }
   }
 
-  // ─── Dashboard & KPI Cards ────────────────────────────────────────────────
-  .dashboard-card {
-    background: var(--gf-card-bg-light);
-    border-radius: 16px;
-    padding: 1.5rem;
-    height: 100%;
-    border: 1px solid rgba(var(--dark-dividers), 0.5);
-  }
-
-  .kpi-card {
-    background: var(--gf-card-bg-light);
-    border-radius: 16px;
-    padding: 1rem 1.25rem;
-    min-height: 5.5rem;
-    border: 1px solid rgba(var(--dark-dividers), 0.5);
-
-    &__label {
-      display: block;
-      font-size: 0.85rem;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      opacity: 0.6;
-      margin-bottom: 0.5rem;
-    }
-
-    &__value {
-      ::ng-deep {
-        .value,
-        .h2 {
-          font-size: 1.4rem !important;
-          font-weight: 700 !important;
-          line-height: 1.2 !important;
-        }
-      }
-
-      &.kpi-positive ::ng-deep .value {
-        color: #16a34a !important;
-      }
-
-      &.kpi-negative ::ng-deep .value {
-        color: #dc2626 !important;
-      }
-    }
-  }
-
-  // ─── Asset Icon ───────────────────────────────────────────────────────────
-  .asset-icon-wrapper {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    border-radius: 50%;
-    height: 3rem;
-    width: 3rem;
-    background-color: var(--gf-surface-light);
-    border: 1px solid rgba(var(--dark-dividers), 0.8);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    margin-bottom: 1rem;
-
-    ion-icon {
-      font-size: 1.75rem;
-      color: rgba(var(--dark-primary-text), 0.7);
-    }
-  }
-
   // ─── Table Redesign (Separated Rows) ──────────────────────────────────────
   ::ng-deep {
     table.gf-table {
-      border-collapse: separate !important;
-      border-spacing: 0 10px !important;
-      background: transparent !important;
-      border: none !important;
-
-      tr.mat-mdc-header-row {
-        background: transparent !important;
-        th {
-          border: none !important;
-          text-transform: uppercase;
-          font-size: 0.75rem !important;
-          font-weight: 600 !important;
-          letter-spacing: 0.05em;
-          padding: 0.5rem 0.75rem !important;
-          color: rgba(var(--dark-primary-text), 0.6) !important;
-        }
-      }
+      @include table.gf-table-cards;
 
       tr.mat-mdc-row {
-        background-color: var(--gf-card-bg-light) !important;
-        transition:
-          transform 0.2s ease,
-          box-shadow 0.2s ease;
-
-        &:hover {
-          transform: translateY(-1px);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-
-          td {
-            background-color: var(--gf-card-bg-light) !important;
-          }
-        }
-
         td {
-          padding: 0.75rem !important;
-          border-top: 1px solid rgba(var(--dark-dividers), 0.5) !important;
-          border-bottom: 1px solid rgba(var(--dark-dividers), 0.5) !important;
-          background-color: var(--gf-card-bg-light) !important;
           color: rgba(var(--dark-primary-text)) !important;
-
-          &:first-child {
-            border-left: 1px solid rgba(var(--dark-dividers), 0.5) !important;
-            border-top-left-radius: 12px;
-            border-bottom-left-radius: 12px;
-          }
-          &:last-child {
-            border-right: 1px solid rgba(var(--dark-dividers), 0.5) !important;
-            border-top-right-radius: 12px;
-            border-bottom-right-radius: 12px;
-          }
         }
       }
     }
@@ -149,38 +41,14 @@
     background-color: var(--dark-background);
   }
 
-  .kpi-card,
-  .dashboard-card {
-    background: rgb(48, 56, 72);
-  }
-
   ::ng-deep {
     table.gf-table {
+      @include table.gf-table-cards(true);
+
       tr.mat-mdc-row {
-        background-color: rgb(48, 56, 72) !important;
-
-        &:hover {
-          box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
-
-          td {
-            background-color: rgb(48, 56, 72) !important;
-          }
-        }
-
         td {
-          background-color: rgb(48, 56, 72) !important;
           color: rgba(var(--light-primary-text)) !important;
-          border-color: rgba(255, 255, 255, 0.1) !important;
-
-          &:first-child,
-          &:last-child {
-            border-color: rgba(255, 255, 255, 0.1) !important;
-          }
         }
-      }
-
-      tr.mat-mdc-header-row th {
-        color: rgba(255, 255, 255, 0.5) !important;
       }
     }
 
@@ -190,23 +58,6 @@
       &.mat-mdc-tab-label-active {
         color: #fff !important;
       }
-    }
-  }
-
-  .kpi-card__value {
-    &.kpi-positive ::ng-deep .value {
-      color: #4ade80 !important;
-    }
-
-    &.kpi-negative ::ng-deep .value {
-      color: #f87171 !important;
-    }
-  }
-
-  .asset-icon-wrapper {
-    background-color: rgb(35, 42, 56);
-    ion-icon {
-      color: rgba(255, 255, 255, 0.8);
     }
   }
 }
