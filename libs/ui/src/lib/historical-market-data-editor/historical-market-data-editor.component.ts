@@ -246,16 +246,32 @@ export class GfHistoricalMarketDataEditorComponent
   }
 
   public onImportHistoricalData() {
+    this.importHistoricalData(
+      this.historicalDataForm.controls.historicalData.controls.csvString
+        .value ?? ''
+    );
+  }
+
+  public onFileSelected(event: Event) {
+    const file = (event.target as HTMLInputElement).files?.[0];
+
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        const csvString = e.target?.result as string;
+        this.importHistoricalData(csvString);
+      };
+      reader.readAsText(file);
+    }
+  }
+
+  private importHistoricalData(csvString: string) {
     try {
-      const marketData = csvToJson<UpdateMarketDataDto>(
-        this.historicalDataForm.controls.historicalData.controls.csvString
-          .value ?? '',
-        {
-          dynamicTyping: true,
-          header: true,
-          skipEmptyLines: true
-        }
-      ).data;
+      const marketData = csvToJson<UpdateMarketDataDto>(csvString, {
+        dynamicTyping: true,
+        header: true,
+        skipEmptyLines: true
+      }).data;
 
       this.dataService
         .postMarketData({

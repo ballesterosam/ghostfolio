@@ -1776,46 +1776,53 @@ export class PortfolioService {
     };
 
     if (assetProfile.countries.length > 0) {
+      const totalCountryWeight = getSum(
+        assetProfile.countries.map((c) => new Big(c.weight))
+      );
+      const countryWeightDivisor = totalCountryWeight.gt(1.1) ? 100 : 1;
+
       for (const country of assetProfile.countries) {
+        const weight = country.weight / countryWeightDivisor;
+
         if (developedMarkets.includes(country.code)) {
           markets.developedMarkets = new Big(markets.developedMarkets)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else if (emergingMarkets.includes(country.code)) {
           markets.emergingMarkets = new Big(markets.emergingMarkets)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else {
           markets.otherMarkets = new Big(markets.otherMarkets)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         }
 
         if (country.code === 'JP') {
           marketsAdvanced.japan = new Big(marketsAdvanced.japan)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else if (country.code === 'CA' || country.code === 'US') {
           marketsAdvanced.northAmerica = new Big(marketsAdvanced.northAmerica)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else if (asiaPacificMarkets.includes(country.code)) {
           marketsAdvanced.asiaPacific = new Big(marketsAdvanced.asiaPacific)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else if (emergingMarkets.includes(country.code)) {
           marketsAdvanced.emergingMarkets = new Big(
             marketsAdvanced.emergingMarkets
           )
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else if (europeMarkets.includes(country.code)) {
           marketsAdvanced.europe = new Big(marketsAdvanced.europe)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         } else {
           marketsAdvanced.otherMarkets = new Big(marketsAdvanced.otherMarkets)
-            .plus(country.weight)
+            .plus(weight)
             .toNumber();
         }
       }

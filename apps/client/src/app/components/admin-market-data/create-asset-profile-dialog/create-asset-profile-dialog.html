@@ -1,12 +1,14 @@
-<form
-  class="d-flex flex-column h-100"
-  [formGroup]="createAssetProfileForm"
-  (keyup.enter)="createAssetProfileForm.valid && onSubmit()"
-  (ngSubmit)="onSubmit()"
->
-  <h1 i18n mat-dialog-title>Add Asset Profile</h1>
-  <div class="flex-grow-1 py-3" mat-dialog-content>
-    <div class="mb-3">
+<gf-dialog-header
+  i18n-title
+  position="center"
+  title="Add Asset Profile"
+  [deviceType]="data.deviceType"
+  (closeButtonClicked)="onCancel()"
+/>
+
+<div class="flex-grow-1" mat-dialog-content>
+  <div class="container p-0">
+    <div class="mb-4 text-center">
       <mat-radio-group
         color="primary"
         [value]="mode"
@@ -21,37 +23,49 @@
       </mat-radio-group>
     </div>
 
-    @if (mode === 'auto') {
-      <div>
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label i18n>Name, symbol or ISIN</mat-label>
-          <gf-symbol-autocomplete
-            formControlName="searchSymbol"
-            [includeIndices]="true"
-          />
-        </mat-form-field>
-      </div>
-    } @else if (mode === 'manual') {
-      <div>
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label i18n>Symbol</mat-label>
-          <input formControlName="addSymbol" matInput />
-          <span matTextPrefix>{{ ghostfolioPrefix }}</span>
-        </mat-form-field>
-      </div>
-    } @else if (mode === 'currency') {
-      <div>
-        <mat-form-field appearance="outline" class="w-100">
-          <mat-label i18n>Currency</mat-label>
-          <input formControlName="addCurrency" matInput />
-          @if (showCurrencyErrorMessage) {
-            <mat-error i18n>Oops! Invalid currency.</mat-error>
-          }
-        </mat-form-field>
-      </div>
-    }
+    <form
+      [formGroup]="createAssetProfileForm"
+      (keyup.enter)="createAssetProfileForm.valid && onSubmit()"
+      (ngSubmit)="onSubmit()"
+    >
+      @if (mode === 'auto') {
+        <div>
+          <mat-form-field appearance="outline" class="w-100 without-hint">
+            <mat-label i18n>Name, symbol or ISIN</mat-label>
+            <gf-symbol-autocomplete
+              formControlName="searchSymbol"
+              [includeIndices]="true"
+            />
+          </mat-form-field>
+        </div>
+      } @else if (mode === 'manual') {
+        <div>
+          <mat-form-field appearance="outline" class="w-100 without-hint">
+            <mat-label i18n>Symbol</mat-label>
+            <input formControlName="addSymbol" matInput />
+            <span matTextPrefix>{{ ghostfolioPrefix }}</span>
+          </mat-form-field>
+        </div>
+      } @else if (mode === 'currency') {
+        <div>
+          <mat-form-field appearance="outline" class="w-100 without-hint">
+            <mat-label i18n>Currency</mat-label>
+            <input formControlName="addCurrency" matInput />
+            @if (showCurrencyErrorMessage) {
+              <mat-error i18n>Oops! Invalid currency.</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      }
+    </form>
   </div>
-  <div class="d-flex justify-content-end" mat-dialog-actions>
+</div>
+
+<gf-dialog-footer
+  [deviceType]="data.deviceType"
+  (closeButtonClicked)="onCancel()"
+>
+  <div class="d-flex justify-content-end w-100">
     <button mat-button type="button" (click)="onCancel()">
       @if (createAssetProfileForm.dirty) {
         <ng-container i18n>Cancel</ng-container>
@@ -60,12 +74,14 @@
       }
     </button>
     <button
+      class="ms-2"
       color="primary"
       mat-flat-button
-      type="submit"
+      type="button"
       [disabled]="createAssetProfileForm.hasError('atLeastOneValid')"
+      (click)="onSubmit()"
     >
       <ng-container i18n>Save</ng-container>
     </button>
   </div>
-</form>
+</gf-dialog-footer>

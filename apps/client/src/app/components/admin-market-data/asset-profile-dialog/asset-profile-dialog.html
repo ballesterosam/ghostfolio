@@ -1,111 +1,152 @@
-<div class="d-flex flex-column h-100">
-  <div class="align-items-center d-flex mb-3" mat-dialog-title>
-    <span class="flex-grow-1 text-truncate">{{
-      assetProfile?.name ?? data.symbol
-    }}</span>
-    <button
-      class="ms-1 no-min-width px-2"
-      mat-button
-      type="button"
-      [matMenuTriggerFor]="assetProfileActionsMenu"
-      (click)="$event.stopPropagation()"
-    >
-      <ion-icon name="ellipsis-vertical" />
+<gf-dialog-header
+  position="center"
+  [deviceType]="data.deviceType"
+  [title]="assetProfile?.name ?? data.symbol"
+  (closeButtonClicked)="onClose()"
+>
+  <button
+    class="ms-1 no-min-width px-2"
+    mat-button
+    type="button"
+    [matMenuTriggerFor]="assetProfileActionsMenu"
+    (click)="$event.stopPropagation()"
+  >
+    <ion-icon name="ellipsis-vertical" />
+  </button>
+  <mat-menu
+    #assetProfileActionsMenu="matMenu"
+    class="no-max-width"
+    xPosition="before"
+  >
+    <button mat-menu-item type="button" (click)="initialize()">
+      <ng-container i18n>Refresh</ng-container>
     </button>
-    <mat-menu
-      #assetProfileActionsMenu="matMenu"
-      class="no-max-width"
-      xPosition="before"
-    >
-      <button mat-menu-item type="button" (click)="initialize()">
-        <ng-container i18n>Refresh</ng-container>
-      </button>
-      <button
-        mat-menu-item
-        type="button"
-        [disabled]="
-          assetProfileForm.dirty || !assetProfileForm.controls.isActive.value
-        "
-        [matMenuTriggerFor]="gatherHistoricalMarketDataMenu"
-        (click)="
-          onGatherSymbol({ dataSource: data.dataSource, symbol: data.symbol })
-        "
-      >
-        <ng-container i18n>Gather Historical Market Data</ng-container>
-      </button>
-      <mat-menu #gatherHistoricalMarketDataMenu="matMenu">
-        @for (dateRange of dateRangeOptions; track dateRange.value) {
-          <button
-            mat-menu-item
-            type="button"
-            (click)="
-              onGatherSymbol({
-                dataSource: data.dataSource,
-                range: dateRange.value,
-                symbol: data.symbol
-              })
-            "
-          >
-            {{ dateRange.label }}
-          </button>
-        }
-      </mat-menu>
-      <button
-        mat-menu-item
-        type="button"
-        [disabled]="
-          assetProfileForm.dirty || !assetProfileForm.controls.isActive.value
-        "
-        (click)="
-          onGatherProfileDataBySymbol({
-            dataSource: data.dataSource,
-            symbol: data.symbol
-          })
-        "
-      >
-        <ng-container i18n>Gather Profile Data</ng-container>
-      </button>
-      <hr class="m-0" />
-      <button
-        mat-menu-item
-        type="button"
-        [disabled]="
-          !canDeleteAssetProfile({
-            activitiesCount: assetProfile?.activitiesCount,
-            isBenchmark: isBenchmark,
-            symbol: data.symbol,
-            watchedByCount: assetProfile?.watchedByCount
-          })
-        "
-        (click)="
-          onDeleteProfileData({
-            dataSource: data.dataSource,
-            symbol: data.symbol
-          })
-        "
-      >
-        <ng-container i18n>Delete</ng-container>
-      </button>
-    </mat-menu>
-  </div>
-
-  <div class="flex-grow-1" mat-dialog-content>
-    <gf-line-chart
-      class="mb-4"
-      [colorScheme]="user?.settings?.colorScheme"
-      [historicalDataItems]="historicalDataItems"
-      [isAnimated]="true"
-      [label]="
-        isUUID(data.symbol) ? (assetProfile?.name ?? data.symbol) : data.symbol
+    <button
+      mat-menu-item
+      type="button"
+      [disabled]="
+        assetProfileForm.dirty || !assetProfileForm.controls.isActive.value
       "
-      [locale]="data.locale"
-      [showXAxis]="true"
-      [showYAxis]="true"
-    />
+      [matMenuTriggerFor]="gatherHistoricalMarketDataMenu"
+      (click)="
+        onGatherSymbol({ dataSource: data.dataSource, symbol: data.symbol })
+      "
+    >
+      <ng-container i18n>Gather Historical Market Data</ng-container>
+    </button>
+    <mat-menu #gatherHistoricalMarketDataMenu="matMenu">
+      @for (dateRange of dateRangeOptions; track dateRange.value) {
+        <button
+          mat-menu-item
+          type="button"
+          (click)="
+            onGatherSymbol({
+              dataSource: data.dataSource,
+              range: dateRange.value,
+              symbol: data.symbol
+            })
+          "
+        >
+          {{ dateRange.label }}
+        </button>
+      }
+    </mat-menu>
+    <button
+      mat-menu-item
+      type="button"
+      [disabled]="
+        assetProfileForm.dirty || !assetProfileForm.controls.isActive.value
+      "
+      (click)="
+        onGatherProfileDataBySymbol({
+          dataSource: data.dataSource,
+          symbol: data.symbol
+        })
+      "
+    >
+      <ng-container i18n>Gather Profile Data</ng-container>
+    </button>
+    <hr class="m-0" />
+    <button
+      mat-menu-item
+      type="button"
+      [disabled]="
+        !canDeleteAssetProfile({
+          activitiesCount: assetProfile?.activitiesCount,
+          isBenchmark: isBenchmark,
+          symbol: data.symbol,
+          watchedByCount: assetProfile?.watchedByCount
+        })
+      "
+      (click)="
+        onDeleteProfileData({
+          dataSource: data.dataSource,
+          symbol: data.symbol
+        })
+      "
+    >
+      <ng-container i18n>Delete</ng-container>
+    </button>
+  </mat-menu>
+</gf-dialog-header>
+
+<div class="flex-grow-1" mat-dialog-content>
+  <div class="container p-0">
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card text-center">
+          <div
+            class="asset-icon-wrapper"
+            [title]="assetProfile?.name ?? data.symbol"
+          >
+            <ion-icon
+              [name]="
+                getAssetIcon(
+                  assetProfile?.assetSubClass,
+                  assetProfile?.assetClass
+                )
+              "
+            />
+          </div>
+          <gf-value
+            size="large"
+            [isCurrency]="true"
+            [locale]="data.locale"
+            [unit]="assetProfile?.currency"
+            [value]="marketPrice"
+          />
+        </div>
+      </div>
+    </div>
+
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card">
+          <gf-line-chart
+            [colorScheme]="user?.settings?.colorScheme"
+            [historicalDataItems]="historicalDataItems"
+            [isAnimated]="true"
+            [label]="
+              isUUID(data.symbol)
+                ? (assetProfile?.name ?? data.symbol)
+                : data.symbol
+            "
+            [locale]="data.locale"
+            [maintainAspectRatio]="false"
+            [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+            [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+            [overrideLineWidth]="2"
+            [showGradient]="true"
+            [showXAxis]="true"
+            [showYAxis]="true"
+          />
+        </div>
+      </div>
+    </div>
 
     <mat-tab-group
       animationDuration="0ms"
-      [dynamicHeight]="true"
+      class="mb-4"
       [mat-stretch-tabs]="false"
     >
       <mat-tab>
@@ -164,143 +205,144 @@
                 </form>
               </div>
             } @else {
-              <div class="col-6 mb-3">
-                <gf-value i18n size="medium" [value]="assetProfile?.symbol"
-                  >Symbol</gf-value
-                >
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Symbol</div>
+                  <div class="kpi-card__value">
+                    <gf-value
+                      size="medium"
+                      [enableCopyToClipboardButton]="true"
+                      [value]="assetProfile?.symbol"
+                    />
+                  </div>
+                </div>
               </div>
-              <div class="col-6 mb-3">
-                <gf-value
-                  i18n
-                  size="medium"
-                  [value]="
-                    assetProfile?.dataProviderInfo?.name ??
-                    assetProfile?.dataSource
-                  "
-                  >Data Source</gf-value
-                >
-                <div
-                  class="edit-asset-profile-identifier-container position-absolute"
-                >
-                  <button
-                    class="h-100 no-min-width px-2"
-                    mat-button
-                    type="button"
-                    [disabled]="!canSaveAssetProfileIdentifier"
-                    (click)="onSetEditAssetProfileIdentifierMode()"
-                  >
-                    <ion-icon name="create-outline" />
-                  </button>
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Data Source</div>
+                  <div class="kpi-card__value d-flex align-items-center">
+                    <gf-value
+                      size="medium"
+                      [value]="
+                        assetProfile?.dataProviderInfo?.name ??
+                        assetProfile?.dataSource
+                      "
+                    />
+                    <button
+                      class="ms-1 no-min-width px-2"
+                      mat-button
+                      type="button"
+                      [disabled]="!canSaveAssetProfileIdentifier"
+                      (click)="onSetEditAssetProfileIdentifierMode()"
+                    >
+                      <ion-icon name="create-outline" />
+                    </button>
+                  </div>
                 </div>
               </div>
             }
-            <div class="col-6 mb-3">
-              <gf-value i18n size="medium" [value]="assetProfile?.currency"
-                >Currency</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Currency</div>
+                <div class="kpi-card__value">
+                  <gf-value size="medium" [value]="assetProfile?.currency" />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                size="medium"
-                [hidden]="!assetProfile?.isin"
-                [value]="assetProfile?.isin"
-                >ISIN</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>ISIN</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [enableCopyToClipboardButton]="true"
+                    [hidden]="!assetProfile?.isin"
+                    [value]="assetProfile?.isin"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [isDate]="assetProfile?.dateOfFirstActivity ? true : false"
-                [locale]="data.locale"
-                [value]="assetProfile?.dateOfFirstActivity ?? '-'"
-                >First Activity</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>First Activity</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [isDate]="assetProfile?.dateOfFirstActivity ? true : false"
+                    [locale]="data.locale"
+                    [value]="assetProfile?.dateOfFirstActivity ?? '-'"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [locale]="data.locale"
-                [value]="assetProfile?.activitiesCount"
-                >Activities</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Activities</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [locale]="data.locale"
+                    [value]="assetProfile?.activitiesCount"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [hidden]="!assetClassLabel"
-                [value]="assetClassLabel"
-                >Asset Class</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Asset Class</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [hidden]="!assetClassLabel"
+                    [value]="assetClassLabel"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [hidden]="!assetSubClassLabel"
-                [value]="assetSubClassLabel"
-                >Asset Sub Class</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Asset Sub Class</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [hidden]="!assetSubClassLabel"
+                    [value]="assetSubClassLabel"
+                  />
+                </div>
+              </div>
             </div>
-            @if (
-              assetProfile?.countries?.length > 0 ||
-              assetProfile?.sectors?.length > 0
-            ) {
-              @if (
-                assetProfile?.countries?.length === 1 &&
-                assetProfile?.sectors?.length === 1
-              ) {
-                @if (assetProfile?.sectors?.length === 1) {
-                  <div class="col-6 mb-3">
-                    <gf-value
-                      i18n
-                      size="medium"
-                      [locale]="data.locale"
-                      [value]="translate(assetProfile?.sectors[0].name)"
-                      >Sector</gf-value
-                    >
-                  </div>
-                }
-                @if (assetProfile?.countries?.length === 1) {
-                  <div class="col-6 mb-3">
-                    <gf-value
-                      i18n
-                      size="medium"
-                      [locale]="data.locale"
-                      [value]="
-                        getCountryName({
-                          code: assetProfile?.countries[0].code,
-                          locale: data.locale
-                        })
-                      "
-                      >Country</gf-value
-                    >
-                  </div>
-                }
-              } @else {
-                <div class="col-md-6 mb-3">
-                  <div class="h5" i18n>Sectors</div>
+
+            @if (hasAllocationData) {
+              <div class="col-md-6 mb-3">
+                <div class="dashboard-card">
+                  <h3 class="h5 mb-3" i18n>Sectors</h3>
                   <gf-portfolio-proportion-chart
                     [colorScheme]="data.colorScheme"
                     [data]="sectors"
+                    [glow]="true"
+                    [hollow]="true"
                     [isInPercentage]="true"
                     [keys]="['name']"
                     [maxItems]="10"
+                    [separateSegments]="data.colorScheme === 'DARK'"
                   />
                 </div>
-                <div class="col-md-6 mb-3">
-                  <div class="h5" i18n>Countries</div>
+              </div>
+              <div class="col-md-6 mb-3">
+                <div class="dashboard-card">
+                  <h3 class="h5 mb-3" i18n>Countries</h3>
                   <gf-portfolio-proportion-chart
                     [colorScheme]="data.colorScheme"
                     [data]="countries"
+                    [glow]="true"
+                    [hollow]="true"
                     [isInPercentage]="true"
                     [keys]="['name']"
                     [maxItems]="10"
+                    [separateSegments]="data.colorScheme === 'DARK'"
                   />
                 </div>
-              }
+              </div>
             }
           </div>
           <form
@@ -387,29 +429,21 @@
                 ></textarea>
               </mat-form-field>
             </div>
-            <div>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label i18n>Sectors</mat-label>
-                <textarea
-                  cdkTextareaAutosize
-                  formControlName="sectors"
-                  matInput
-                  type="text"
-                ></textarea>
-              </mat-form-field>
+            <div class="mt-3">
+              <gf-asset-profile-allocation-editor
+                formControlName="sectors"
+                type="sector"
+                [label]="translate('Sectors')"
+              />
             </div>
-            <div>
-              <mat-form-field appearance="outline" class="w-100">
-                <mat-label i18n>Countries</mat-label>
-                <textarea
-                  cdkTextareaAutosize
-                  formControlName="countries"
-                  matInput
-                  type="text"
-                ></textarea>
-              </mat-form-field>
+            <div class="mt-3">
+              <gf-asset-profile-allocation-editor
+                formControlName="countries"
+                type="country"
+                [label]="translate('Countries')"
+              />
             </div>
-            <div>
+            <div class="mt-3">
               <mat-form-field appearance="outline" class="w-100 without-hint">
                 <mat-label i18n>Url</mat-label>
                 <input formControlName="url" matInput type="text" />
@@ -466,6 +500,12 @@
             <div class="d-none d-sm-block ms-2" i18n>Scraper Configuration</div>
           </ng-template>
           <div class="container mt-3 p-0">
+            <div class="alert alert-info mb-3">
+              <ng-container i18n
+                >Use this configuration to extract market data from an external
+                website when no other data source is available.</ng-container
+              >
+            </div>
             <div [formGroup]="assetProfileForm">
               <div formGroupName="scraperConfiguration">
                 <div class="mt-3">
@@ -494,6 +534,7 @@
                       type="text"
                       [matAutocomplete]="auto"
                     ></textarea>
+                    <mat-hint i18n>Optional: JSON format</mat-hint>
                   </mat-form-field>
                 </div>
                 <div class="mt-3">
@@ -503,6 +544,7 @@
                   >
                     <mat-label i18n>Locale</mat-label>
                     <input formControlName="locale" matInput type="text" />
+                    <mat-hint i18n>e.g. en-US</mat-hint>
                   </mat-form-field>
                 </div>
                 <div class="mt-3">
@@ -521,10 +563,7 @@
                   </mat-form-field>
                 </div>
                 <div class="mt-3">
-                  <mat-form-field
-                    appearance="outline"
-                    class="w-100 without-hint"
-                  >
+                  <mat-form-field appearance="outline" class="w-100">
                     <mat-label>
                       <ng-container i18n>Selector</ng-container>*
                     </mat-label>
@@ -534,17 +573,21 @@
                       matInput
                       type="text"
                     ></textarea>
+                    <mat-hint i18n
+                      >The CSS selector to find the price (e.g.
+                      #price)</mat-hint
+                    >
                   </mat-form-field>
                 </div>
                 <div class="mt-3">
-                  <mat-form-field
-                    appearance="outline"
-                    class="w-100 without-hint"
-                  >
+                  <mat-form-field appearance="outline" class="w-100">
                     <mat-label>
                       <ng-container i18n>Url</ng-container>*
                     </mat-label>
                     <input formControlName="url" matInput type="text" />
+                    <mat-hint i18n
+                      >The URL of the website containing the price</mat-hint
+                    >
                   </mat-form-field>
                 </div>
                 <div class="my-3 text-end">
@@ -570,9 +613,14 @@
       }
     </mat-tab-group>
   </div>
+</div>
 
-  <div class="d-flex" mat-dialog-actions>
-    <div class="gf-spacer">
+<gf-dialog-footer
+  [deviceType]="data.deviceType"
+  (closeButtonClicked)="onClose()"
+>
+  <div class="d-flex justify-content-between w-100">
+    <div>
       <mat-checkbox
         color="primary"
         [checked]="isDataGatheringEnabled && (assetProfile?.isActive ?? false)"
@@ -586,13 +634,6 @@
         <ng-container i18n>Data Gathering</ng-container>
       </mat-checkbox>
     </div>
-    <button mat-button type="button" (click)="onClose()">
-      @if (assetProfileForm.dirty) {
-        <ng-container i18n>Cancel</ng-container>
-      } @else {
-        <ng-container i18n>Close</ng-container>
-      }
-    </button>
     <button
       color="primary"
       mat-flat-button
@@ -602,4 +643,4 @@
       <ng-container i18n>Save</ng-container>
     </button>
   </div>
-</div>
+</gf-dialog-footer>

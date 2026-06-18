@@ -18,7 +18,7 @@ export const routes: Routes = [
       {
         path: internalRoutes.zen.subRoutes.holdings.path,
         component: GfHomeHoldingsComponent,
-        title: internalRoutes.home.subRoutes.holdings.title
+        title: internalRoutes.portfolio.subRoutes.holdings.title
       }
     ],
     component: GfZenPageComponent,

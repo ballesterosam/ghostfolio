@@ -37,6 +37,20 @@
     (ngSubmit)="onImportHistoricalData()"
   >
     <div class="mt-3" formGroupName="historicalData">
+      <div class="mb-2">
+        <label class="btn btn-outline-primary mb-0 w-100" for="csv-upload">
+          <ng-container i18n>Upload CSV File</ng-container>
+        </label>
+        <input
+          class="d-none"
+          id="csv-upload"
+          type="file"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <div class="text-center my-2 text-muted" i18n>— or —</div>
+
       <mat-form-field appearance="outline" class="w-100 without-hint">
         <mat-label>
           <ng-container i18n>Historical Data</ng-container> (CSV)

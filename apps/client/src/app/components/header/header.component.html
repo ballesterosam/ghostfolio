@@ -27,46 +27,6 @@
           [routerLink]="['/']"
           >Overview</a
         >
-        <div class="contextual-dropdown">
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/']"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <ion-icon name="analytics-outline"></ion-icon>
-            <span i18n>Overview</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/home', 'holdings']"
-          >
-            <ion-icon name="albums-outline"></ion-icon>
-            <span i18n>Holdings</span>
-          </a>
-
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/home', 'watchlist']"
-          >
-            <ion-icon name="bookmark-outline"></ion-icon>
-            <span i18n>Watchlist</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="
-              hasPermissionToAccessMarkets
-                ? ['/home', 'markets-premium']
-                : ['/home', 'markets']
-            "
-          >
-            <ion-icon name="newspaper-outline"></ion-icon>
-            <span i18n>Markets</span>
-          </a>
-        </div>
       </li>
 
       <!-- Portfolio -->
@@ -94,6 +54,14 @@
           <a
             class="dropdown-link"
             routerLinkActive="active"
+            [routerLink]="['/portfolio', 'holdings']"
+          >
+            <ion-icon name="albums-outline"></ion-icon>
+            <span i18n>Holdings</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
             [routerLink]="['/portfolio', 'activities']"
           >
             <ion-icon name="swap-vertical-outline"></ion-icon>
@@ -106,6 +74,26 @@
           >
             <ion-icon name="pie-chart-outline"></ion-icon>
             <span i18n>Allocations</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'watchlist']"
+          >
+            <ion-icon name="bookmark-outline"></ion-icon>
+            <span i18n>Watchlist</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="
+              hasPermissionToAccessMarkets
+                ? ['/portfolio', 'markets-premium']
+                : ['/portfolio', 'markets']
+            "
+          >
+            <ion-icon name="newspaper-outline"></ion-icon>
+            <span i18n>Markets</span>
           </a>
           <a
             class="dropdown-link"
@@ -199,53 +187,6 @@
         </li>
       }
 
-      <!-- Resources -->
-      <li class="list-inline-item nav-item-dropdown">
-        <a
-          class="d-none d-sm-block rounded nav-link-btn"
-          i18n
-          mat-button
-          [class.nav-pill-active]="currentRoute() === routeResources"
-          [routerLink]="routerLinkResources"
-          >Resources</a
-        >
-        <div class="contextual-dropdown">
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/resources']"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <ion-icon name="reader-outline"></ion-icon>
-            <span i18n>Overview</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/resources', 'guides']"
-          >
-            <ion-icon name="book-outline"></ion-icon>
-            <span i18n>Guides</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/resources', 'markets']"
-          >
-            <ion-icon name="newspaper-outline"></ion-icon>
-            <span i18n>Markets</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/resources', 'glossary']"
-          >
-            <ion-icon name="library-outline"></ion-icon>
-            <span i18n>Glossary</span>
-          </a>
-        </div>
-      </li>
-
       <!-- Pricing -->
       @if (
         hasPermissionForSubscription && user()?.subscription?.type === 'Basic'
@@ -266,75 +207,6 @@
           </a>
         </li>
       }
-
-      <!-- About -->
-      <li class="list-inline-item nav-item-dropdown">
-        <a
-          class="d-none d-sm-block rounded nav-link-btn"
-          i18n
-          mat-button
-          [class.nav-pill-active]="currentRoute() === routeAbout"
-          [routerLink]="routerLinkAbout"
-          >About</a
-        >
-        <div class="contextual-dropdown">
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="routerLinkAbout"
-            [routerLinkActiveOptions]="{ exact: true }"
-          >
-            <ion-icon name="information-circle-outline"></ion-icon>
-            <span i18n>About</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/about', 'changelog']"
-          >
-            <ion-icon name="sparkles-outline"></ion-icon>
-            <span i18n>Changelog</span>
-          </a>
-          @if (!hasPermissionForSubscription) {
-            <a
-              class="dropdown-link"
-              routerLinkActive="active"
-              [routerLink]="['/about', 'license']"
-            >
-              <ion-icon name="ribbon-outline"></ion-icon>
-              <span i18n>License</span>
-            </a>
-          }
-          @if (user()) {
-            @if (hasPermissionForSubscription) {
-              <a
-                class="dropdown-link"
-                routerLinkActive="active"
-                [routerLink]="['/about', 'privacy-policy']"
-              >
-                <ion-icon name="shield-checkmark-outline"></ion-icon>
-                <span i18n>Privacy Policy</span>
-              </a>
-              <a
-                class="dropdown-link"
-                routerLinkActive="active"
-                [routerLink]="['/about', 'terms-of-service']"
-              >
-                <ion-icon name="document-text-outline"></ion-icon>
-                <span i18n>Terms of Service</span>
-              </a>
-            }
-          }
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
-            [routerLink]="['/about', 'oss-friends']"
-          >
-            <ion-icon name="happy-outline"></ion-icon>
-            <span i18n>OSS Friends</span>
-          </a>
-        </div>
-      </li>
     </ul>
     <span class="gf-spacer"></span>
     <ul class="align-items-center d-flex list-inline m-0 px-2 user-controls">
@@ -512,14 +384,6 @@
             >
           }
           <hr class="m-0" />
-          <a
-            class="d-flex d-sm-none"
-            i18n
-            mat-menu-item
-            [class.fw-bold]="currentRoute() === routeResources"
-            [routerLink]="routerLinkResources"
-            >Resources</a
-          >
           @if (
             hasPermissionForSubscription &&
             user()?.subscription?.type === 'Basic'
@@ -538,14 +402,6 @@
               </span>
             </a>
           }
-          <a
-            class="d-flex d-sm-none"
-            i18n
-            mat-menu-item
-            [class.fw-bold]="currentRoute() === routeAbout"
-            [routerLink]="routerLinkAbout"
-            >About Ghostfolio</a
-          >
           <hr class="d-flex d-sm-none m-0" />
           <button i18n mat-menu-item (click)="onSignOut()">Log out</button>
         </mat-menu>
@@ -576,16 +432,6 @@
           [class.nav-pill-active]="currentRoute() === routeFeatures"
           [routerLink]="routerLinkFeatures"
           >Features</a
-        >
-      </li>
-      <li class="list-inline-item">
-        <a
-          class="d-none d-sm-block rounded"
-          i18n
-          mat-button
-          [class.nav-pill-active]="currentRoute() === routeAbout"
-          [routerLink]="routerLinkAbout"
-          >About</a
         >
       </li>
       @if (hasPermissionForSubscription) {
