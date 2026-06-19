@@ -1,5 +1,6 @@
 import {
   extractNumberFromString,
+  getCurrencySymbolInfo,
   getNumberFormatGroup
 } from '@ghostfolio/common/helper';
 
@@ -114,6 +115,23 @@ describe('Helper', () => {
     it('Get zh-CN number format group when it is default', () => {
       languageGetter.mockReturnValue('zh-CN');
       expect(getNumberFormatGroup()).toEqual(',');
+    });
+  });
+
+  describe('Get currency symbol info', () => {
+    it('Get EUR in es-ES', () => {
+      // In some environments, es-ES uses a non-breaking space between the number and the symbol €
+      expect(getCurrencySymbolInfo('es-ES', 'EUR')).toEqual({
+        symbol: '€',
+        position: 'suffix'
+      });
+    });
+
+    it('Get USD in en-US', () => {
+      expect(getCurrencySymbolInfo('en-US', 'USD')).toEqual({
+        symbol: '$',
+        position: 'prefix'
+      });
     });
   });
 });

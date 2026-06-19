@@ -29,6 +29,7 @@ import {
   ellipsisHorizontal,
   eyeOffOutline,
   trashOutline,
+  trashBinOutline,
   walletOutline
 } from 'ionicons/icons';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
@@ -67,6 +68,7 @@ export class GfAccountsTableComponent {
   public readonly totalValueInBaseCurrency = input<number>();
 
   public readonly accountDeleted = output<string>();
+  public readonly accountDeletedWithActivities = output<string>();
   public readonly accountToUpdate = output<Account>();
   public readonly transferBalance = output<void>();
 
@@ -121,6 +123,7 @@ export class GfAccountsTableComponent {
       ellipsisHorizontal,
       eyeOffOutline,
       trashOutline,
+      trashBinOutline,
       walletOutline
     });
 
@@ -144,6 +147,16 @@ export class GfAccountsTableComponent {
       },
       confirmType: ConfirmationDialogType.Warn,
       title: $localize`Do you really want to delete this account?`
+    });
+  }
+
+  protected onDeleteAccountWithActivities(aId: string) {
+    this.notificationService.confirm({
+      confirmFn: () => {
+        this.accountDeletedWithActivities.emit(aId);
+      },
+      confirmType: ConfirmationDialogType.Warn,
+      title: $localize`Do you really want to delete this account and all its associated activities? This action cannot be undone.`
     });
   }
 

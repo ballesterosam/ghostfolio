@@ -1,6 +1,7 @@
 import { UserService } from '@ghostfolio/api/app/user/user.service';
 import { ConfigurationService } from '@ghostfolio/api/services/configuration/configuration.service';
 import { PropertyService } from '@ghostfolio/api/services/property/property.service';
+import { PlatformSyncQueueService } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.service';
 
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -12,6 +13,7 @@ export class AuthService {
   public constructor(
     private readonly configurationService: ConfigurationService,
     private readonly jwtService: JwtService,
+    private readonly platformSyncQueueService: PlatformSyncQueueService,
     private readonly propertyService: PropertyService,
     private readonly userService: UserService
   ) {}
@@ -27,6 +29,11 @@ export class AuthService {
     });
 
     if (user) {
+      // Trigger platform sync asynchronously
+      this.platformSyncQueueService
+        .addSyncUserJob(user.id)
+        .catch(() => undefined);
+
       return this.jwtService.sign({
         id: user.id
       });
@@ -60,6 +67,11 @@ export class AuthService {
           }
         });
       }
+
+      // Trigger platform sync asynchronously
+      this.platformSyncQueueService
+        .addSyncUserJob(user.id)
+        .catch(() => undefined);
 
       return this.jwtService.sign({
         id: user.id

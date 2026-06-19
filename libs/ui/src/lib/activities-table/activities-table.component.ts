@@ -56,6 +56,7 @@ import { isUUID } from 'class-validator';
 import { addIcons } from 'ionicons';
 import {
   alertCircleOutline,
+  businessOutline,
   calendarClearOutline,
   cloudDownloadOutline,
   cloudUploadOutline,
@@ -65,13 +66,19 @@ import {
   documentTextOutline,
   ellipsisHorizontal,
   ellipsisVertical,
+  helpCircleOutline,
+  layersOutline,
+  leafOutline,
+  logoBitcoin,
+  pieChartOutline,
+  receiptOutline,
   tabletLandscapeOutline,
-  trashOutline
+  trashOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 import { GfActivityTypeComponent } from '../activity-type/activity-type.component';
-import { GfEntityLogoComponent } from '../entity-logo/entity-logo.component';
 import { GfNoTransactionsInfoComponent } from '../no-transactions-info/no-transactions-info.component';
 import { GfValueComponent } from '../value/value.component';
 
@@ -80,7 +87,6 @@ import { GfValueComponent } from '../value/value.component';
   imports: [
     CommonModule,
     GfActivityTypeComponent,
-    GfEntityLogoComponent,
     GfNoTransactionsInfoComponent,
     GfSymbolPipe,
     GfValueComponent,
@@ -165,16 +171,9 @@ export class GfActivitiesTableComponent implements AfterViewInit, OnInit {
       'value',
       'currency',
       'valueInBaseCurrency',
-      'account',
       'comment',
       'actions'
     ];
-
-    if (!this.showAccountColumn()) {
-      columns = columns.filter((column) => {
-        return column !== 'account';
-      });
-    }
 
     if (!this.showCheckbox()) {
       columns = columns.filter((column) => {
@@ -207,6 +206,7 @@ export class GfActivitiesTableComponent implements AfterViewInit, OnInit {
 
     addIcons({
       alertCircleOutline,
+      businessOutline,
       calendarClearOutline,
       cloudDownloadOutline,
       cloudUploadOutline,
@@ -216,8 +216,15 @@ export class GfActivitiesTableComponent implements AfterViewInit, OnInit {
       documentTextOutline,
       ellipsisHorizontal,
       ellipsisVertical,
+      helpCircleOutline,
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
+      receiptOutline,
       tabletLandscapeOutline,
-      trashOutline
+      trashOutline,
+      walletOutline
     });
   }
 
@@ -263,6 +270,33 @@ export class GfActivitiesTableComponent implements AfterViewInit, OnInit {
       activity.isDraft === false &&
       ['BUY', 'DIVIDEND', 'SELL'].includes(activity.type)
     );
+  }
+
+  public getAssetIcon(element: Activity): string {
+    const subClass = element.SymbolProfile?.assetSubClass;
+    const assetClass = element.SymbolProfile?.assetClass;
+
+    if (assetClass === 'LIQUIDITY' || subClass === 'CASH') {
+      return 'wallet-outline';
+    }
+
+    switch (subClass) {
+      case 'CRYPTOCURRENCY':
+        return 'logo-bitcoin';
+      case 'STOCK':
+        return 'business-outline';
+      case 'ETF':
+        return 'pie-chart-outline';
+      case 'MUTUALFUND':
+        return 'layers-outline';
+      case 'BOND':
+      case 'LOAN':
+        return 'receipt-outline';
+      case 'PRECIOUS_METAL':
+        return 'leaf-outline';
+      default:
+        return 'help-circle-outline';
+    }
   }
 
   public isExcludedFromAnalysis(activity: Activity) {

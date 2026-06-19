@@ -1,3 +1,349 @@
 :host {
   display: block;
+
+  .summary-dashboard {
+    margin-bottom: 2rem;
+  }
+
+  .summary-header {
+    .summary-title {
+      font-size: 1.85rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      opacity: 0.95;
+      margin-bottom: 0.25rem;
+    }
+
+    .summary-subtitle {
+      font-size: 0.95rem;
+      opacity: 0.6;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  // ─── Cards Styling ────────────────────────────────────────────────────────
+  .summary-card {
+    background: var(--gf-card-bg-light);
+    border-radius: 16px;
+    padding: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 7.5rem;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    transition:
+      transform 0.25s ease,
+      box-shadow 0.25s ease,
+      border-color 0.25s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    &.flex-row {
+      flex-direction: row;
+      align-items: center;
+    }
+
+    // Hero variation (e.g. Net Worth)
+    &--hero {
+      background: linear-gradient(160deg, #5d8ab9 0%, #304f75 100%);
+      color: #fff;
+      border: none;
+      position: relative;
+      overflow: hidden;
+
+      .card-label {
+        color: rgba(255, 255, 255, 0.82);
+      }
+
+      .card-value {
+        color: #fff !important;
+      }
+
+      .sub-text {
+        color: rgba(255, 255, 255, 0.7) !important;
+      }
+
+      .sub-value ::ng-deep .value {
+        color: #fff !important;
+      }
+
+      .border-top {
+        border-top-color: rgba(255, 255, 255, 0.15) !important;
+      }
+
+      &:hover {
+        box-shadow: 0 8px 24px rgba(48, 79, 117, 0.25);
+      }
+    }
+  }
+
+  // ─── Card Content Elements ────────────────────────────────────────────────
+  .card-text-block {
+    flex: 1;
+  }
+
+  .card-label {
+    display: block;
+    font-size: 0.8rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(var(--dark-primary-text), 0.6);
+    margin-bottom: 0.25rem;
+
+    &.label-hero {
+      font-size: 0.85rem;
+      letter-spacing: 0.12em;
+    }
+  }
+
+  .card-value {
+    font-size: 1.6rem;
+    font-weight: 700;
+    line-height: 1.2;
+    margin: 0;
+
+    &.value-hero {
+      font-size: 2.4rem;
+      letter-spacing: -0.01em;
+    }
+
+    ::ng-deep {
+      .value,
+      .h2 {
+        font-weight: 700 !important;
+      }
+    }
+  }
+
+  .card-sub-value {
+    font-size: 1.15rem;
+    font-weight: 600;
+  }
+
+  .sub-text {
+    font-size: 0.8rem;
+  }
+
+  .sub-value {
+    font-size: 1.05rem;
+  }
+
+  .sub-text-small {
+    font-size: 0.75rem;
+  }
+
+  // ─── Sparkline Containers ─────────────────────────────────────────────────
+  .card-sparkline {
+    width: 45%;
+    height: 3.5rem;
+    align-self: center;
+
+    gf-line-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  .card-sparkline-small {
+    width: 35%;
+    height: 2.75rem;
+
+    gf-line-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  .card-sparkline-extra-small {
+    width: 30%;
+    height: 2.25rem;
+
+    gf-line-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  .card-sparkline-large {
+    width: 50%;
+    height: 5.5rem;
+    align-self: flex-end;
+
+    gf-line-chart {
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+  }
+
+  // ─── Mini Bar Chart (Buy & Sell Comparison) ────────────────────────────────
+  .card-chart-bars {
+    width: 2.25rem;
+    height: 4.5rem;
+    display: flex;
+    align-items: flex-end;
+    gap: 0.35rem;
+    margin-left: 1rem;
+    flex-shrink: 0;
+
+    .bar {
+      width: 0.85rem;
+      border-radius: 4px 4px 0 0;
+      transition: height 0.3s ease;
+
+      &--buy {
+        background-color: #22c55e;
+      }
+
+      &--sell {
+        background-color: #f97316;
+      }
+    }
+  }
+
+  // ─── Badges and Tooltips ──────────────────────────────────────────────────
+  .badge-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 50%;
+    font-size: 0.95rem;
+
+    &--buy {
+      color: #22c55e;
+    }
+
+    &--sell {
+      color: #f97316;
+    }
+  }
+
+  .info-tooltip {
+    color: rgba(var(--dark-primary-text), 0.4);
+    font-size: 1.05rem;
+
+    &:hover {
+      color: rgba(var(--dark-primary-text), 0.7);
+    }
+  }
+
+  // ─── Progress Bar ──────────────────────────────────────────────────────────
+  .progress-bar-container {
+    width: 100%;
+  }
+
+  .progress-bar-track {
+    width: 100%;
+    height: 6px;
+    background: rgba(0, 0, 0, 0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+
+  .progress-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+    transition: width 0.5s ease-out;
+
+    &--positive {
+      background-color: #22c55e;
+    }
+
+    &--negative {
+      background-color: #f97316;
+    }
+  }
+
+  // ─── Hero Icon Overlay ─────────────────────────────────────────────────────
+  .card-icon-overlay {
+    position: absolute;
+    right: 1.25rem;
+    bottom: -1rem;
+    opacity: 0.08;
+    pointer-events: none;
+
+    .hero-bg-icon {
+      font-size: 7.5rem;
+    }
+  }
+
+  // ─── Sub-Cards for Funds (Emergency, buying power, etc) ───────────────────
+  .sub-card-funds {
+    background: rgba(0, 0, 0, 0.02);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    height: 100%;
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background: rgba(0, 0, 0, 0.03);
+    }
+
+    .border-top {
+      border-top-color: rgba(0, 0, 0, 0.06) !important;
+    }
+  }
+}
+
+// ─── Dark Mode Overrides ────────────────────────────────────────────────────
+:host-context(.theme-dark) {
+  .summary-card {
+    background: rgb(48, 56, 72);
+    border-color: rgba(255, 255, 255, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
+    &:hover {
+      border-color: rgba(255, 255, 255, 0.08);
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+    }
+
+    &.summary-card--hero {
+      background: linear-gradient(160deg, #3a5f8a 0%, #1e334d 100%);
+      border: none;
+
+      &:hover {
+        box-shadow: 0 8px 24px rgba(30, 51, 77, 0.4);
+      }
+    }
+  }
+
+  .card-label {
+    color: rgba(255, 255, 255, 0.55);
+  }
+
+  .info-tooltip {
+    color: rgba(255, 255, 255, 0.4);
+
+    &:hover {
+      color: rgba(255, 255, 255, 0.7);
+    }
+  }
+
+  .progress-bar-track {
+    background: rgba(255, 255, 255, 0.1);
+  }
+
+  .sub-card-funds {
+    background: rgba(255, 255, 255, 0.02);
+    border-color: rgba(255, 255, 255, 0.04);
+
+    &:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+
+    .border-top {
+      border-top-color: rgba(255, 255, 255, 0.06) !important;
+    }
+  }
 }

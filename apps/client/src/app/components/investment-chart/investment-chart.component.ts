@@ -3,12 +3,11 @@ import {
   getVerticalHoverLinePlugin,
   transformTickToAbbreviation
 } from '@ghostfolio/common/chart-helper';
-import { primaryColorRgb, secondaryColorRgb } from '@ghostfolio/common/config';
+import { secondaryColorRgb } from '@ghostfolio/common/config';
 import {
   getBackgroundColor,
   getDateFormatString,
   getLocale,
-  getTextColor,
   parseDate
 } from '@ghostfolio/common/helper';
 import { LineChartItem } from '@ghostfolio/common/interfaces';
@@ -64,6 +63,7 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
   @Input() public readonly isLoading = false;
   @Input() public readonly locale = getLocale();
   @Input() public readonly savingsRate = 0;
+  @Input() public readonly showGradient = true;
 
   private readonly chartCanvas =
     viewChild.required<ElementRef<HTMLCanvasElement>>('chartCanvas');
@@ -113,44 +113,73 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
       }),
       datasets: [
         {
-          backgroundColor: `rgb(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b})`,
-          borderColor: `rgb(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b})`,
-          borderWidth: this.groupBy ? 0 : 1,
+          backgroundColor: (context) => {
+            if (this.groupBy) {
+              // Vibrant color for bars in Timeline charts
+              return 'rgba(255, 255, 255, 0.7)';
+            }
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return undefined;
+            const gradient = ctx.createLinearGradient(
+              0,
+              chartArea.top,
+              0,
+              chartArea.bottom
+            );
+            // Alternative color: Slate gray-blue for secondary line
+            gradient.addColorStop(0, 'rgba(148, 163, 184, 0.3)');
+            gradient.addColorStop(1, 'rgba(148, 163, 184, 0)');
+            return gradient;
+          },
+          borderColor: this.groupBy
+            ? 'rgba(255, 255, 255, 0.9)'
+            : 'rgb(148, 163, 184)',
+          borderWidth: this.groupBy ? 0 : 3, // Thicker line
           data: this.investments.map(({ date, investment }) => {
             return {
               x: parseDate(date)?.getTime() ?? null,
               y: this.isInPercentage ? investment * 100 : investment
             };
           }),
+          fill: this.showGradient && !this.groupBy ? 'origin' : false,
           label: this.benchmarkDataLabel,
           segment: {
             borderColor: (context) =>
-              this.isInFuture(
-                context,
-                `rgba(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b}, 0.67)`
-              ),
+              this.isInFuture(context, 'rgba(148, 163, 184, 0.67)'),
             borderDash: (context) => this.isInFuture(context, [2, 2])
           },
           stepped: true
         },
         {
-          borderColor: `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`,
-          borderWidth: 2,
+          backgroundColor: (context) => {
+            const chart = context.chart;
+            const { ctx, chartArea } = chart;
+            if (!chartArea) return undefined;
+            const gradient = ctx.createLinearGradient(
+              0,
+              chartArea.top,
+              0,
+              chartArea.bottom
+            );
+            gradient.addColorStop(0, 'rgba(147, 197, 253, 0.5)');
+            gradient.addColorStop(1, 'rgba(147, 197, 253, 0)');
+            return gradient;
+          },
+          borderColor: 'rgb(147, 197, 253)',
+          borderWidth: 3, // Thicker line
           data: this.values.map(({ date, value }) => {
             return {
               x: parseDate(date)?.getTime() ?? null,
               y: this.isInPercentage ? value * 100 : value
             };
           }),
-          fill: false,
+          fill: this.showGradient && !this.groupBy ? 'origin' : false,
           label: $localize`Total Amount`,
           pointRadius: 0,
           segment: {
             borderColor: (context) =>
-              this.isInFuture(
-                context,
-                `rgba(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b}, 0.67)`
-              ),
+              this.isInFuture(context, 'rgba(147, 197, 253, 0.67)'),
             borderDash: (context) => this.isInFuture(context, [2, 2])
           }
         }
@@ -158,7 +187,9 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
     };
 
     if (this.chartCanvas) {
-      if (this.chart) {
+      const chartType = this.groupBy ? 'bar' : 'line';
+
+      if (this.chart && (this.chart.config as any).type === chartType) {
         this.chart.data = chartData;
         this.chart.options.plugins ??= {};
         this.chart.options.plugins.tooltip =
@@ -172,6 +203,8 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
 
         this.chart.update();
       } else {
+        this.chart?.destroy();
+
         this.chart = new Chart<'bar' | 'line'>(
           this.chartCanvas().nativeElement,
           {
@@ -180,25 +213,25 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
               animation: false,
               elements: {
                 line: {
-                  tension: 0
+                  tension: 0.1
                 },
                 point: {
                   hoverBackgroundColor: getBackgroundColor(this.colorScheme),
-                  hoverRadius: 2,
+                  hoverRadius: 5,
                   radius: 0
                 }
               },
               interaction: { intersect: false, mode: 'index' },
-              maintainAspectRatio: true,
+              maintainAspectRatio: false,
               plugins: {
                 annotation: {
                   annotations: {
                     savingsRate: this.savingsRate
                       ? {
-                          borderColor: `rgba(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b}, 0.75)`,
+                          borderColor: `rgba(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b}, 0.75)`,
                           borderWidth: 1,
                           label: {
-                            backgroundColor: `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`,
+                            backgroundColor: `rgb(${secondaryColorRgb.r}, ${secondaryColorRgb.g}, ${secondaryColorRgb.b})`,
                             borderRadius: 2,
                             color: 'white',
                             content: $localize`Savings Rate`,
@@ -216,7 +249,7 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
                         }
                       : undefined,
                     yAxis: {
-                      borderColor: `rgba(${getTextColor(this.colorScheme)}, 0.1)`,
+                      borderColor: 'rgba(255, 255, 255, 0.3)',
                       borderWidth: 1,
                       scaleID: 'y',
                       type: 'line',
@@ -229,19 +262,25 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
                 },
                 tooltip: this.getTooltipPluginConfiguration(),
                 verticalHoverLine: {
-                  color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`
+                  color: 'rgba(255, 255, 255, 0.3)'
                 }
               },
               responsive: true,
               scales: {
                 x: {
                   border: {
-                    color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`,
-                    width: this.groupBy ? 0 : 1
+                    color: 'rgba(255, 255, 255, 0.3)',
+                    width: chartType === 'bar' ? 0 : 1
                   },
                   display: true,
                   grid: {
                     display: false
+                  },
+                  ticks: {
+                    color: 'rgba(255, 255, 255, 0.7)',
+                    font: {
+                      size: 11
+                    }
                   },
                   type: 'time',
                   time: {
@@ -253,18 +292,10 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
                   border: {
                     display: false
                   },
-                  display: !this.isInPercentage,
+                  display: true,
                   grid: {
-                    color: ({ scale, tick }) => {
-                      if (
-                        tick.value === 0 ||
-                        tick.value === scale.max ||
-                        tick.value === scale.min
-                      ) {
-                        return `rgba(${getTextColor(this.colorScheme)}, 0.1)`;
-                      }
-
-                      return 'transparent';
+                    color: () => {
+                      return 'rgba(255, 255, 255, 0.2)';
                     }
                   },
                   position: 'right',
@@ -272,7 +303,11 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
                     callback: (value: number) => {
                       return transformTickToAbbreviation(value);
                     },
+                    color: 'rgba(255, 255, 255, 0.7)',
                     display: true,
+                    font: {
+                      size: 11
+                    },
                     mirror: true,
                     z: 1
                   }
@@ -282,7 +317,7 @@ export class GfInvestmentChartComponent implements OnChanges, OnDestroy {
             plugins: [
               getVerticalHoverLinePlugin(this.chartCanvas(), this.colorScheme)
             ],
-            type: this.groupBy ? 'bar' : 'line'
+            type: chartType
           }
         );
       }

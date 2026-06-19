@@ -1,16 +1,63 @@
+@use '../../../styles/table';
+
 :host {
   display: block;
 
   .mat-mdc-dialog-content {
     max-height: unset;
+    background-color: var(--gf-surface-light);
+    padding: 1.5rem !important;
 
     gf-line-chart {
       aspect-ratio: 16 / 9;
-      margin: 0 -0.5rem;
     }
 
     .button-container {
       gap: 0.5rem;
+    }
+  }
+
+  // ─── Table Redesign (Separated Rows) ──────────────────────────────────────
+  ::ng-deep {
+    table.gf-table {
+      @include table.gf-table-cards;
+
+      tr.mat-mdc-row {
+        td {
+          color: rgba(var(--dark-primary-text)) !important;
+        }
+      }
+    }
+
+    .mat-mdc-tab-body-wrapper {
+      padding-top: 1rem;
+    }
+  }
+}
+
+// ─── Dark Mode Overrides ────────────────────────────────────────────────────
+:host-context(.theme-dark) {
+  .mat-mdc-dialog-content {
+    background-color: var(--dark-background);
+  }
+
+  ::ng-deep {
+    table.gf-table {
+      @include table.gf-table-cards(true);
+
+      tr.mat-mdc-row {
+        td {
+          color: rgba(var(--light-primary-text)) !important;
+        }
+      }
+    }
+
+    .mat-mdc-tab-label {
+      color: rgba(255, 255, 255, 0.7) !important;
+
+      &.mat-mdc-tab-label-active {
+        color: #fff !important;
+      }
     }
   }
 }

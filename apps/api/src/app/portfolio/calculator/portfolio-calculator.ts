@@ -58,6 +58,7 @@ import {
   subDays
 } from 'date-fns';
 import { isNumber, sortBy, sum, uniqBy } from 'lodash';
+import { createHash } from 'node:crypto';
 
 export abstract class PortfolioCalculator {
   protected static readonly ENABLE_LOGGING = false;
@@ -145,10 +146,10 @@ export abstract class PortfolioCalculator {
             tags,
             type,
             date: format(date, DATE_FORMAT),
-            fee: new Big(feeInAssetProfileCurrency),
-            feeInBaseCurrency: new Big(feeInBaseCurrency),
-            quantity: new Big(quantity),
-            unitPrice: new Big(unitPriceInAssetProfileCurrency)
+            fee: new Big(feeInAssetProfileCurrency ?? 0),
+            feeInBaseCurrency: new Big(feeInBaseCurrency ?? 0),
+            quantity: new Big(quantity ?? 0),
+            unitPrice: new Big(unitPriceInAssetProfileCurrency ?? 0)
           };
         }
       )
@@ -1095,7 +1096,15 @@ export abstract class PortfolioCalculator {
 
     let cachedPortfolioSnapshot: PortfolioSnapshot;
     let isCachedPortfolioSnapshotExpired = false;
-    const jobId = this.userId;
+    let jobId = this.userId;
+
+    if (this.filters?.length > 0) {
+      const filtersHash = createHash('sha256')
+        .update(JSON.stringify(this.filters))
+        .digest('hex');
+
+      jobId = `${jobId}-${filtersHash}`;
+    }
 
     try {
       const cachedPortfolioSnapshotValue = await this.redisCacheService.get(

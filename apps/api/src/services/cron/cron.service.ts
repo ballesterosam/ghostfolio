@@ -3,6 +3,7 @@ import { ConfigurationService } from '@ghostfolio/api/services/configuration/con
 import { ExchangeRateDataService } from '@ghostfolio/api/services/exchange-rate-data/exchange-rate-data.service';
 import { PropertyService } from '@ghostfolio/api/services/property/property.service';
 import { DataGatheringService } from '@ghostfolio/api/services/queues/data-gathering/data-gathering.service';
+import { PlatformSyncQueueService } from '@ghostfolio/api/services/queues/platform-sync/platform-sync-queue.service';
 import { StatisticsGatheringService } from '@ghostfolio/api/services/queues/statistics-gathering/statistics-gathering.service';
 import { TwitterBotService } from '@ghostfolio/api/services/twitter-bot/twitter-bot.service';
 import {
@@ -25,6 +26,7 @@ export class CronService {
     private readonly configurationService: ConfigurationService,
     private readonly dataGatheringService: DataGatheringService,
     private readonly exchangeRateDataService: ExchangeRateDataService,
+    private readonly platformSyncQueueService: PlatformSyncQueueService,
     private readonly propertyService: PropertyService,
     private readonly statisticsGatheringService: StatisticsGatheringService,
     private readonly twitterBotService: TwitterBotService,
@@ -89,6 +91,11 @@ export class CronService {
         })
       );
     }
+  }
+
+  @Cron('0 7,19 * * *')
+  public async runPlatformSync() {
+    await this.platformSyncQueueService.addSyncAllJob();
   }
 
   private async isDataGatheringEnabled() {

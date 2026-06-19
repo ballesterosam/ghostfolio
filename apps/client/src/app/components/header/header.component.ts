@@ -44,13 +44,35 @@ import { Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
+  albumsOutline,
+  analyticsOutline,
+  bookOutline,
+  bookmarkOutline,
+  calculatorOutline,
   closeOutline,
+  documentTextOutline,
+  flashOutline,
+  happyOutline,
+  informationCircleOutline,
+  libraryOutline,
   logoGithub,
   menuOutline,
+  newspaperOutline,
   optionsOutline,
+  peopleOutline,
   personCircleOutline,
+  pieChartOutline,
   radioButtonOffOutline,
-  radioButtonOnOutline
+  radioButtonOnOutline,
+  ribbonOutline,
+  scanOutline,
+  serverOutline,
+  settingsOutline,
+  shieldCheckmarkOutline,
+  sparklesOutline,
+  swapVerticalOutline,
+  syncOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -100,6 +122,7 @@ export class GfHeaderComponent implements OnChanges {
   protected hasPermissionToAccessAdminControl: boolean;
   protected hasPermissionToAccessAssistant: boolean;
   protected hasPermissionToAccessFearAndGreedIndex: boolean;
+  protected hasPermissionToAccessMarkets: boolean;
   protected hasPermissionToCreateUser: boolean;
   protected impersonationId: string;
   protected readonly internalRoutes = internalRoutes;
@@ -144,13 +167,35 @@ export class GfHeaderComponent implements OnChanges {
       });
 
     addIcons({
+      albumsOutline,
+      analyticsOutline,
+      bookOutline,
+      bookmarkOutline,
+      calculatorOutline,
       closeOutline,
+      documentTextOutline,
+      flashOutline,
+      happyOutline,
+      informationCircleOutline,
+      libraryOutline,
       logoGithub,
       menuOutline,
+      newspaperOutline,
       optionsOutline,
+      peopleOutline,
       personCircleOutline,
+      pieChartOutline,
       radioButtonOffOutline,
-      radioButtonOnOutline
+      radioButtonOnOutline,
+      ribbonOutline,
+      scanOutline,
+      serverOutline,
+      settingsOutline,
+      shieldCheckmarkOutline,
+      sparklesOutline,
+      swapVerticalOutline,
+      syncOutline,
+      walletOutline
     });
   }
 
@@ -206,6 +251,11 @@ export class GfHeaderComponent implements OnChanges {
     this.hasPermissionToAccessFearAndGreedIndex = hasPermission(
       this.info()?.globalPermissions,
       permissions.enableFearAndGreedIndex
+    );
+
+    this.hasPermissionToAccessMarkets = hasPermission(
+      this.user()?.permissions,
+      permissions.readMarketDataOfMarkets
     );
 
     this.hasPermissionToCreateUser = hasPermission(

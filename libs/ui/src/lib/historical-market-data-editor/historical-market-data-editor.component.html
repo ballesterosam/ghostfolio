@@ -1,7 +1,7 @@
 <div>
   @for (itemByMonth of marketDataByMonth | keyvalue; track itemByMonth) {
     <div class="d-flex">
-      <div class="date mr-1 text-nowrap">{{ itemByMonth.key }}</div>
+      <div class="date me-1 text-nowrap">{{ itemByMonth.key }}</div>
       <div class="align-items-center d-flex flex-grow-1 px-1">
         @for (day of days; track day) {
           <div
@@ -37,6 +37,20 @@
     (ngSubmit)="onImportHistoricalData()"
   >
     <div class="mt-3" formGroupName="historicalData">
+      <div class="mb-2">
+        <label class="btn btn-outline-primary mb-0 w-100" for="csv-upload">
+          <ng-container i18n>Upload CSV File</ng-container>
+        </label>
+        <input
+          class="d-none"
+          id="csv-upload"
+          type="file"
+          (change)="onFileSelected($event)"
+        />
+      </div>
+
+      <div class="text-center my-2 text-muted" i18n>— or —</div>
+
       <mat-form-field appearance="outline" class="w-100 without-hint">
         <mat-label>
           <ng-container i18n>Historical Data</ng-container> (CSV)

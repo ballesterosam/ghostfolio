@@ -26,6 +26,7 @@ import {
   type ChartData,
   type ChartDataset,
   DoughnutController,
+  Legend,
   LinearScale,
   Tooltip,
   type TooltipOptions
@@ -53,6 +54,9 @@ const {
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    '[class.has-legend]': 'showLegend'
+  },
   imports: [NgxSkeletonLoaderModule],
   selector: 'gf-portfolio-proportion-chart',
   styleUrls: ['./portfolio-proportion-chart.component.scss'],
@@ -75,10 +79,20 @@ export class GfPortfolioProportionChartComponent
   @Input() keys: string[] = [];
   @Input() locale = getLocale();
   @Input() maxItems?: number;
+  @Input() glow = false;
+  @Input() hollow = false;
+  @Input() separateSegments = false;
   @Input() showLabels = false;
+  @Input() showLegend = false;
 
   public chart: Chart<'doughnut'>;
   public isLoading = true;
+  public legendItems: {
+    color: string;
+    name: string;
+    displayValue: string;
+  }[] = [];
+  private sortedKeys: string[] = [];
 
   protected readonly proportionChartClicked = output<AssetProfileIdentifier>();
 
@@ -92,7 +106,13 @@ export class GfPortfolioProportionChartComponent
   } = {};
 
   public constructor() {
-    Chart.register(ArcElement, DoughnutController, LinearScale, Tooltip);
+    Chart.register(
+      ArcElement,
+      DoughnutController,
+      Legend,
+      LinearScale,
+      Tooltip
+    );
   }
 
   public ngAfterViewInit() {
@@ -157,7 +177,10 @@ export class GfPortfolioProportionChartComponent
             }
           } else {
             chartData[primaryKeyValue] = {
-              name: asset[primaryKey] as string,
+              name:
+                primaryKey === 'id'
+                  ? asset.name
+                  : (asset[primaryKey] as string),
               subCategory: {},
               value: new Big(assetValue)
             };
@@ -292,19 +315,34 @@ export class GfPortfolioProportionChartComponent
 
     const datasets: ChartDataset<'doughnut'>[] = [
       {
-        backgroundColor: chartDataSorted.map(([, item]) => {
-          return item.color;
-        }),
-        borderWidth: 0,
+        backgroundColor: this.hollow
+          ? chartDataSorted.map(([, item]) => {
+              try {
+                return Color(item.color).alpha(0.08).string();
+              } catch {
+                return 'transparent';
+              }
+            })
+          : chartDataSorted.map(([, item]) => {
+              return item.color;
+            }),
+        borderWidth: this.hollow ? 2 : this.separateSegments ? 3 : 0,
+        borderColor: this.hollow
+          ? chartDataSorted.map(([, item]) => item.color)
+          : ('transparent' as any),
+        borderRadius: this.hollow || this.separateSegments ? 4 : 0,
         data: chartDataSorted.map(([, item]) => {
           return item.value.toNumber();
-        })
+        }),
+        ...(this.hollow || this.separateSegments ? { spacing: 4 } : {})
       }
     ];
 
     let labels = chartDataSorted.map(([, { name }]) => {
       return name;
     });
+
+    let sortedKeys = chartDataSorted.map(([key]) => key);
 
     if (this.keys[1]) {
       datasets.unshift({
@@ -314,19 +352,54 @@ export class GfPortfolioProportionChartComponent
       });
 
       labels = labelSubCategory.concat(labels);
+      sortedKeys = labelSubCategory.concat(sortedKeys);
     }
 
     if (datasets[0]?.data?.length === 0 || datasets[0]?.data?.[0] === 0) {
       labels = [''];
+      sortedKeys = [''];
       datasets[0].backgroundColor = [this.colorMap[UNKNOWN_KEY]];
       datasets[0].data[0] = Number.MAX_SAFE_INTEGER;
     }
 
     if (datasets[1]?.data?.length === 0 || datasets[1]?.data?.[1] === 0) {
       labels = [''];
+      sortedKeys = [''];
       datasets[1].backgroundColor = [this.colorMap[UNKNOWN_KEY]];
       datasets[1].data[1] = Number.MAX_SAFE_INTEGER;
     }
+
+    this.sortedKeys = sortedKeys;
+
+    const totalSum = getSum(chartDataSorted.map(([, item]) => item.value));
+
+    this.legendItems = chartDataSorted.map(([, item]) => {
+      let displayValue = '';
+      if (item.value.toNumber() === Number.MAX_SAFE_INTEGER || totalSum.eq(0)) {
+        displayValue = '';
+      } else if (this.isInPercentage) {
+        displayValue = `${item.value.times(100).toFixed(2)}%`;
+      } else {
+        const pct = totalSum.gt(0)
+          ? item.value.times(100).div(totalSum).toFixed(2)
+          : '0.00';
+        displayValue = `${item.value.toNumber().toLocaleString(this.locale, {
+          maximumFractionDigits: 2,
+          minimumFractionDigits: 2
+        })} ${this.baseCurrency || ''} (${pct}%)`;
+      }
+
+      return {
+        color: item.color,
+        displayValue,
+        name:
+          item.name === UNKNOWN_KEY
+            ? $localize`No data available`
+            : item.name === this.OTHER_KEY
+              ? $localize`Other`
+              : item.name
+      };
+    });
 
     const data: ChartData<'doughnut'> = {
       datasets,
@@ -342,6 +415,36 @@ export class GfPortfolioProportionChartComponent
 
         this.chart.update();
       } else {
+        const plugins = [ChartDataLabels];
+
+        if (this.glow) {
+          plugins.push({
+            id: 'shadowPlugin',
+            beforeDatasetDraw: (chart, args) => {
+              const { ctx } = chart;
+              const meta = chart.getDatasetMeta(args.index);
+              meta.data.forEach((element) => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const arcElement = element as any;
+                if (!arcElement._originalDraw) {
+                  arcElement._originalDraw = arcElement.draw;
+                  arcElement.draw = function (context: any) {
+                    const drawCtx = context || ctx;
+                    drawCtx.save();
+                    drawCtx.shadowBlur = 15;
+                    drawCtx.shadowColor =
+                      this.options?.borderColor || 'transparent';
+                    drawCtx.shadowOffsetX = 0;
+                    drawCtx.shadowOffsetY = 0;
+                    arcElement._originalDraw.call(this, drawCtx);
+                    drawCtx.restore();
+                  };
+                }
+              });
+            }
+          });
+        }
+
         this.chart = new Chart<'doughnut'>(this.chartCanvas().nativeElement, {
           data,
           options: {
@@ -350,16 +453,14 @@ export class GfPortfolioProportionChartComponent
             layout: {
               padding: this.showLabels === true ? 100 : 0
             },
-            onClick: (_, activeElements, chart) => {
+            onClick: (_, activeElements) => {
               try {
                 const dataIndex = activeElements[0].index;
-                const symbol = chart.data.labels?.[dataIndex] as string;
+                const symbol = this.sortedKeys[dataIndex];
 
-                const dataSource = this.data[symbol].dataSource;
+                const dataSource = this.data[symbol]?.dataSource;
 
-                if (dataSource) {
-                  this.proportionChartClicked.emit({ dataSource, symbol });
-                }
+                this.proportionChartClicked.emit({ dataSource, symbol });
               } catch {}
             },
             onHover: (event, chartElement) => {
@@ -381,13 +482,20 @@ export class GfPortfolioProportionChartComponent
                     align: 'end',
                     anchor: 'end',
                     formatter: (value, context) => {
-                      const symbol = context.chart.data.labels?.[
+                      const symbolKey = this.sortedKeys[context.dataIndex];
+                      let symbol = context.chart.data.labels?.[
                         context.dataIndex
                       ] as string;
 
+                      if (symbol === 'Commodity') {
+                        symbol = $localize`Commodity`;
+                      } else if (symbol === 'Cryptocurrency') {
+                        symbol = $localize`Cryptocurrency`;
+                      }
+
                       return value > 0
-                        ? isUUID(symbol)
-                          ? (this.data[symbol]?.name ?? symbol)
+                        ? isUUID(symbolKey)
+                          ? (this.data[symbolKey]?.name ?? symbol)
                           : symbol
                         : '';
                     },
@@ -395,11 +503,17 @@ export class GfPortfolioProportionChartComponent
                   }
                 }
               },
-              legend: { display: false },
+              legend: {
+                display: false,
+                position: 'right',
+                labels: {
+                  color: `rgba(${getTextColor(this.colorScheme)}, 0.8)`
+                }
+              },
               tooltip: this.getTooltipPluginConfiguration(data)
             }
           },
-          plugins: [ChartDataLabels],
+          plugins,
           type: 'doughnut'
         });
       }
@@ -441,6 +555,7 @@ export class GfPortfolioProportionChartComponent
             (data.datasets[context.datasetIndex - 1]?.data?.length ?? 0) +
             context.dataIndex;
 
+          const symbolKey = this.sortedKeys[labelIndex];
           let symbol =
             (context.chart.data.labels?.[labelIndex] as string) ?? '';
 
@@ -448,9 +563,13 @@ export class GfPortfolioProportionChartComponent
             symbol = $localize`Other`;
           } else if (symbol === UNKNOWN_KEY) {
             symbol = $localize`No data available`;
+          } else if (symbol === 'Commodity') {
+            symbol = $localize`Commodity`;
+          } else if (symbol === 'Cryptocurrency') {
+            symbol = $localize`Cryptocurrency`;
           }
 
-          const name = this.data[symbol]?.name;
+          const name = this.data[symbolKey]?.name;
 
           let sum = 0;
 

@@ -40,6 +40,7 @@ model Account {
   updatedAt  DateTime         @updatedAt
   user       User             @relation(fields: [userId], onDelete: Cascade, references: [id])
   userId     String
+  platformIntegration PlatformIntegration?
 
   @@id([id, userId])
   @@index([currency])
@@ -280,6 +281,7 @@ model User {
   updatedAt     DateTime        @updatedAt
   watchlist     SymbolProfile[] @relation("UserWatchlist")
   SymbolProfile SymbolProfile[]
+  platformIntegrations PlatformIntegration[]
 
   @@index([accessToken])
   @@index([createdAt])
@@ -359,4 +361,44 @@ enum Type {
 enum ViewMode {
   DEFAULT
   ZEN
+}
+
+model PlatformIntegration {
+  id                   String                @id @default(uuid())
+  createdAt            DateTime              @default(now())
+  updatedAt            DateTime              @updatedAt
+  provider             IntegrationProvider
+  encryptedCredentials String                // Token cifrado (AES-256-GCM)
+  credentialsIv        String                // IV para descifrado
+  credentialsKdfSalt   String?               // Sal por credencial para scrypt KDF (null = legacy SHA-256)
+  credentialsTag       String                // Authentication Tag para descifrado
+  lastSyncAt           DateTime?
+  lastSyncStatus       IntegrationSyncStatus @default(PENDING)
+  lastSyncError        String?
+  isActive             Boolean               @default(true)
+  externalAccountId    String                // Número de cuenta externo (ej. AWIVYYQ9)
+
+  // Relación 1:1 con Account. Cada cuenta de Ghostfolio puede estar vinculada a una integración.
+  account              Account               @relation(fields: [accountId, userId], references: [id, userId], onDelete: Cascade)
+  accountId            String
+  user                 User                  @relation(fields: [userId], onDelete: Cascade, references: [id])
+  userId               String
+
+  @@unique([accountId, userId])
+  @@unique([userId, provider, externalAccountId])
+  @@index([userId])
+  @@index([provider])
+  @@index([isActive])
+}
+
+enum IntegrationProvider {
+  INDEXA_CAPITAL
+  ETORO
+}
+
+enum IntegrationSyncStatus {
+  PENDING
+  SUCCESS
+  ERROR
+  SYNCING
 }

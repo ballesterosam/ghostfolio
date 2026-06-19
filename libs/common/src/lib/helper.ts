@@ -242,7 +242,9 @@ export function getAssetProfileIdentifier({
 export function getBackgroundColor(aColorScheme: ColorScheme) {
   return getCssVariable(
     aColorScheme === 'DARK' ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      (aColorScheme !== 'LIGHT' &&
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ||
+          document.body.classList.contains('theme-dark')))
       ? '--dark-background'
       : '--light-background'
   );
@@ -343,6 +345,29 @@ export function getLocale() {
   return navigator.language ?? locale;
 }
 
+export function getCurrencySymbolInfo(
+  locale: string,
+  currency: string
+): { symbol: string; position: 'prefix' | 'suffix' } {
+  try {
+    const formatter = new Intl.NumberFormat(locale, {
+      style: 'currency',
+      currency
+    });
+    const parts = formatter.formatToParts(0);
+    const currencyPart = parts.find((part) => part.type === 'currency');
+    const symbol = currencyPart ? currencyPart.value : currency;
+
+    const currencyIndex = parts.findIndex((part) => part.type === 'currency');
+    const integerIndex = parts.findIndex((part) => part.type === 'integer');
+    const position = currencyIndex < integerIndex ? 'prefix' : 'suffix';
+
+    return { symbol, position };
+  } catch {
+    return { symbol: currency, position: 'suffix' };
+  }
+}
+
 export function getLowercase(object: object, path: string) {
   const value = get(object, path);
 
@@ -389,7 +414,9 @@ export function getSum(aArray: Big[]) {
 export function getTextColor(aColorScheme: ColorScheme) {
   const cssVariable = getCssVariable(
     aColorScheme === 'DARK' ||
-      window.matchMedia('(prefers-color-scheme: dark)').matches
+      (aColorScheme !== 'LIGHT' &&
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ||
+          document.body.classList.contains('theme-dark')))
       ? '--light-primary-text'
       : '--dark-primary-text'
   );

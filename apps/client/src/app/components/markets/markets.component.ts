@@ -75,6 +75,19 @@ export class GfMarketsComponent implements OnInit {
   }
 
   public ngOnInit() {
+    this.dataService.info$
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.dataService
+          .fetchBenchmarks()
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(({ benchmarks }) => {
+            this.benchmarks = benchmarks;
+
+            this.changeDetectorRef.markForCheck();
+          });
+      });
+
     this.dataService
       .fetchMarketDataOfMarkets({ includeHistoricalData: this.numberOfDays })
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -82,15 +95,6 @@ export class GfMarketsComponent implements OnInit {
         this.fearAndGreedIndexData = fearAndGreedIndex;
 
         this.initialize();
-
-        this.changeDetectorRef.markForCheck();
-      });
-
-    this.dataService
-      .fetchBenchmarks()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ benchmarks }) => {
-        this.benchmarks = benchmarks;
 
         this.changeDetectorRef.markForCheck();
       });

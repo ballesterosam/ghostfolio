@@ -1,0 +1,63 @@
+.btn-integration-grid {
+  background: var(--gf-bg-card, #ffffff);
+  border: 1px solid var(--gf-border-color, #e0e0e0);
+  transition: all 0.2s ease-in-out;
+  cursor: pointer;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  padding: 1rem;
+
+  &:hover {
+    background: var(--gf-bg-hover, #f5f5f5);
+    border-color: var(--gf-primary-color, #36cfcc);
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+  }
+}
+
+:host-context(.theme-dark) {
+  .btn-integration-grid {
+    background: #2c2c2c;
+    border-color: #444444;
+
+    &:hover {
+      background: #383838;
+      border-color: #36cfcc;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+  }
+}
+
+.entity-logo-grid {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  ::ng-deep img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 80px !important;
+    max-height: 80px !important;
+    object-fit: contain;
+    border-radius: 8px;
+    padding: 6px;
+    background: #ffffff; /* Uniform white frame background */
+    border: 1px solid rgba(0, 0, 0, 0.08);
+  }
+}
+
+.bullet {
+  width: 8px;
+  height: 8px;
+  display: inline-block;
+}
+
+.max-h-200 {
+  max-height: 200px;
+}

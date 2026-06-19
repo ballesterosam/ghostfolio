@@ -1,0 +1,160 @@
+<h1 i18n mat-dialog-title>Add Platform Integration</h1>
+
+<div class="py-3" mat-dialog-content>
+  <!-- Step 1: Select Provider -->
+  @if (step === 'select') {
+    <div class="row">
+      @for (integration of supportedIntegrations; track integration.provider) {
+        <div class="col-6 col-sm-4 col-md-3 mb-4 d-flex justify-content-center">
+          <button
+            class="btn-integration-grid"
+            type="button"
+            [matTooltip]="integration.name"
+            (click)="selectIntegration(integration)"
+          >
+            <gf-entity-logo
+              class="entity-logo-grid"
+              [tooltip]="integration.name"
+              [url]="integration.url"
+            />
+          </button>
+        </div>
+      }
+    </div>
+  }
+
+  <!-- Step 2: Configure Credentials -->
+  @if (step === 'configure' && selectedIntegration) {
+    <form [formGroup]="integrationForm" (ngSubmit)="onSubmit()">
+      <div class="d-flex align-items-center mb-4">
+        <gf-entity-logo
+          class="me-3"
+          [tooltip]="selectedIntegration.name"
+          [url]="selectedIntegration.url"
+        />
+        <h2 class="m-0">{{ selectedIntegration.name }}</h2>
+      </div>
+
+      <div class="card bg-light p-3 mb-4 border-0">
+        <h4 class="font-weight-bold mb-2" i18n>Connection Steps:</h4>
+        <ol class="m-0 ps-3">
+          @for (stepText of selectedIntegration.setupSteps; track stepText) {
+            <li class="mb-1">{{ stepText }}</li>
+          }
+        </ol>
+      </div>
+
+      @for (field of selectedIntegration.credentialFields; track field.key) {
+        <mat-form-field appearance="outline" class="w-100">
+          <mat-label>{{ field.label }}</mat-label>
+          <input
+            matInput
+            [formControlName]="field.key"
+            [placeholder]="field.placeholder"
+            [type]="field.type"
+          />
+          @if (field.helpText) {
+            <mat-hint>{{ field.helpText }}</mat-hint>
+          }
+        </mat-form-field>
+      }
+
+      <div class="d-flex justify-content-between mt-4">
+        <button mat-button type="button" (click)="goBack()">
+          <span i18n>Back</span>
+        </button>
+        <button
+          color="primary"
+          mat-flat-button
+          type="submit"
+          [disabled]="integrationForm.invalid"
+        >
+          <span i18n>Connect</span>
+        </button>
+      </div>
+    </form>
+  }
+
+  <!-- Step 3: Loading -->
+  @if (step === 'loading') {
+    <div class="text-center py-5">
+      <mat-spinner class="mx-auto mb-4" diameter="50"></mat-spinner>
+      <h3 i18n>Connecting accounts...</h3>
+      <p class="text-muted" i18n>
+        We are validating your credentials and importing your portfolios.
+      </p>
+    </div>
+  }
+
+  <!-- Step 4: Success -->
+  @if (step === 'success' && connectionResult) {
+    <div class="text-center py-4">
+      <ion-icon
+        class="text-success display-3 mb-3"
+        name="checkmark-circle-outline"
+      ></ion-icon>
+      <h2 class="font-weight-bold text-success mb-3" i18n>
+        Successfully Connected!
+      </h2>
+      <p class="mb-4" i18n>
+        We created and connected the following accounts in Ghostfolio:
+      </p>
+
+      <div class="list-group mb-4 text-start max-h-200 overflow-auto">
+        @for (account of connectionResult.accountsCreated; track account.id) {
+          <div class="list-group-item d-flex align-items-center">
+            <span class="bullet me-2 bg-success rounded-circle"></span>
+            <div>
+              <span class="font-weight-bold">{{ account.name }}</span>
+              <span class="text-muted text-sm ms-2"
+                >({{ account.externalAccountId }})</span
+              >
+            </div>
+          </div>
+        }
+      </div>
+
+      <p class="text-muted text-sm" i18n>
+        Your historical operations are now synchronized. Transactions and cash
+        balance will sync automatically.
+      </p>
+
+      <div class="d-flex justify-content-end mt-4">
+        <button
+          color="primary"
+          mat-flat-button
+          type="button"
+          (click)="onCancel()"
+        >
+          <span i18n>Done</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Step 5: Error -->
+  @if (step === 'error') {
+    <div class="text-center py-4">
+      <ion-icon
+        class="text-danger display-3 mb-3"
+        name="alert-circle-outline"
+      ></ion-icon>
+      <h2 class="font-weight-bold text-danger mb-3" i18n>Connection Failed</h2>
+      <p class="mb-4">{{ errorMessage }}</p>
+
+      <div class="d-flex justify-content-between mt-4">
+        <button mat-button type="button" (click)="goBack()">
+          <span i18n>Back</span>
+        </button>
+        <button
+          color="primary"
+          mat-flat-button
+          type="button"
+          (click)="onCancel()"
+        >
+          <span i18n>Close</span>
+        </button>
+      </div>
+    </div>
+  }
+</div>

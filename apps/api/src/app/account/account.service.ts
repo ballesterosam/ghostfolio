@@ -139,6 +139,36 @@ export class AccountService {
     return account;
   }
 
+  public async deleteAccountWithActivities(
+    where: Prisma.AccountWhereUniqueInput
+  ): Promise<Account> {
+    const { id, userId } = where.id_userId;
+
+    const account = await this.prismaService.$transaction(async (prisma) => {
+      // Delete all orders (activities) associated with the account
+      await prisma.order.deleteMany({
+        where: {
+          accountId: id,
+          accountUserId: userId
+        }
+      });
+
+      // Delete the account (will cascade delete balances/integrations)
+      return prisma.account.delete({
+        where
+      });
+    });
+
+    this.eventEmitter.emit(
+      PortfolioChangedEvent.getName(),
+      new PortfolioChangedEvent({
+        userId: account.userId
+      })
+    );
+
+    return account;
+  }
+
   public async getAccounts(aUserId: string): Promise<Account[]> {
     const accounts = await this.accounts({
       include: {

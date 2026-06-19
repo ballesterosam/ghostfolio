@@ -1,5 +1,5 @@
-<div class="container">
-  <h1 class="d-none d-sm-block h3 mb-3 text-center" i18n>Analysis</h1>
+<div class="overview p-3">
+  <h2 class="section-title" i18n>Analysis</h2>
   @if (user?.settings?.isExperimentalFeatures) {
     <div class="mb-3 row">
       <div class="col-lg">
@@ -26,16 +26,16 @@
               >
                 <span class="align-items-center d-flex">
                   @if (user?.subscription?.type === 'Basic') {
-                    <gf-premium-indicator class="mr-2" />
+                    <gf-premium-indicator class="me-2" />
                   } @else {
                     @if (isLoadingPortfolioPrompt) {
                       <mat-spinner
-                        class="mr-2"
+                        class="me-2"
                         color="accent"
                         [diameter]="16"
                       />
                     } @else {
-                      <ion-icon class="mr-2" name="copy-outline" />
+                      <ion-icon class="me-2" name="copy-outline" />
                     }
                   }
                   <ng-container i18n
@@ -51,16 +51,16 @@
               >
                 <span class="align-items-center d-flex">
                   @if (user?.subscription?.type === 'Basic') {
-                    <gf-premium-indicator class="mr-2" />
+                    <gf-premium-indicator class="me-2" />
                   } @else {
                     @if (isLoadingAnalysisPrompt) {
                       <mat-spinner
-                        class="mr-2"
+                        class="me-2"
                         color="accent"
                         [diameter]="16"
                       />
                     } @else {
-                      <ion-icon class="mr-2" name="copy-outline" />
+                      <ion-icon class="me-2" name="copy-outline" />
                     }
                   }
                   <ng-container i18n
@@ -75,12 +75,13 @@
     </div>
   }
 
-  <div class="mb-5 row">
-    <div class="col-lg-4 mb-3 mb-lg-0">
-      <mat-card appearance="outlined">
-        <mat-card-content>
+  <!-- ROW 1: Totals -->
+  <div class="mb-4 row">
+    <div class="col-lg-4 mb-3">
+      <div class="kpi-card h-100">
+        <span class="kpi-card__label" i18n>Total amount</span>
+        <div class="kpi-card__value kpi-large">
           <gf-value
-            i18n
             size="large"
             [isCurrency]="true"
             [locale]="user?.settings?.locale"
@@ -91,16 +92,23 @@
                 ? undefined
                 : performance?.currentValueInBaseCurrency
             "
-            >Total amount</gf-value
-          >
-        </mat-card-content>
-      </mat-card>
+          />
+        </div>
+      </div>
     </div>
-    <div class="col-lg-4 mb-3 mb-lg-0">
-      <mat-card appearance="outlined">
-        <mat-card-content>
+    <div class="col-lg-4 mb-3">
+      <div class="kpi-card h-100">
+        <span class="kpi-card__label" i18n>Change w/ FX</span>
+        <div
+          class="kpi-card__value kpi-large"
+          [class.kpi-negative]="
+            (performance?.netPerformanceWithCurrencyEffect ?? 0) < 0
+          "
+          [class.kpi-positive]="
+            (performance?.netPerformanceWithCurrencyEffect ?? 0) > 0
+          "
+        >
           <gf-value
-            i18n
             size="large"
             [colorizeSign]="true"
             [isCurrency]="true"
@@ -112,16 +120,23 @@
                 ? undefined
                 : performance?.netPerformanceWithCurrencyEffect
             "
-            >Change with currency effect</gf-value
-          >
-        </mat-card-content>
-      </mat-card>
+          />
+        </div>
+      </div>
     </div>
-    <div class="col-lg-4">
-      <mat-card appearance="outlined">
-        <mat-card-content>
+    <div class="col-lg-4 mb-3">
+      <div class="kpi-card h-100">
+        <span class="kpi-card__label" i18n>Performance w/ FX</span>
+        <div
+          class="kpi-card__value kpi-large"
+          [class.kpi-negative]="
+            (performance?.netPerformancePercentageWithCurrencyEffect ?? 0) < 0
+          "
+          [class.kpi-positive]="
+            (performance?.netPerformancePercentageWithCurrencyEffect ?? 0) > 0
+          "
+        >
           <gf-value
-            i18n
             size="large"
             [colorizeSign]="true"
             [isPercent]="true"
@@ -131,395 +146,369 @@
                 ? undefined
                 : performance?.netPerformancePercentageWithCurrencyEffect
             "
-            >Performance with currency effect</gf-value
-          >
-        </mat-card-content>
-      </mat-card>
+          />
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- ROW 2: Portfolio Evolution Hero Chart -->
   <div class="mb-5 row">
     <div class="col-lg">
-      <gf-benchmark-comparator
-        class="h-100"
-        [benchmark]="benchmark"
-        [benchmarkDataItems]="benchmarkDataItems"
-        [benchmarks]="benchmarks"
-        [colorScheme]="user?.settings?.colorScheme"
-        [isLoading]="isLoadingBenchmarkComparator || isLoadingInvestmentChart"
-        [locale]="user?.settings?.locale"
-        [performanceDataItems]="performanceDataItemsInPercentage"
-        [user]="user"
-        (benchmarkChanged)="onChangeBenchmark($event)"
-      />
+      <div class="hero-card evolution-hero">
+        <div class="hero-card__body">
+          <span class="hero-card__label" i18n>Portfolio Evolution</span>
+          @if (user?.subscription?.type === 'Basic') {
+            <gf-premium-indicator class="ms-1" />
+          }
+        </div>
+        <div class="hero-card__chart">
+          <gf-investment-chart
+            class="h-100"
+            [benchmarkDataItems]="investments"
+            [benchmarkDataLabel]="portfolioEvolutionDataLabel"
+            [colorScheme]="'dark'"
+            [currency]="user?.settings?.baseCurrency"
+            [historicalDataItems]="performanceDataItems"
+            [isInPercentage]="
+              hasImpersonationId || user.settings.isRestrictedView
+            "
+            [isLoading]="isLoadingInvestmentChart"
+            [locale]="user?.settings?.locale"
+            [showGradient]="true"
+          />
+        </div>
+      </div>
     </div>
   </div>
 
-  <div class="mb-5 row">
-    <div class="col">
-      <mat-card appearance="outlined">
-        <mat-card-content>
-          <div class="d-flex py-1">
-            <div
-              class="align-items-center d-flex flex-grow-1 mr-2 text-truncate"
+  <!-- ROW 3: Widgets + Performance Chart -->
+  <div class="row mb-5">
+    <div class="col-lg-4 d-flex flex-column gap-3 mb-3">
+      <!-- Asset Performance -->
+      <div class="kpi-card perf-widget flex-fill">
+        <div class="card-text-block">
+          <span class="kpi-card__label" i18n>Asset Performance</span>
+          <div class="kpi-card__value d-flex flex-column gap-1">
+            <gf-value
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [unit]="user?.settings?.baseCurrency"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformance
+              "
+            />
+            <gf-value
+              class="font-size-medium"
+              [colorizeSign]="true"
+              [isPercent]="true"
+              [locale]="user?.settings?.locale"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformancePercentage
+              "
+            />
+          </div>
+        </div>
+        <ion-icon
+          class="perf-widget__icon text-primary"
+          name="bar-chart-outline"
+        />
+      </div>
+
+      <!-- Currency Performance -->
+      <div class="kpi-card perf-widget flex-fill">
+        <div class="card-text-block">
+          <span class="kpi-card__label" i18n>Currency Performance</span>
+          <div class="kpi-card__value d-flex flex-column gap-1">
+            <gf-value
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [unit]="user?.settings?.baseCurrency"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformance === null
+                    ? null
+                    : performance?.netPerformanceWithCurrencyEffect -
+                      performance?.netPerformance
+              "
+            />
+            <gf-value
+              class="font-size-medium"
+              [colorizeSign]="true"
+              [isPercent]="true"
+              [locale]="user?.settings?.locale"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformancePercentage === null
+                    ? null
+                    : performance?.netPerformancePercentageWithCurrencyEffect -
+                      performance?.netPerformancePercentage
+              "
+            />
+          </div>
+        </div>
+        <ion-icon class="perf-widget__icon text-info" name="globe-outline" />
+      </div>
+
+      <!-- Net Performance -->
+      <div class="kpi-card perf-widget flex-fill">
+        <div class="card-text-block">
+          <span class="kpi-card__label" i18n>Net Performance</span>
+          <div class="kpi-card__value d-flex flex-column gap-1">
+            <gf-value
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [unit]="user?.settings?.baseCurrency"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformanceWithCurrencyEffect
+              "
+            />
+            <gf-value
+              class="font-size-medium"
+              [colorizeSign]="true"
+              [isPercent]="true"
+              [locale]="user?.settings?.locale"
+              [value]="
+                isLoadingInvestmentChart
+                  ? undefined
+                  : performance?.netPerformancePercentageWithCurrencyEffect
+              "
+            />
+          </div>
+        </div>
+        <ion-icon
+          class="perf-widget__icon text-success"
+          name="trending-up-outline"
+        />
+      </div>
+    </div>
+
+    <!-- Performance Chart -->
+    <div class="col-lg-8 mb-3">
+      <div class="hero-card performance-hero h-100">
+        <div
+          class="hero-card__body w-100 d-flex justify-content-between align-items-start pr-4"
+        >
+          <div>
+            <span class="hero-card__label" i18n>Performance</span>
+            @if (user?.subscription?.type === 'Basic') {
+              <gf-premium-indicator class="ms-1" />
+            }
+          </div>
+          <div class="hero-select-wrap" style="width: 200px">
+            <mat-form-field
+              appearance="outline"
+              class="w-100 without-hint"
+              color="accent"
             >
-              <span i18n>Absolute Asset Performance</span>
-              @if (user?.subscription?.type === 'Basic') {
-                <gf-premium-indicator class="ml-1" />
-              }
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [isCurrency]="true"
-                [locale]="user?.settings?.locale"
-                [unit]="user?.settings?.baseCurrency"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformance
-                "
-              />
-            </div>
+              <mat-select
+                name="benchmark"
+                [disabled]="user?.subscription?.type === 'Basic'"
+                [value]="benchmark?.id"
+                (selectionChange)="onChangeBenchmark($event.value)"
+              >
+                <mat-option [value]="null" />
+                @for (symbolProfile of benchmarks; track symbolProfile) {
+                  <mat-option [value]="symbolProfile.id">{{
+                    symbolProfile.name
+                  }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
           </div>
-          <div class="d-flex mb-3 ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
-              <ng-container i18n>Asset Performance</ng-container>
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [colorizeSign]="true"
-                [isPercent]="true"
-                [locale]="user?.settings?.locale"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformancePercentage
-                "
-              />
-            </div>
-          </div>
-          <div class="d-flex py-1">
-            <div
-              class="align-items-center d-flex flex-grow-1 mr-2 text-truncate"
-            >
-              <span i18n>Absolute Currency Performance</span>
-              @if (user?.subscription?.type === 'Basic') {
-                <gf-premium-indicator class="ml-1" />
-              }
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [isCurrency]="true"
-                [locale]="user?.settings?.locale"
-                [unit]="user?.settings?.baseCurrency"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformance === null
-                      ? null
-                      : performance?.netPerformanceWithCurrencyEffect -
-                        performance?.netPerformance
-                "
-              />
-            </div>
-          </div>
-          <div class="d-flex ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
-              <ng-container i18n>Currency Performance</ng-container>
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [colorizeSign]="true"
-                [isPercent]="true"
-                [locale]="user?.settings?.locale"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformancePercentage === null
-                      ? null
-                      : performance?.netPerformancePercentageWithCurrencyEffect -
-                        performance?.netPerformancePercentage
-                "
-              />
-            </div>
-          </div>
-          <div><hr /></div>
-          <div class="d-flex py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
-              <ng-container i18n>Absolute Net Performance</ng-container>
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [isCurrency]="true"
-                [locale]="user?.settings?.locale"
-                [unit]="user?.settings?.baseCurrency"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformanceWithCurrencyEffect
-                "
-              />
-            </div>
-          </div>
-          <div class="d-flex ml-3 py-1">
-            <div class="flex-grow-1 mr-2 text-truncate">
-              <ng-container i18n>Net Performance</ng-container>
-            </div>
-            <div class="d-flex justify-content-end">
-              <gf-value
-                class="justify-content-end"
-                position="end"
-                [colorizeSign]="true"
-                [isPercent]="true"
-                [locale]="user?.settings?.locale"
-                [value]="
-                  isLoadingInvestmentChart
-                    ? undefined
-                    : performance?.netPerformancePercentageWithCurrencyEffect
-                "
-              />
-            </div>
-          </div>
-        </mat-card-content>
-      </mat-card>
+        </div>
+        <div class="hero-card__chart">
+          <gf-benchmark-comparator
+            class="h-100 full-chart"
+            [benchmark]="benchmark"
+            [benchmarkDataItems]="benchmarkDataItems"
+            [benchmarks]="benchmarks"
+            [colorScheme]="'dark'"
+            [isLoading]="
+              isLoadingBenchmarkComparator || isLoadingInvestmentChart
+            "
+            [locale]="user?.settings?.locale"
+            [performanceDataItems]="performanceDataItemsInPercentage"
+            [user]="user"
+            (benchmarkChanged)="onChangeBenchmark($event)"
+          />
+        </div>
+      </div>
     </div>
   </div>
 
+  <!-- ROW 4: Top/Bottom -->
   <div class="mb-5 row">
     <div class="col-md-6 mb-3">
-      <mat-card appearance="outlined" class="h-100">
-        <mat-card-header>
-          <mat-card-title class="align-items-center d-flex" i18n
-            >Top</mat-card-title
-          >
-        </mat-card-header>
-        <mat-card-content>
-          <ol class="mb-0 ml-1 pl-3">
-            @for (holding of top3; track holding) {
-              <li class="py-1">
-                <a
-                  class="d-flex"
-                  [queryParams]="{
-                    dataSource: holding.assetProfile.dataSource,
-                    holdingDetailDialog: true,
-                    symbol: holding.assetProfile.symbol
-                  }"
-                  [routerLink]="[]"
-                >
-                  <div class="flex-grow-1 mr-2">
-                    {{ holding.assetProfile.name }}
-                  </div>
-                  <div class="d-flex justify-content-end">
-                    <gf-value
-                      class="justify-content-end"
-                      position="end"
-                      [colorizeSign]="true"
-                      [isPercent]="true"
-                      [locale]="user?.settings?.locale"
-                      [value]="holding.netPerformancePercentWithCurrencyEffect"
-                    />
-                  </div>
-                </a>
-              </li>
-            }
-          </ol>
-          <div>
-            @if (!top3) {
-              <ngx-skeleton-loader
-                animation="pulse"
-                [theme]="{
-                  height: '1.5rem',
-                  width: '100%'
+      <div class="dashboard-card h-100">
+        <h3 class="h5 mb-3" i18n>Top</h3>
+        <ol class="mb-0 ms-1 ps-3">
+          @for (holding of top3; track holding) {
+            <li class="py-1">
+              <a
+                class="d-flex"
+                [queryParams]="{
+                  dataSource: holding.assetProfile.dataSource,
+                  holdingDetailDialog: true,
+                  symbol: holding.assetProfile.symbol
                 }"
-              />
-            }
-          </div>
-        </mat-card-content>
-      </mat-card>
+                [routerLink]="[]"
+              >
+                <div class="flex-grow-1 me-2 text-main">
+                  {{ holding.assetProfile.name }}
+                </div>
+                <div class="d-flex justify-content-end">
+                  <gf-value
+                    class="justify-content-end"
+                    position="end"
+                    [colorizeSign]="true"
+                    [isPercent]="true"
+                    [locale]="user?.settings?.locale"
+                    [value]="holding.netPerformancePercentWithCurrencyEffect"
+                  />
+                </div>
+              </a>
+            </li>
+          }
+        </ol>
+        <div>
+          @if (!top3) {
+            <ngx-skeleton-loader
+              animation="pulse"
+              [theme]="{
+                height: '1.5rem',
+                width: '100%'
+              }"
+            />
+          }
+        </div>
+      </div>
     </div>
     <div class="col-md-6 mb-3">
-      <mat-card appearance="outlined" class="h-100">
-        <mat-card-header>
-          <mat-card-title class="align-items-center d-flex" i18n
-            >Bottom</mat-card-title
-          >
-        </mat-card-header>
-        <mat-card-content>
-          <ol class="mb-0 ml-1 pl-3">
-            @for (holding of bottom3; track holding) {
-              <li class="py-1">
-                <a
-                  class="d-flex"
-                  [queryParams]="{
-                    dataSource: holding.assetProfile.dataSource,
-                    holdingDetailDialog: true,
-                    symbol: holding.assetProfile.symbol
-                  }"
-                  [routerLink]="[]"
-                >
-                  <div class="flex-grow-1 mr-2">
-                    {{ holding.assetProfile.name }}
-                  </div>
-                  <div class="d-flex justify-content-end">
-                    <gf-value
-                      class="justify-content-end"
-                      position="end"
-                      [colorizeSign]="true"
-                      [isPercent]="true"
-                      [locale]="user?.settings?.locale"
-                      [value]="holding.netPerformancePercentWithCurrencyEffect"
-                    />
-                  </div>
-                </a>
-              </li>
-            }
-          </ol>
-          <div>
-            @if (!bottom3) {
-              <ngx-skeleton-loader
-                animation="pulse"
-                [theme]="{
-                  height: '1.5rem',
-                  width: '100%'
+      <div class="dashboard-card h-100">
+        <h3 class="h5 mb-3" i18n>Bottom</h3>
+        <ol class="mb-0 ms-1 ps-3">
+          @for (holding of bottom3; track holding) {
+            <li class="py-1">
+              <a
+                class="d-flex"
+                [queryParams]="{
+                  dataSource: holding.assetProfile.dataSource,
+                  holdingDetailDialog: true,
+                  symbol: holding.assetProfile.symbol
                 }"
-              />
+                [routerLink]="[]"
+              >
+                <div class="flex-grow-1 me-2 text-main">
+                  {{ holding.assetProfile.name }}
+                </div>
+                <div class="d-flex justify-content-end">
+                  <gf-value
+                    class="justify-content-end"
+                    position="end"
+                    [colorizeSign]="true"
+                    [isPercent]="true"
+                    [locale]="user?.settings?.locale"
+                    [value]="holding.netPerformancePercentWithCurrencyEffect"
+                  />
+                </div>
+              </a>
+            </li>
+          }
+        </ol>
+        <div>
+          @if (!bottom3) {
+            <ngx-skeleton-loader
+              animation="pulse"
+              [theme]="{
+                height: '1.5rem',
+                width: '100%'
+              }"
+            />
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 5: Timelines -->
+  <div class="row g-4 mb-4">
+    <!-- Investment Timeline -->
+    <div class="col-lg-6">
+      <div class="dashboard-card grid-card timeline-card">
+        <div class="align-items-center d-flex mb-4">
+          <h3 class="h5 mb-0 text-truncate flex-grow-1">
+            <span i18n>Investment Timeline</span>
+            @if (user?.subscription?.type === 'Basic') {
+              <gf-premium-indicator class="ms-1" />
             }
-          </div>
-        </mat-card-content>
-      </mat-card>
-    </div>
-  </div>
-
-  <div class="mb-5 row">
-    <div class="col-lg">
-      <div class="align-items-center d-flex mb-4">
-        <div
-          class="align-items-center d-flex flex-grow-1 h5 mb-0 text-truncate"
-        >
-          <span i18n>Portfolio Evolution</span>
-          @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
-          }
+          </h3>
+          <gf-toggle
+            [defaultValue]="mode()"
+            [isLoading]="false"
+            [options]="modeOptions"
+            (valueChange)="onChangeGroupBy($event.value)"
+          />
         </div>
-      </div>
-      <div class="chart-container">
-        <gf-investment-chart
-          class="h-100"
-          [benchmarkDataItems]="investments"
-          [benchmarkDataLabel]="portfolioEvolutionDataLabel"
-          [currency]="user?.settings?.baseCurrency"
-          [historicalDataItems]="performanceDataItems"
-          [isInPercentage]="
-            hasImpersonationId || user.settings.isRestrictedView
-          "
-          [isLoading]="isLoadingInvestmentChart"
-          [locale]="user?.settings?.locale"
-        />
+        <div class="chart-wrap">
+          <gf-investment-chart
+            class="h-100"
+            [benchmarkDataItems]="investmentsByGroup"
+            [benchmarkDataLabel]="investmentTimelineDataLabel"
+            [colorScheme]="user?.settings?.colorScheme"
+            [currency]="user?.settings?.baseCurrency"
+            [groupBy]="mode()"
+            [isInPercentage]="
+              hasImpersonationId || user.settings.isRestrictedView
+            "
+            [isLoading]="isLoadingInvestmentTimelineChart"
+            [locale]="user?.settings?.locale"
+            [savingsRate]="savingsRate"
+          />
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="mb-5 row">
-    <div class="col-lg">
-      <div class="align-items-center d-flex mb-4">
-        <div
-          class="align-items-center d-flex flex-grow-1 h5 mb-0 text-truncate"
-        >
-          <span i18n>Investment Timeline</span>
-          @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
-          }
+    <!-- Dividend Timeline -->
+    <div class="col-lg-6">
+      <div class="dashboard-card grid-card timeline-card">
+        <div class="align-items-center d-flex mb-4">
+          <h3 class="h5 mb-0 text-truncate flex-grow-1">
+            <span i18n>Dividend Timeline</span>
+            @if (user?.subscription?.type === 'Basic') {
+              <gf-premium-indicator class="ms-1" />
+            }
+          </h3>
+          <gf-toggle
+            [defaultValue]="mode()"
+            [isLoading]="false"
+            [options]="modeOptions"
+            (valueChange)="onChangeGroupBy($event.value)"
+          />
         </div>
-        <gf-toggle
-          class="d-none d-lg-block"
-          [defaultValue]="mode()"
-          [isLoading]="false"
-          [options]="modeOptions"
-          (valueChange)="onChangeGroupBy($event.value)"
-        />
-      </div>
-      @if (streaks) {
-        <div class="row">
-          <div class="col-md-6 col-xs-12 my-2">
-            <gf-value
-              i18n
-              size="large"
-              [unit]="unitCurrentStreak"
-              [value]="streaks?.currentStreak"
-              >Current Streak</gf-value
-            >
-          </div>
-          <div class="col-md-6 col-xs-12 my-2">
-            <gf-value
-              i18n
-              size="large"
-              [unit]="unitLongestStreak"
-              [value]="streaks?.longestStreak"
-              >Longest Streak</gf-value
-            >
-          </div>
+        <div class="chart-wrap">
+          <gf-investment-chart
+            class="h-100"
+            [benchmarkDataItems]="dividendsByGroup"
+            [benchmarkDataLabel]="dividendTimelineDataLabel"
+            [colorScheme]="user?.settings?.colorScheme"
+            [currency]="user?.settings?.baseCurrency"
+            [groupBy]="mode()"
+            [isInPercentage]="
+              hasImpersonationId || user.settings.isRestrictedView
+            "
+            [isLoading]="isLoadingDividendTimelineChart"
+            [locale]="user?.settings?.locale"
+          />
         </div>
-      }
-      <div class="chart-container">
-        <gf-investment-chart
-          class="h-100"
-          [benchmarkDataItems]="investmentsByGroup"
-          [benchmarkDataLabel]="investmentTimelineDataLabel"
-          [currency]="user?.settings?.baseCurrency"
-          [groupBy]="mode()"
-          [isInPercentage]="
-            hasImpersonationId || user.settings.isRestrictedView
-          "
-          [isLoading]="isLoadingInvestmentTimelineChart"
-          [locale]="user?.settings?.locale"
-          [savingsRate]="savingsRate"
-        />
-      </div>
-    </div>
-  </div>
-
-  <div class="row">
-    <div class="col-lg">
-      <div class="align-items-center d-flex mb-4">
-        <div
-          class="align-items-center d-flex flex-grow-1 h5 mb-0 text-truncate"
-        >
-          <span i18n>Dividend Timeline</span>
-          @if (user?.subscription?.type === 'Basic') {
-            <gf-premium-indicator class="ml-1" />
-          }
-        </div>
-        <gf-toggle
-          class="d-none d-lg-block"
-          [defaultValue]="mode()"
-          [isLoading]="false"
-          [options]="modeOptions"
-          (valueChange)="onChangeGroupBy($event.value)"
-        />
-      </div>
-      <div class="chart-container">
-        <gf-investment-chart
-          class="h-100"
-          [benchmarkDataItems]="dividendsByGroup"
-          [benchmarkDataLabel]="dividendTimelineDataLabel"
-          [currency]="user?.settings?.baseCurrency"
-          [groupBy]="mode()"
-          [isInPercentage]="
-            hasImpersonationId || user.settings.isRestrictedView
-          "
-          [isLoading]="isLoadingDividendTimelineChart"
-          [locale]="user?.settings?.locale"
-        />
       </div>
     </div>
   </div>

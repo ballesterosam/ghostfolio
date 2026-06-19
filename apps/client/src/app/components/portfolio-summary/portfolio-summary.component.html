@@ -1,383 +1,636 @@
-<div class="container p-0">
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Time in Market</div>
-    <div class="justify-content-end">
-      <gf-value class="justify-content-end" [value]="timeInMarket" />
-    </div>
+<div class="summary-dashboard container-fluid p-0">
+  <div class="summary-header text-center mb-4">
+    <h1 class="summary-title" i18n>Summary</h1>
+    <p *ngIf="dateRangeText" class="summary-subtitle">{{ dateRangeText }}</p>
   </div>
-  <div
-    class="flex-nowrap px-3 py-1 row"
-    [hidden]="summary?.activityCount === null"
-  >
-    <div class="d-flex flex-grow-1 ml-3 text-truncate">
-      {{ summary?.activityCount }}
-      <ng-container i18n>{summary?.activityCount, plural,
-        =1 {activity}
-        other {activities}
-      }</ng-container>
-      <span
-        class="align-items-center d-none d-sm-flex ml-1"
-        matTooltipPosition="above"
-        [matTooltip]="buyAndSellActivitiesTooltip"
+
+  <div class="row g-3">
+    <!-- Card 1: Time in Market -->
+    <div class="col-12 col-md-6">
+      <div
+        class="summary-card flex-row align-items-center justify-content-between"
       >
-        <ion-icon name="information-circle-outline" />
-      </span>
+        <div class="card-text-block">
+          <span class="card-label" i18n
+            >Time in Market: {{ timeInMarket }}</span
+          >
+          <h3 class="card-value d-flex align-items-center mb-0 mt-1">
+            {{ summary?.activityCount }}
+            <span class="ms-1">
+              <ng-container i18n>{summary?.activityCount, plural,
+                =1 {activity}
+                other {activities}
+              }</ng-container>
+            </span>
+            <span
+              class="info-tooltip ms-2 align-items-center d-inline-flex cursor-pointer"
+              matTooltipPosition="above"
+              [matTooltip]="buyAndSellActivitiesTooltip"
+            >
+              <ion-icon name="information-circle-outline" />
+            </span>
+          </h3>
+        </div>
+        <div class="card-sparkline">
+          <gf-line-chart
+            [colorScheme]="user?.settings?.colorScheme"
+            [hidden]="!historicalDataItems || historicalDataItems.length === 0"
+            [historicalDataItems]="historicalDataItems"
+            [isAnimated]="false"
+            [maintainAspectRatio]="false"
+            [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
+            [overrideLineColor]="'rgba(59, 130, 246, 1)'"
+            [overrideLineWidth]="1.5"
+            [showGradient]="true"
+            [showLoader]="false"
+            [showXAxis]="false"
+            [showYAxis]="false"
+          />
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Buy</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.totalBuy"
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Sell</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.totalSell"
-      />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Investment</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="
-          isLoading
-            ? undefined
-            : summary?.totalInvestmentValueWithCurrencyEffect
-        "
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Absolute Gross Performance</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="
-          isLoading ? undefined : summary?.grossPerformanceWithCurrencyEffect
-        "
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Fees</div>
-    <div class="d-flex justify-content-end">
-      @if (summary?.fees || summary?.fees === 0) {
-        <span class="mr-1">-</span>
-      }
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.fees"
-      />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Absolute Net Performance</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="
-          isLoading ? undefined : summary?.netPerformanceWithCurrencyEffect
-        "
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate ml-3">
-      <ng-container i18n>Net Performance</ng-container>
-      <abbr
-        class="d-none d-sm-inline-block initialism ml-2 text-muted"
-        title="Return on Average Investment"
-        >(ROAI)</abbr
+
+    <!-- Card 3: Buy & Sell Comparison -->
+    <div class="col-12 col-md-6">
+      <div
+        class="summary-card flex-row align-items-center justify-content-between"
       >
+        <div class="card-text-block w-50">
+          <div
+            class="mb-2 d-flex align-items-center justify-content-between border-bottom pb-1"
+          >
+            <span class="card-label d-flex align-items-center" i18n>
+              Buy
+              <span class="badge-icon badge-icon--buy ms-1">
+                <ion-icon name="add-circle-outline" />
+              </span>
+            </span>
+            <span class="card-sub-value text-success">
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="isLoading ? undefined : summary?.totalBuy"
+              />
+            </span>
+          </div>
+          <div>
+            <span class="card-label d-flex align-items-center" i18n>
+              Sell
+              <span class="badge-icon badge-icon--sell ms-1">
+                <ion-icon name="remove-circle-outline" />
+              </span>
+            </span>
+            <h3 class="card-value mb-0 mt-1">
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="isLoading ? undefined : summary?.totalSell"
+              />
+            </h3>
+          </div>
+        </div>
+        <div class="card-chart-bars d-flex align-items-end gap-2">
+          <div
+            class="bar bar--buy"
+            matTooltip="Buy"
+            matTooltipPosition="above"
+            [style.height.%]="buyBarHeight"
+          ></div>
+          <div
+            class="bar bar--sell"
+            matTooltip="Sell"
+            matTooltipPosition="above"
+            [style.height.%]="sellBarHeight"
+          ></div>
+        </div>
+      </div>
     </div>
-    <div class="flex-column flex-wrap justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        position="end"
-        [colorizeSign]="true"
-        [isPercent]="true"
-        [locale]="locale"
-        [value]="
-          isLoading
-            ? undefined
-            : summary?.netPerformancePercentageWithCurrencyEffect
-        "
-      />
+
+    <!-- Card 2: Buy Total Volume -->
+    <div class="col-12 col-md-4">
+      <div class="summary-card">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="card-label" i18n>Buy Volume</span>
+          <span class="badge-icon badge-icon--buy">
+            <ion-icon name="add-circle-outline" />
+          </span>
+        </div>
+        <h2 class="card-value mb-0">
+          <gf-value
+            [isCurrency]="true"
+            [locale]="locale"
+            [precision]="precision"
+            [unit]="baseCurrency"
+            [value]="isLoading ? undefined : summary?.totalBuy"
+          />
+        </h2>
+      </div>
     </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Total Assets</div>
-    <div class="flex-column flex-wrap justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        position="end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.currentValueInBaseCurrency"
-      />
+
+    <!-- Card 4: Total Investment -->
+    <div class="col-12 col-md-4">
+      <div class="summary-card">
+        <span class="card-label mb-2 block" i18n>Total Investment</span>
+        <h2 class="card-value mb-0">
+          <gf-value
+            [isCurrency]="true"
+            [locale]="locale"
+            [precision]="precision"
+            [unit]="baseCurrency"
+            [value]="
+              isLoading
+                ? undefined
+                : summary?.totalInvestmentValueWithCurrencyEffect
+            "
+          />
+        </h2>
+      </div>
     </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="align-items-center d-flex flex-grow-1">
-      <ng-container i18n>Emergency Fund</ng-container>
-      @if (
-        !hasImpersonationId &&
-        summary?.totalValueInBaseCurrency > 0 &&
-        user?.settings?.isExperimentalFeatures
-      ) {
-        <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
-          [isPercent]="true"
-          [locale]="locale"
-          [value]="isLoading ? undefined : emergencyFundPercentage"
-        />
-      }
+
+    <!-- Card 10: Cash Flow (Interest & Dividends) -->
+    <div class="col-12 col-md-4">
+      <div class="summary-card">
+        <span class="card-label mb-2 block" i18n>Income & Cash Flow</span>
+        <div class="d-flex flex-column gap-2 mt-1">
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="sub-text text-muted" i18n>Dividends</span>
+            <span class="fw-semibold">
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="
+                  isLoading ? undefined : summary?.dividendInBaseCurrency
+                "
+              />
+            </span>
+          </div>
+          <div class="d-flex justify-content-between align-items-center">
+            <span class="sub-text text-muted" i18n>Interest</span>
+            <span class="fw-semibold">
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="
+                  isLoading ? undefined : summary?.interestInBaseCurrency
+                "
+              />
+            </span>
+          </div>
+        </div>
+      </div>
     </div>
-    <div
-      class="align-items-center d-flex justify-content-end"
-      [class.cursor-pointer]="
-        hasPermissionToUpdateUserSettings &&
-        !user?.settings?.isRestrictedView &&
-        user?.subscription?.type !== 'Basic'
-      "
-      (click)="
-        hasPermissionToUpdateUserSettings &&
-          !user?.settings?.isRestrictedView &&
-          user?.subscription?.type !== 'Basic' &&
-          onEditEmergencyFund()
-      "
-    >
-      @if (
-        hasPermissionToUpdateUserSettings &&
-        !isLoading &&
-        !user?.settings?.isRestrictedView &&
-        user?.subscription?.type !== 'Basic'
-      ) {
-        <ion-icon
-          class="mr-1 text-muted"
-          name="ellipsis-horizontal-circle-outline"
-        />
-      }
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.emergencyFund?.total"
-      />
+
+    <!-- Card 5: Absolute Gross Performance & Fees -->
+    <div class="col-12 col-md-6">
+      <div class="summary-card flex-column justify-content-between h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div class="card-text-block">
+            <span class="card-label" i18n>Absolute Gross Performance</span>
+            <h2
+              class="card-value my-1"
+              [class.text-danger]="!grossPerformancePositive"
+              [class.text-success]="grossPerformancePositive"
+            >
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.grossPerformanceWithCurrencyEffect
+                "
+              />
+            </h2>
+            <div class="d-flex align-items-center mt-1">
+              <span class="sub-text text-muted me-1" i18n>Fees:</span>
+              <span class="sub-text text-danger font-weight-bold">
+                @if (summary?.fees || summary?.fees === 0) {
+                  <span class="me-1">-</span>
+                }
+                <gf-value
+                  [isCurrency]="true"
+                  [locale]="locale"
+                  [precision]="precision"
+                  [unit]="baseCurrency"
+                  [value]="isLoading ? undefined : summary?.fees"
+                />
+              </span>
+            </div>
+          </div>
+          <div class="card-sparkline-small">
+            <gf-line-chart
+              [colorScheme]="user?.settings?.colorScheme"
+              [hidden]="
+                !historicalDataItems || historicalDataItems.length === 0
+              "
+              [historicalDataItems]="historicalDataItems"
+              [isAnimated]="false"
+              [maintainAspectRatio]="false"
+              [overrideGradientColor]="
+                grossPerformancePositive
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)'
+              "
+              [overrideLineColor]="
+                grossPerformancePositive
+                  ? 'rgba(34, 197, 94, 1)'
+                  : 'rgba(239, 68, 68, 1)'
+              "
+              [overrideLineWidth]="1.5"
+              [showGradient]="true"
+              [showLoader]="false"
+              [showXAxis]="false"
+              [showYAxis]="false"
+            />
+          </div>
+        </div>
+        <div class="progress-bar-container mt-3">
+          <div class="progress-bar-track">
+            <div
+              class="progress-bar-fill"
+              [class.progress-bar-fill--negative]="!grossPerformancePositive"
+              [class.progress-bar-fill--positive]="grossPerformancePositive"
+              [style.width.%]="grossPerformanceProgressWidth"
+            ></div>
+          </div>
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate" i18n>Cash</div>
-    <div class="flex-column flex-wrap justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        position="end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.emergencyFund?.cash"
-      />
+
+    <!-- Card 6: Net Performance (ROAI) & Absolute Net Performance -->
+    <div class="col-12 col-md-6">
+      <div
+        class="summary-card flex-row justify-content-between align-items-stretch"
+      >
+        <div
+          class="card-text-block d-flex flex-column justify-content-between w-50"
+        >
+          <div>
+            <span class="card-label" i18n>Net Performance (ROAI)</span>
+            <h2 class="card-value my-1">
+              <gf-value
+                [colorizeSign]="true"
+                [isPercent]="true"
+                [locale]="locale"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.netPerformancePercentageWithCurrencyEffect
+                "
+              />
+            </h2>
+          </div>
+          <div class="mt-2 pt-2 border-top">
+            <span class="card-label sub-label-small" i18n
+              >Absolute Net Performance</span
+            >
+            <h3 class="card-value mb-0 mt-1">
+              <gf-value
+                [isCurrency]="true"
+                [locale]="locale"
+                [precision]="precision"
+                [unit]="baseCurrency"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.netPerformanceWithCurrencyEffect
+                "
+              />
+            </h3>
+          </div>
+        </div>
+        <div class="card-sparkline-large w-50">
+          <gf-line-chart
+            [colorScheme]="user?.settings?.colorScheme"
+            [hidden]="!historicalDataItems || historicalDataItems.length === 0"
+            [historicalDataItems]="historicalDataItems"
+            [isAnimated]="false"
+            [maintainAspectRatio]="false"
+            [overrideGradientColor]="
+              (summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0
+                ? 'rgba(34, 197, 94, 0.15)'
+                : 'rgba(239, 68, 68, 0.15)'
+            "
+            [overrideLineColor]="
+              (summary?.netPerformancePercentageWithCurrencyEffect ?? 0) >= 0
+                ? 'rgba(34, 197, 94, 1)'
+                : 'rgba(239, 68, 68, 1)'
+            "
+            [overrideLineWidth]="2"
+            [showGradient]="true"
+            [showLoader]="false"
+            [showXAxis]="false"
+            [showYAxis]="false"
+          />
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate" i18n>Assets</div>
-    <div class="flex-column flex-wrap justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        position="end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.emergencyFund?.assets"
-      />
+
+    <!-- Card 7: Net Worth & Balance Sheet -->
+    <div class="col-12 col-md-8">
+      <div
+        class="summary-card summary-card--hero flex-row justify-content-between align-items-center"
+      >
+        <div class="card-text-block">
+          <span class="card-label label-hero" i18n>Net Worth</span>
+          <h1 class="card-value value-hero mb-3 mt-1">
+            <gf-value
+              [isCurrency]="true"
+              [locale]="locale"
+              [precision]="precision"
+              [unit]="baseCurrency"
+              [value]="
+                isLoading ? undefined : summary?.totalValueInBaseCurrency
+              "
+            />
+          </h1>
+          <div class="balance-sheet-grid d-flex gap-4 border-top pt-2">
+            <div>
+              <span class="sub-text text-muted" i18n>Total Assets</span>
+              <div class="sub-value fw-semibold mt-1">
+                <gf-value
+                  [isCurrency]="true"
+                  [locale]="locale"
+                  [precision]="precision"
+                  [unit]="baseCurrency"
+                  [value]="
+                    isLoading ? undefined : summary?.currentValueInBaseCurrency
+                  "
+                />
+              </div>
+            </div>
+            <div>
+              <span class="sub-text text-muted" i18n>Liabilities</span>
+              <div class="sub-value fw-semibold text-danger mt-1">
+                @if (
+                  summary?.liabilitiesInBaseCurrency ||
+                  summary?.liabilitiesInBaseCurrency === 0
+                ) {
+                  <span class="me-1">-</span>
+                }
+                <gf-value
+                  [isCurrency]="true"
+                  [locale]="locale"
+                  [precision]="precision"
+                  [unit]="baseCurrency"
+                  [value]="
+                    isLoading ? undefined : summary?.liabilitiesInBaseCurrency
+                  "
+                />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="card-icon-overlay d-none d-sm-block">
+          <ion-icon class="hero-bg-icon" name="wallet-outline" />
+        </div>
+      </div>
     </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="align-items-center d-flex flex-grow-1">
-      <ng-container i18n>Buying Power</ng-container>
-      @if (
-        !hasImpersonationId &&
-        summary?.totalValueInBaseCurrency > 0 &&
-        user?.settings?.isExperimentalFeatures
-      ) {
-        <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
-          [isPercent]="true"
-          [locale]="locale"
-          [value]="isLoading ? undefined : buyingPowerPercentage"
-        />
-      }
+
+    <!-- Card 8: Annualized Performance -->
+    <div class="col-12 col-md-4">
+      <div class="summary-card flex-column justify-content-between h-100">
+        <div class="d-flex justify-content-between align-items-start">
+          <div>
+            <span class="card-label" i18n>Annualized Performance</span>
+            <h2
+              class="card-value my-1"
+              [class.text-danger]="!annualizedPerformancePositive"
+              [class.text-success]="annualizedPerformancePositive"
+            >
+              <gf-value
+                [colorizeSign]="true"
+                [isPercent]="true"
+                [locale]="locale"
+                [value]="
+                  isLoading
+                    ? undefined
+                    : summary?.annualizedPerformancePercentWithCurrencyEffect
+                "
+              />
+            </h2>
+          </div>
+          <div class="card-sparkline-extra-small">
+            <gf-line-chart
+              [colorScheme]="user?.settings?.colorScheme"
+              [hidden]="
+                !historicalDataItems || historicalDataItems.length === 0
+              "
+              [historicalDataItems]="historicalDataItems"
+              [isAnimated]="false"
+              [maintainAspectRatio]="false"
+              [overrideGradientColor]="
+                annualizedPerformancePositive
+                  ? 'rgba(34, 197, 94, 0.15)'
+                  : 'rgba(239, 68, 68, 0.15)'
+              "
+              [overrideLineColor]="
+                annualizedPerformancePositive
+                  ? 'rgba(34, 197, 94, 1)'
+                  : 'rgba(239, 68, 68, 1)'
+              "
+              [overrideLineWidth]="1.5"
+              [showGradient]="true"
+              [showLoader]="false"
+              [showXAxis]="false"
+              [showYAxis]="false"
+            />
+          </div>
+        </div>
+        <div class="progress-bar-container mt-3">
+          <div class="progress-bar-track">
+            <div
+              class="progress-bar-fill"
+              [class.progress-bar-fill--negative]="
+                !annualizedPerformancePositive
+              "
+              [class.progress-bar-fill--positive]="
+                annualizedPerformancePositive
+              "
+              [style.width.%]="annualizedPerformanceProgressWidth"
+            ></div>
+          </div>
+        </div>
+      </div>
     </div>
-    <div class="align-items-center d-flex justify-content-end">
-      <gf-value
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.cash"
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="align-items-center d-flex flex-grow-1">
-      <ng-container i18n>Excluded from Analysis</ng-container>
-      @if (
-        !hasImpersonationId &&
-        summary?.totalValueInBaseCurrency > 0 &&
-        user?.settings?.isExperimentalFeatures
-      ) {
-        <gf-value
-          class="d-lg-inline-block d-none ml-2 small text-muted"
-          [isPercent]="true"
-          [locale]="locale"
-          [value]="isLoading ? undefined : excludedFromAnalysisPercentage"
-        />
-      }
-    </div>
-    <div class="align-items-center d-flex justify-content-end">
-      <gf-value
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.excludedAccountsAndActivities"
-      />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Liabilities</div>
-    <div class="d-flex justify-content-end">
-      @if (
-        summary?.liabilitiesInBaseCurrency ||
-        summary?.liabilitiesInBaseCurrency === 0
-      ) {
-        <span class="mr-1">-</span>
-      }
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.liabilitiesInBaseCurrency"
-      />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 font-weight-bold text-truncate" i18n>Net Worth</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.totalValueInBaseCurrency"
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 ml-3 text-truncate">
-      <ng-container i18n>Annualized Performance</ng-container>
-    </div>
-    <div class="flex-column flex-wrap justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        position="end"
-        [colorizeSign]="true"
-        [isPercent]="true"
-        [locale]="locale"
-        [value]="
-          isLoading
-            ? undefined
-            : summary?.annualizedPerformancePercentWithCurrencyEffect
-        "
-      />
-    </div>
-  </div>
-  <div class="row">
-    <div class="col"><hr /></div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Interest</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.interestInBaseCurrency"
-      />
-    </div>
-  </div>
-  <div class="flex-nowrap px-3 py-1 row">
-    <div class="flex-grow-1 text-truncate" i18n>Dividend</div>
-    <div class="justify-content-end">
-      <gf-value
-        class="justify-content-end"
-        [isCurrency]="true"
-        [locale]="locale"
-        [precision]="precision"
-        [unit]="baseCurrency"
-        [value]="isLoading ? undefined : summary?.dividendInBaseCurrency"
-      />
+
+    <!-- Card 9: Liquidity & Funds -->
+    <div class="col-12">
+      <div class="summary-card flex-column">
+        <span class="card-label mb-3" i18n>Liquidity, Funds & Adjustments</span>
+        <div class="row g-3">
+          <!-- Emergency Fund -->
+          <div class="col-12 col-md-4">
+            <div class="sub-card-funds p-3 rounded">
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Emergency Fund</span
+                >
+                @if (
+                  !hasImpersonationId &&
+                  summary?.totalValueInBaseCurrency > 0 &&
+                  user?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="locale"
+                    [value]="isLoading ? undefined : emergencyFundPercentage"
+                  />
+                }
+              </div>
+              <div class="d-flex align-items-center justify-content-between">
+                <h3 class="card-value mb-0 d-flex align-items-center">
+                  @if (
+                    hasPermissionToUpdateUserSettings &&
+                    !isLoading &&
+                    !user?.settings?.isRestrictedView &&
+                    user?.subscription?.type !== 'Basic'
+                  ) {
+                    <ion-icon
+                      class="me-2 cursor-pointer text-muted"
+                      name="ellipsis-horizontal-circle-outline"
+                      (click)="onEditEmergencyFund()"
+                    />
+                  }
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="locale"
+                    [precision]="precision"
+                    [unit]="baseCurrency"
+                    [value]="
+                      isLoading ? undefined : summary?.emergencyFund?.total
+                    "
+                  />
+                </h3>
+              </div>
+              <!-- Desglose Cash / Assets -->
+              <div
+                class="mt-2 pt-2 border-top d-flex justify-content-between gap-3 sub-text-small text-muted"
+              >
+                <div>
+                  <span i18n>Cash:</span>
+                  <strong class="text-reset ms-1">
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="locale"
+                      [precision]="precision"
+                      [unit]="baseCurrency"
+                      [value]="
+                        isLoading ? undefined : summary?.emergencyFund?.cash
+                      "
+                    />
+                  </strong>
+                </div>
+                <div>
+                  <span i18n>Assets:</span>
+                  <strong class="text-reset ms-1">
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="locale"
+                      [precision]="precision"
+                      [unit]="baseCurrency"
+                      [value]="
+                        isLoading ? undefined : summary?.emergencyFund?.assets
+                      "
+                    />
+                  </strong>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Buying Power -->
+          <div class="col-12 col-md-4">
+            <div
+              class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Buying Power (Cash)</span
+                >
+                @if (
+                  !hasImpersonationId &&
+                  summary?.totalValueInBaseCurrency > 0 &&
+                  user?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="locale"
+                    [value]="isLoading ? undefined : buyingPowerPercentage"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0">
+                <gf-value
+                  [isCurrency]="true"
+                  [locale]="locale"
+                  [precision]="precision"
+                  [unit]="baseCurrency"
+                  [value]="isLoading ? undefined : summary?.cash"
+                />
+              </h3>
+            </div>
+          </div>
+
+          <!-- Excluded from Analysis -->
+          <div class="col-12 col-md-4">
+            <div
+              class="sub-card-funds p-3 rounded h-100 d-flex flex-column justify-content-between"
+            >
+              <div
+                class="d-flex justify-content-between align-items-center mb-2"
+              >
+                <span class="card-label sub-label-small" i18n
+                  >Excluded from Analysis</span
+                >
+                @if (
+                  !hasImpersonationId &&
+                  summary?.totalValueInBaseCurrency > 0 &&
+                  user?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="locale"
+                    [value]="
+                      isLoading ? undefined : excludedFromAnalysisPercentage
+                    "
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0">
+                <gf-value
+                  [isCurrency]="true"
+                  [locale]="locale"
+                  [precision]="precision"
+                  [unit]="baseCurrency"
+                  [value]="
+                    isLoading
+                      ? undefined
+                      : summary?.excludedAccountsAndActivities
+                  "
+                />
+              </h3>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

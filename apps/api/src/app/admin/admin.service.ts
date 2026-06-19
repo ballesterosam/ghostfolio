@@ -624,8 +624,8 @@ export class AdminService {
       const [updatedAssetProfile] =
         await this.symbolProfileService.getSymbolProfiles([
           {
-            dataSource: dataSource as DataSource,
-            symbol: symbol as string
+            dataSource: dataSource,
+            symbol: symbol
           }
         ]);
 

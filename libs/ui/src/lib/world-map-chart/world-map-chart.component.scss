@@ -1,6 +1,7 @@
 :host {
   display: block;
   height: 100%;
+  width: 100%;
 
   ::ng-deep {
     .loader {
@@ -9,9 +10,15 @@
 
     .svgMap-map-wrapper {
       background: transparent;
+      width: 100% !important;
+
+      svg {
+        width: 100% !important;
+        height: 100% !important;
+      }
 
       .svgMap-country {
-        stroke: #e5e5e5;
+        stroke: #737373;
       }
 
       .svgMap-map-controls-wrapper {
@@ -25,7 +32,7 @@
   ::ng-deep {
     .svgMap-map-wrapper {
       .svgMap-country {
-        stroke: #414141;
+        stroke: #cccccc;
       }
     }
   }

@@ -7,34 +7,60 @@
 
 <div class="flex-grow-1" mat-dialog-content>
   <div class="container p-0">
-    <div class="row">
-      <div class="col-12 d-flex justify-content-center mb-3">
-        <gf-value
-          size="large"
-          [isCurrency]="true"
-          [locale]="data.locale"
-          [unit]="data.baseCurrency"
-          [value]="value"
-        />
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card text-center">
+          <div
+            class="asset-icon-wrapper"
+            [title]="SymbolProfile?.name ?? SymbolProfile?.symbol"
+          >
+            <ion-icon
+              [name]="
+                getAssetIcon(
+                  SymbolProfile?.assetSubClass,
+                  SymbolProfile?.assetClass
+                )
+              "
+            />
+          </div>
+          <gf-value
+            size="large"
+            [isCurrency]="true"
+            [locale]="data.locale"
+            [unit]="data.baseCurrency"
+            [value]="value"
+          />
+        </div>
       </div>
     </div>
 
-    <gf-line-chart
-      class="mb-4"
-      [benchmarkDataItems]="benchmarkDataItems"
-      [benchmarkLabel]="benchmarkLabel"
-      [colorScheme]="data.colorScheme"
-      [currency]="SymbolProfile?.currency"
-      [historicalDataItems]="historicalDataItems"
-      [isAnimated]="true"
-      [label]="
-        isUUID(data.symbol) ? (SymbolProfile?.name ?? data.symbol) : data.symbol
-      "
-      [locale]="data.locale"
-      [showGradient]="true"
-      [showXAxis]="true"
-      [showYAxis]="true"
-    />
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card">
+          <gf-line-chart
+            [benchmarkDataItems]="benchmarkDataItems"
+            [benchmarkLabel]="benchmarkLabel"
+            [colorScheme]="data.colorScheme"
+            [currency]="SymbolProfile?.currency"
+            [historicalDataItems]="historicalDataItems"
+            [isAnimated]="false"
+            [label]="
+              isUUID(data.symbol)
+                ? (SymbolProfile?.name ?? data.symbol)
+                : data.symbol
+            "
+            [locale]="data.locale"
+            [maintainAspectRatio]="false"
+            [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+            [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+            [overrideLineWidth]="2"
+            [showGradient]="true"
+            [showXAxis]="true"
+            [showYAxis]="true"
+          />
+        </div>
+      </div>
+    </div>
 
     <mat-tab-group
       animationDuration="0ms"
@@ -44,211 +70,296 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <ion-icon name="reader-outline" />
-          <div class="d-none d-sm-block ml-2" i18n>Overview</div>
+          <div class="d-none d-sm-block ms-2" i18n>Overview</div>
         </ng-template>
         <div class="container mt-3 p-0">
-          <div class="row w-100">
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [colorizeSign]="true"
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="netPerformanceWithCurrencyEffectPrecision"
-                [unit]="data.baseCurrency"
-                [value]="netPerformanceWithCurrencyEffect"
-              >
-                @if (
-                  SymbolProfile?.currency &&
-                  data.baseCurrency !== SymbolProfile?.currency
-                ) {
-                  Change with currency effect
-                } @else {
-                  Change
-                }
-              </gf-value>
+          <div class="row">
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label">
+                  @if (
+                    SymbolProfile?.currency &&
+                    data.baseCurrency !== SymbolProfile?.currency
+                  ) {
+                    <ng-container i18n>Change w/ FX</ng-container>
+                  } @else {
+                    <ng-container i18n>Change</ng-container>
+                  }
+                </div>
+                <div
+                  class="kpi-card__value"
+                  [class.kpi-negative]="netPerformanceWithCurrencyEffect < 0"
+                  [class.kpi-positive]="netPerformanceWithCurrencyEffect > 0"
+                >
+                  <gf-value
+                    size="medium"
+                    [colorizeSign]="true"
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="netPerformanceWithCurrencyEffectPrecision"
+                    [unit]="data.baseCurrency"
+                    [value]="netPerformanceWithCurrencyEffect"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [colorizeSign]="true"
-                [isPercent]="true"
-                [locale]="data.locale"
-                [precision]="netPerformancePercentWithCurrencyEffectPrecision"
-                [value]="netPerformancePercentWithCurrencyEffect"
-              >
-                @if (
-                  SymbolProfile?.currency &&
-                  data.baseCurrency !== SymbolProfile?.currency
-                ) {
-                  Performance with currency effect
-                } @else {
-                  Performance
-                }
-              </gf-value>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label">
+                  @if (
+                    SymbolProfile?.currency &&
+                    data.baseCurrency !== SymbolProfile?.currency
+                  ) {
+                    <ng-container i18n>Perf. w/ FX</ng-container>
+                  } @else {
+                    <ng-container i18n>Performance</ng-container>
+                  }
+                </div>
+                <div
+                  class="kpi-card__value"
+                  [class.kpi-negative]="
+                    netPerformancePercentWithCurrencyEffect < 0
+                  "
+                  [class.kpi-positive]="
+                    netPerformancePercentWithCurrencyEffect > 0
+                  "
+                >
+                  <gf-value
+                    size="medium"
+                    [colorizeSign]="true"
+                    [isPercent]="true"
+                    [locale]="data.locale"
+                    [precision]="
+                      netPerformancePercentWithCurrencyEffectPrecision
+                    "
+                    [value]="netPerformancePercentWithCurrencyEffect"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="averagePricePrecision"
-                [unit]="SymbolProfile?.currency"
-                [value]="averagePrice"
-                >Average Unit Price</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Avg. Unit Price</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="averagePricePrecision"
+                    [unit]="SymbolProfile?.currency"
+                    [value]="averagePrice"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="marketPricePrecision"
-                [unit]="SymbolProfile?.currency"
-                [value]="marketPrice"
-                >Market Price</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Market Price</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="marketPricePrecision"
+                    [unit]="SymbolProfile?.currency"
+                    [value]="marketPrice"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [class.text-danger]="
-                  marketPriceMin?.toFixed(2) === marketPrice?.toFixed(2) &&
-                  marketPriceMax?.toFixed(2) !== marketPriceMin?.toFixed(2)
-                "
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="marketPriceMinPrecision"
-                [unit]="SymbolProfile?.currency"
-                [value]="marketPriceMin"
-                >Minimum Price</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Min. Price</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [class.text-danger]="
+                      marketPriceMin?.toFixed(2) === marketPrice?.toFixed(2) &&
+                      marketPriceMax?.toFixed(2) !== marketPriceMin?.toFixed(2)
+                    "
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="marketPriceMinPrecision"
+                    [unit]="SymbolProfile?.currency"
+                    [value]="marketPriceMin"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [class.text-success]="
-                  marketPriceMax?.toFixed(2) === marketPrice?.toFixed(2) &&
-                  marketPriceMax?.toFixed(2) !== marketPriceMin?.toFixed(2)
-                "
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="marketPriceMaxPrecision"
-                [unit]="SymbolProfile?.currency"
-                [value]="marketPriceMax"
-                >Maximum Price</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Max. Price</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [class.text-success]="
+                      marketPriceMax?.toFixed(2) === marketPrice?.toFixed(2) &&
+                      marketPriceMax?.toFixed(2) !== marketPriceMin?.toFixed(2)
+                    "
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="marketPriceMaxPrecision"
+                    [unit]="SymbolProfile?.currency"
+                    [value]="marketPriceMax"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [locale]="data.locale"
-                [precision]="quantityPrecision"
-                [value]="quantity"
-                >Quantity</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Quantity</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [locale]="data.locale"
+                    [precision]="quantityPrecision"
+                    [value]="quantity"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [precision]="
-                  investmentInBaseCurrencyWithCurrencyEffectPrecision
-                "
-                [unit]="data.baseCurrency"
-                [value]="investmentInBaseCurrencyWithCurrencyEffect"
-                >Investment</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Investment</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [precision]="
+                      investmentInBaseCurrencyWithCurrencyEffectPrecision
+                    "
+                    [unit]="data.baseCurrency"
+                    [value]="investmentInBaseCurrencyWithCurrencyEffect"
+                  />
+                </div>
+              </div>
             </div>
             @if (
               dividendInBaseCurrency && user?.settings?.isExperimentalFeatures
             ) {
-              <div class="col-6 mb-3">
-                <gf-value
-                  i18n
-                  size="medium"
-                  [isCurrency]="true"
-                  [locale]="data.locale"
-                  [precision]="dividendInBaseCurrencyPrecision"
-                  [unit]="data.baseCurrency"
-                  [value]="dividendInBaseCurrency"
-                  >Dividend</gf-value
-                >
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Dividend</div>
+                  <div class="kpi-card__value">
+                    <gf-value
+                      size="medium"
+                      [isCurrency]="true"
+                      [locale]="data.locale"
+                      [precision]="dividendInBaseCurrencyPrecision"
+                      [unit]="data.baseCurrency"
+                      [value]="dividendInBaseCurrency"
+                    />
+                  </div>
+                </div>
               </div>
-              <div class="col-6 mb-3">
-                <gf-value
-                  i18n
-                  size="medium"
-                  [isPercent]="true"
-                  [locale]="data.locale"
-                  [value]="dividendYieldPercentWithCurrencyEffect"
-                  >Dividend Yield</gf-value
-                >
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Dividend Yield</div>
+                  <div class="kpi-card__value">
+                    <gf-value
+                      size="medium"
+                      [isPercent]="true"
+                      [locale]="data.locale"
+                      [value]="dividendYieldPercentWithCurrencyEffect"
+                    />
+                  </div>
+                </div>
               </div>
             }
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [isCurrency]="true"
-                [locale]="data.locale"
-                [unit]="data.baseCurrency"
-                [value]="feeInBaseCurrency"
-                >Fees</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Fees</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [isCurrency]="true"
+                    [locale]="data.locale"
+                    [unit]="data.baseCurrency"
+                    [value]="feeInBaseCurrency"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [deviceType]="data.deviceType"
-                [isDate]="true"
-                [locale]="data.locale"
-                [value]="dateOfFirstActivity"
-                >First Activity</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>First Activity</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [deviceType]="data.deviceType"
+                    [isDate]="true"
+                    [locale]="data.locale"
+                    [value]="dateOfFirstActivity"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                size="medium"
-                [locale]="data.locale"
-                [value]="activitiesCount"
-              >
-                @if (activitiesCount === 1) {
-                  <ng-container i18n>Activity</ng-container>
-                } @else {
-                  <ng-container i18n>Activities</ng-container>
-                }
-              </gf-value>
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label">
+                  @if (activitiesCount === 1) {
+                    <ng-container i18n>Activity</ng-container>
+                  } @else {
+                    <ng-container i18n>Activities</ng-container>
+                  }
+                </div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [locale]="data.locale"
+                    [value]="activitiesCount"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3"></div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [hidden]="!assetClass"
-                [value]="assetClass"
-                >Asset Class</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>Symbol</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [enableCopyToClipboardButton]="true"
+                    [hidden]="!SymbolProfile?.symbol"
+                    [value]="SymbolProfile?.symbol"
+                  />
+                </div>
+              </div>
             </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [hidden]="!assetSubClass"
-                [value]="assetSubClass"
-                >Asset Sub Class</gf-value
-              >
+            <div class="col-6 col-md-4 mb-3">
+              <div class="kpi-card">
+                <div class="kpi-card__label" i18n>ISIN</div>
+                <div class="kpi-card__value">
+                  <gf-value
+                    size="medium"
+                    [enableCopyToClipboardButton]="true"
+                    [hidden]="!SymbolProfile?.isin"
+                    [value]="SymbolProfile?.isin"
+                  />
+                </div>
+              </div>
             </div>
+            @if (assetClass) {
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Asset Class</div>
+                  <div class="kpi-card__value">
+                    <gf-value size="medium" [value]="assetClass" />
+                  </div>
+                </div>
+              </div>
+            }
+            @if (assetSubClass) {
+              <div class="col-6 col-md-4 mb-3">
+                <div class="kpi-card">
+                  <div class="kpi-card__label" i18n>Asset Sub Class</div>
+                  <div class="kpi-card__value">
+                    <gf-value size="medium" [value]="assetSubClass" />
+                  </div>
+                </div>
+              </div>
+            }
+
             @if (
               SymbolProfile?.countries?.length > 0 ||
               SymbolProfile?.sectors?.length > 0
@@ -257,77 +368,66 @@
                 SymbolProfile?.countries?.length === 1 &&
                 SymbolProfile?.sectors?.length === 1
               ) {
-                <div class="col-6 mb-3">
-                  <gf-value
-                    i18n
-                    size="medium"
-                    [locale]="data.locale"
-                    [value]="translate(SymbolProfile.sectors[0].name)"
-                    >Sector</gf-value
-                  >
-                </div>
-                @if (SymbolProfile?.countries?.length === 1) {
-                  <div class="col-6 mb-3">
-                    <gf-value
-                      i18n
-                      size="medium"
-                      [locale]="data.locale"
-                      [value]="
-                        getCountryName({
-                          code: SymbolProfile.countries[0].code,
-                          locale: data.locale
-                        })
-                      "
-                      >Country</gf-value
-                    >
+                <div class="col-6 col-md-4 mb-3">
+                  <div class="kpi-card">
+                    <div class="kpi-card__label" i18n>Sector</div>
+                    <div class="kpi-card__value">
+                      <gf-value
+                        size="medium"
+                        [locale]="data.locale"
+                        [value]="translate(SymbolProfile.sectors[0].name)"
+                      />
+                    </div>
                   </div>
-                }
+                </div>
+                <div class="col-6 col-md-4 mb-3">
+                  <div class="kpi-card">
+                    <div class="kpi-card__label" i18n>Country</div>
+                    <div class="kpi-card__value">
+                      <gf-value
+                        size="medium"
+                        [locale]="data.locale"
+                        [value]="
+                          getCountryName({
+                            code: SymbolProfile.countries[0].code,
+                            locale: data.locale
+                          })
+                        "
+                      />
+                    </div>
+                  </div>
+                </div>
               } @else {
                 <div class="col-md-6 mb-3">
-                  <div class="h5" i18n>Sectors</div>
-                  <gf-portfolio-proportion-chart
-                    [baseCurrency]="data.baseCurrency"
-                    [colorScheme]="data.colorScheme"
-                    [data]="sectors"
-                    [isInPercentage]="true"
-                    [keys]="['name']"
-                    [locale]="data.locale"
-                    [maxItems]="10"
-                  />
+                  <div class="dashboard-card">
+                    <h3 class="h5 mb-3" i18n>Sectors</h3>
+                    <gf-portfolio-proportion-chart
+                      [baseCurrency]="data.baseCurrency"
+                      [colorScheme]="data.colorScheme"
+                      [data]="sectors"
+                      [isInPercentage]="true"
+                      [keys]="['name']"
+                      [locale]="data.locale"
+                      [maxItems]="10"
+                    />
+                  </div>
                 </div>
                 <div class="col-md-6 mb-3">
-                  <div class="h5" i18n>Countries</div>
-                  <gf-portfolio-proportion-chart
-                    [baseCurrency]="data.baseCurrency"
-                    [colorScheme]="data.colorScheme"
-                    [data]="countries"
-                    [isInPercentage]="true"
-                    [keys]="['name']"
-                    [locale]="data.locale"
-                    [maxItems]="10"
-                  />
+                  <div class="dashboard-card">
+                    <h3 class="h5 mb-3" i18n>Countries</h3>
+                    <gf-portfolio-proportion-chart
+                      [baseCurrency]="data.baseCurrency"
+                      [colorScheme]="data.colorScheme"
+                      [data]="countries"
+                      [isInPercentage]="true"
+                      [keys]="['name']"
+                      [locale]="data.locale"
+                      [maxItems]="10"
+                    />
+                  </div>
                 </div>
               }
             }
-            <div class="col-6 mb-3">
-              <gf-value
-                i18n
-                size="medium"
-                [enableCopyToClipboardButton]="true"
-                [hidden]="!SymbolProfile?.symbol"
-                [value]="SymbolProfile?.symbol"
-                >Symbol</gf-value
-              >
-            </div>
-            <div class="col-6 mb-3">
-              <gf-value
-                size="medium"
-                [enableCopyToClipboardButton]="true"
-                [hidden]="!SymbolProfile?.isin"
-                [value]="SymbolProfile?.isin"
-                >ISIN</gf-value
-              >
-            </div>
 
             @if (dataProviderInfo) {
               <div class="col-md-12 mb-3 text-center">
@@ -344,7 +444,7 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <ion-icon name="swap-vertical-outline" />
-          <div class="d-none d-sm-block ml-2" i18n>Activities</div>
+          <div class="d-none d-sm-block ms-2" i18n>Activities</div>
         </ng-template>
         <gf-activities-table
           [baseCurrency]="data.baseCurrency"
@@ -380,7 +480,7 @@
       <mat-tab>
         <ng-template mat-tab-label>
           <ion-icon name="wallet-outline" />
-          <div class="d-none d-sm-block ml-2" i18n>Accounts</div>
+          <div class="d-none d-sm-block ms-2" i18n>Accounts</div>
         </ng-template>
         <gf-accounts-table
           [accounts]="accounts"
@@ -402,7 +502,7 @@
         <mat-tab>
           <ng-template mat-tab-label>
             <ion-icon name="server-outline" />
-            <div class="d-none d-sm-block ml-2" i18n>Market Data</div>
+            <div class="d-none d-sm-block ms-2" i18n>Market Data</div>
           </ng-template>
           <gf-historical-market-data-editor
             [currency]="SymbolProfile?.currency"
@@ -442,7 +542,7 @@
                 mat-stroked-button
                 (click)="onCloseHolding()"
               >
-                <ion-icon class="mr-1" name="arrow-down-circle-outline" /><span
+                <ion-icon class="me-1" name="arrow-down-circle-outline" /><span
                   i18n
                   >Close Holding</span
                 >
@@ -453,7 +553,7 @@
               data.hasPermissionToReportDataGlitch === true
             ) {
               <a color="warn" mat-stroked-button [href]="reportDataGlitchMail"
-                ><ion-icon class="mr-1" name="flag-outline" /><span i18n
+                ><ion-icon class="me-1" name="flag-outline" /><span i18n
                   >Report Data Glitch</span
                 >...</a
               >
@@ -468,7 +568,7 @@
                 }"
                 [routerLink]="routerLinkAdminControlMarketData"
                 (click)="onClose()"
-                ><ion-icon class="mr-1" name="create-outline" /><span i18n
+                ><ion-icon class="me-1" name="create-outline" /><span i18n
                   >Manage Asset Profile</span
                 >...</a
               >

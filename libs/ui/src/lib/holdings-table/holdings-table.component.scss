@@ -1,3 +1,62 @@
+@use '../shared/table';
+
 :host {
   display: block;
+
+  // Table structure for separated card rows
+  table.gf-table {
+    @include table.gf-table-cards;
+
+    tr.mat-mdc-row {
+      td.mat-column-dateOfFirstActivity,
+      td.mat-column-quantity,
+      td.mat-column-valueInBaseCurrency,
+      td.mat-column-allocationInPercentage,
+      td.mat-column-performance,
+      td.mat-column-performanceInPercentage {
+        font-size: 1.05rem;
+        font-weight: 500;
+      }
+    }
+  }
+
+  .mobile-detail-content {
+    animation: slideDown 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+
+    .border-bottom-subtle {
+      border-bottom: 1px solid rgba(var(--dark-dividers), 0.5);
+    }
+  }
+
+  .transition-transform {
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .rotate-180 {
+    transform: rotate(180deg);
+  }
+
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 300px;
+    }
+  }
+}
+
+:host-context(.theme-dark) {
+  table.gf-table {
+    @include table.gf-table-cards(true);
+  }
+
+  .mobile-detail-content {
+    .border-bottom-subtle {
+      border-bottom: 1px solid rgba(var(--light-dividers), 0.5);
+    }
+  }
 }

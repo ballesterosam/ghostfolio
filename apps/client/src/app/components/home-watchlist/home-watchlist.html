@@ -1,14 +1,14 @@
-<div class="container">
-  <h1 class="d-none d-sm-block h3 mb-4">
-    <span class="align-items-center d-flex justify-content-center">
+<div class="overview p-3">
+  <h2 class="section-title mb-4">
+    <span class="align-items-center d-flex">
       <span i18n>Watchlist</span>
       @if (user?.subscription?.type === 'Basic') {
-        <gf-premium-indicator class="ml-1" />
+        <gf-premium-indicator class="ms-1" />
       }
     </span>
-  </h1>
+  </h2>
   <div class="row">
-    <div class="col-xs-12 col-md-10 offset-md-1">
+    <div class="col-12">
       <gf-benchmark
         [benchmarks]="watchlist"
         [deviceType]="deviceType()"

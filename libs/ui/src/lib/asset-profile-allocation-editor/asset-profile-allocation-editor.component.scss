@@ -1,0 +1,39 @@
+.allocation-editor {
+  .weight-input {
+    width: 80px;
+
+    input {
+      text-align: right;
+    }
+
+    ::ng-deep {
+      .mat-mdc-form-field-infix {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+        min-height: 40px !important;
+      }
+    }
+  }
+
+  .allocation-item-row {
+    padding: 0.5rem;
+    border-radius: 8px;
+    background-color: rgba(var(--dark-dividers), 0.05);
+
+    .item-name {
+      font-weight: 500;
+      font-size: 0.95rem;
+      color: rgba(var(--dark-primary-text), 0.85);
+    }
+  }
+}
+
+:host-context(.theme-dark) {
+  .allocation-item-row {
+    background-color: rgba(var(--light-dividers), 0.1);
+
+    .item-name {
+      color: rgba(var(--light-primary-text), 0.85);
+    }
+  }
+}

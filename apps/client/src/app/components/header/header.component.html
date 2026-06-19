@@ -11,119 +11,226 @@
         <gf-logo [label]="pageTitle()" />
       </a>
     </div>
-    <span class="gf-spacer"></span>
-    <ul class="align-items-center d-flex list-inline m-0 px-2">
-      <li class="list-inline-item">
+    <ul
+      class="align-items-center d-none d-sm-flex list-inline m-0 nav-center px-2"
+    >
+      <!-- Overview -->
+      <li class="list-inline-item nav-item-dropdown">
         <a
-          class="d-none d-sm-block rounded"
+          class="d-none d-sm-block rounded nav-link-btn"
           i18n
           mat-button
-          [class]="{
-            'font-weight-bold':
-              currentRoute() === internalRoutes.home.path ||
-              currentRoute() === internalRoutes.zen.path,
-            'text-decoration-underline':
-              currentRoute() === internalRoutes.home.path ||
-              currentRoute() === internalRoutes.zen.path
-          }"
+          [class.nav-pill-active]="
+            currentRoute() === internalRoutes.home.path ||
+            currentRoute() === internalRoutes.zen.path
+          "
           [routerLink]="['/']"
           >Overview</a
         >
       </li>
-      <li class="list-inline-item">
+
+      <!-- Portfolio -->
+      <li class="list-inline-item nav-item-dropdown">
         <a
-          class="d-none d-sm-block rounded"
+          class="d-none d-sm-block rounded nav-link-btn"
           i18n
           mat-button
-          [class]="{
-            'font-weight-bold':
-              currentRoute() === internalRoutes.portfolio.path,
-            'text-decoration-underline':
-              currentRoute() === internalRoutes.portfolio.path
-          }"
+          [class.nav-pill-active]="
+            currentRoute() === internalRoutes.portfolio.path
+          "
           [routerLink]="routerLinkPortfolio"
           >Portfolio</a
         >
+        <div class="contextual-dropdown">
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio']"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <ion-icon name="analytics-outline"></ion-icon>
+            <span i18n>Analysis</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'holdings']"
+          >
+            <ion-icon name="albums-outline"></ion-icon>
+            <span i18n>Holdings</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'activities']"
+          >
+            <ion-icon name="swap-vertical-outline"></ion-icon>
+            <span i18n>Activities</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'allocations']"
+          >
+            <ion-icon name="pie-chart-outline"></ion-icon>
+            <span i18n>Allocations</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'watchlist']"
+          >
+            <ion-icon name="bookmark-outline"></ion-icon>
+            <span i18n>Watchlist</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="
+              hasPermissionToAccessMarkets
+                ? ['/portfolio', 'markets-premium']
+                : ['/portfolio', 'markets']
+            "
+          >
+            <ion-icon name="newspaper-outline"></ion-icon>
+            <span i18n>Markets</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'fire']"
+          >
+            <ion-icon name="calculator-outline"></ion-icon>
+            <span i18n>FIRE</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/portfolio', 'x-ray']"
+          >
+            <ion-icon name="scan-outline"></ion-icon>
+            <span i18n>X-ray</span>
+          </a>
+        </div>
       </li>
-      <li class="list-inline-item">
+
+      <!-- Accounts -->
+      <li class="list-inline-item nav-item-dropdown">
         <a
-          class="d-none d-sm-block rounded"
+          class="d-none d-sm-block rounded nav-link-btn"
           i18n
           mat-button
-          [class]="{
-            'font-weight-bold': currentRoute() === internalRoutes.accounts.path,
-            'text-decoration-underline':
-              currentRoute() === internalRoutes.accounts.path
-          }"
+          [class.nav-pill-active]="
+            currentRoute() === internalRoutes.accounts.path
+          "
           [routerLink]="routerLinkAccounts"
           >Accounts</a
         >
-      </li>
-      @if (hasPermissionToAccessAdminControl) {
-        <li class="list-inline-item">
+        <div class="contextual-dropdown">
           <a
-            class="d-none d-sm-block rounded"
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/accounts']"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <ion-icon name="wallet-outline"></ion-icon>
+            <span i18n>Accounts</span>
+          </a>
+          @if (!user()?.settings?.isRestrictedView) {
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/accounts', 'integrations']"
+            >
+              <ion-icon name="sync-outline"></ion-icon>
+              <span i18n>Integrations</span>
+            </a>
+          }
+        </div>
+      </li>
+
+      <!-- Admin Control -->
+      @if (hasPermissionToAccessAdminControl) {
+        <li class="list-inline-item nav-item-dropdown">
+          <a
+            class="d-none d-sm-block rounded nav-link-btn"
             i18n
             mat-button
-            [class]="{
-              'font-weight-bold':
-                currentRoute() === internalRoutes.adminControl.path,
-              'text-decoration-underline':
-                currentRoute() === internalRoutes.adminControl.path
-            }"
+            [class.nav-pill-active]="
+              currentRoute() === internalRoutes.adminControl.path
+            "
             [routerLink]="routerLinkAdminControl"
             >Admin Control</a
           >
+          <div class="contextual-dropdown">
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/admin']"
+              [routerLinkActiveOptions]="{ exact: true }"
+            >
+              <ion-icon name="reader-outline"></ion-icon>
+              <span i18n>Overview</span>
+            </a>
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/admin', 'settings']"
+            >
+              <ion-icon name="settings-outline"></ion-icon>
+              <span i18n>Settings</span>
+            </a>
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/admin', 'market-data']"
+            >
+              <ion-icon name="server-outline"></ion-icon>
+              <span i18n>Market Data</span>
+            </a>
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/admin', 'jobs']"
+            >
+              <ion-icon name="flash-outline"></ion-icon>
+              <span i18n>Job Queue</span>
+            </a>
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/admin', 'users']"
+            >
+              <ion-icon name="people-outline"></ion-icon>
+              <span i18n>Users</span>
+            </a>
+          </div>
         </li>
       }
-      <li class="list-inline-item">
-        <a
-          class="d-none d-sm-block rounded"
-          i18n
-          mat-button
-          [class]="{
-            'font-weight-bold': currentRoute() === routeResources,
-            'text-decoration-underline': currentRoute() === routeResources
-          }"
-          [routerLink]="routerLinkResources"
-          >Resources</a
-        >
-      </li>
+
+      <!-- Pricing -->
       @if (
         hasPermissionForSubscription && user()?.subscription?.type === 'Basic'
       ) {
-        <li class="list-inline-item">
+        <li class="list-inline-item nav-item-dropdown">
           <a
-            class="d-none d-sm-block rounded"
+            class="d-none d-sm-block rounded nav-link-btn"
             mat-button
-            [class]="{
-              'font-weight-bold': currentRoute() === routePricing,
-              'text-decoration-underline': currentRoute() === routePricing
-            }"
+            [class.nav-pill-active]="currentRoute() === routePricing"
             [routerLink]="routerLinkPricing"
           >
             <span class="align-items-center d-flex">
               <span i18n>Pricing</span>
               @if (currentRoute() !== routePricing && hasPromotion()) {
-                <span class="badge badge-warning ml-1">%</span>
+                <span class="badge text-bg-warning ms-1">%</span>
               }
             </span>
           </a>
         </li>
       }
-      <li class="list-inline-item">
-        <a
-          class="d-none d-sm-block rounded"
-          i18n
-          mat-button
-          [class]="{
-            'font-weight-bold': currentRoute() === routeAbout,
-            'text-decoration-underline': currentRoute() === routeAbout
-          }"
-          [routerLink]="routerLinkAbout"
-          >About</a
-        >
-      </li>
+    </ul>
+    <span class="gf-spacer"></span>
+    <ul class="align-items-center d-flex list-inline m-0 px-2 user-controls">
       @if (hasPermissionToAccessAssistant) {
         <li class="d-inline-flex list-inline-item">
           <button
@@ -198,7 +305,7 @@
                   }
                 </span>
                 <gf-premium-indicator
-                  class="d-inline-block ml-1"
+                  class="d-inline-block ms-1"
                   [enableLink]="false" /></span
             ></a>
             <hr class="m-0" />
@@ -207,7 +314,7 @@
             <button mat-menu-item (click)="impersonateAccount(null)">
               <span class="align-items-center d-flex">
                 <ion-icon
-                  class="mr-2"
+                  class="me-2"
                   [name]="
                     hasImpersonationId
                       ? 'radio-button-off-outline'
@@ -221,7 +328,7 @@
               <button mat-menu-item (click)="impersonateAccount(accessItem.id)">
                 <span class="align-items-center d-flex">
                   <ion-icon
-                    class="mr-2"
+                    class="me-2"
                     name="square-outline"
                     [name]="
                       accessItem.id === impersonationId
@@ -243,7 +350,7 @@
             class="d-flex d-sm-none"
             i18n
             mat-menu-item
-            [class.font-weight-bold]="
+            [class.fw-bold]="
               currentRoute() === internalRoutes.home.path ||
               currentRoute() === internalRoutes.zen.path
             "
@@ -254,9 +361,7 @@
             class="d-flex d-sm-none"
             i18n
             mat-menu-item
-            [class.font-weight-bold]="
-              currentRoute() === internalRoutes.portfolio.path
-            "
+            [class.fw-bold]="currentRoute() === internalRoutes.portfolio.path"
             [routerLink]="routerLinkPortfolio"
             >Portfolio</a
           >
@@ -264,27 +369,44 @@
             class="d-flex d-sm-none"
             i18n
             mat-menu-item
-            [class.font-weight-bold]="
-              currentRoute() === internalRoutes.accounts.path
-            "
+            [class.fw-bold]="currentRoute() === internalRoutes.accounts.path"
             [routerLink]="routerLinkAccounts"
             >Accounts</a
           >
-          <a
+          @if (!user()?.settings?.isRestrictedView) {
+            <a
+              class="d-flex d-sm-none"
+              i18n
+              mat-menu-item
+              [routerLink]="['/accounts', 'integrations']"
+              >Integrations</a
+            >
+          }
+          <button
             i18n
             mat-menu-item
-            [class.font-weight-bold]="
-              currentRoute() === internalRoutes.account.path
-            "
-            [routerLink]="routerLinkAccount"
-            >My Ghostfolio</a
+            [class.fw-bold]="currentRoute() === internalRoutes.account.path"
+            [matMenuTriggerFor]="myGhostfolioMenu"
           >
+            My Ghostfolio
+          </button>
+          <mat-menu #myGhostfolioMenu="matMenu">
+            <a i18n mat-menu-item [routerLink]="routerLinkAccount">Settings</a>
+            @if (user()?.subscription) {
+              <a i18n mat-menu-item [routerLink]="['/account', 'membership']"
+                >Membership</a
+              >
+            }
+            <a i18n mat-menu-item [routerLink]="['/account', 'access']"
+              >Access</a
+            >
+          </mat-menu>
           @if (hasPermissionToAccessAdminControl) {
             <a
               class="d-flex d-sm-none"
               i18n
               mat-menu-item
-              [class.font-weight-bold]="
+              [class.fw-bold]="
                 currentRoute() === internalRoutes.adminControl.path
               "
               [routerLink]="routerLinkAdminControl"
@@ -292,14 +414,6 @@
             >
           }
           <hr class="m-0" />
-          <a
-            class="d-flex d-sm-none"
-            i18n
-            mat-menu-item
-            [class.font-weight-bold]="currentRoute() === routeResources"
-            [routerLink]="routerLinkResources"
-            >Resources</a
-          >
           @if (
             hasPermissionForSubscription &&
             user()?.subscription?.type === 'Basic'
@@ -307,25 +421,17 @@
             <a
               class="d-flex d-sm-none"
               mat-menu-item
-              [class.font-weight-bold]="currentRoute() === routePricing"
+              [class.fw-bold]="currentRoute() === routePricing"
               [routerLink]="routerLinkPricing"
             >
               <span class="align-items-center d-flex">
                 <span i18n>Pricing</span>
                 @if (currentRoute() !== routePricing && hasPromotion()) {
-                  <span class="badge badge-warning ml-1">%</span>
+                  <span class="badge text-bg-warning ms-1">%</span>
                 }
               </span>
             </a>
           }
-          <a
-            class="d-flex d-sm-none"
-            i18n
-            mat-menu-item
-            [class.font-weight-bold]="currentRoute() === routeAbout"
-            [routerLink]="routerLinkAbout"
-            >About Ghostfolio</a
-          >
           <hr class="d-flex d-sm-none m-0" />
           <button i18n mat-menu-item (click)="onSignOut()">Log out</button>
         </mat-menu>
@@ -353,25 +459,9 @@
           class="d-none d-sm-block rounded"
           i18n
           mat-button
-          [class]="{
-            'font-weight-bold': currentRoute() === routeFeatures,
-            'text-decoration-underline': currentRoute() === routeFeatures
-          }"
+          [class.nav-pill-active]="currentRoute() === routeFeatures"
           [routerLink]="routerLinkFeatures"
           >Features</a
-        >
-      </li>
-      <li class="list-inline-item">
-        <a
-          class="d-none d-sm-block rounded"
-          i18n
-          mat-button
-          [class]="{
-            'font-weight-bold': currentRoute() === routeAbout,
-            'text-decoration-underline': currentRoute() === routeAbout
-          }"
-          [routerLink]="routerLinkAbout"
-          >About</a
         >
       </li>
       @if (hasPermissionForSubscription) {
@@ -379,16 +469,13 @@
           <a
             class="d-sm-block rounded"
             mat-button
-            [class]="{
-              'font-weight-bold': currentRoute() === routePricing,
-              'text-decoration-underline': currentRoute() === routePricing
-            }"
+            [class.nav-pill-active]="currentRoute() === routePricing"
             [routerLink]="routerLinkPricing"
           >
             <span class="align-items-center d-flex">
               <span i18n>Pricing</span>
               @if (currentRoute() !== routePricing && hasPromotion()) {
-                <span class="badge badge-warning ml-1">%</span>
+                <span class="badge text-bg-warning ms-1">%</span>
               }
             </span>
           </a>
@@ -400,10 +487,7 @@
             class="d-none d-sm-block rounded"
             i18n
             mat-button
-            [class]="{
-              'font-weight-bold': currentRoute() === routeMarkets,
-              'text-decoration-underline': currentRoute() === routeMarkets
-            }"
+            [class.nav-pill-active]="currentRoute() === routeMarkets"
             [routerLink]="routerLinkMarkets"
             >Markets</a
           >
@@ -427,7 +511,7 @@
         </button>
       </li>
       @if (currentRoute() !== 'register' && hasPermissionToCreateUser) {
-        <li class="list-inline-item ml-1">
+        <li class="list-inline-item ms-1">
           <a
             class="d-none d-sm-block px-3 rounded"
             color="primary"

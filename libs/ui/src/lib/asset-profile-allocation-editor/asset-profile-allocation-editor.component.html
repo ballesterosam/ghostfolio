@@ -1,0 +1,71 @@
+<div class="allocation-editor">
+  <mat-form-field appearance="outline" class="w-100 mb-2">
+    <mat-label>{{ label() }}</mat-label>
+    <mat-chip-grid #chipGrid aria-label="Allocation items">
+      @for (item of items(); track item) {
+        <mat-chip-row (removed)="removeItem(item)">
+          {{ item.name || item.code }}
+          <button matChipRemove>
+            <ion-icon name="close-outline" />
+          </button>
+        </mat-chip-row>
+      }
+      <input
+        #itemInput
+        [formControl]="itemControl"
+        [matAutocomplete]="auto"
+        [matChipInputFor]="chipGrid"
+        [matChipInputSeparatorKeyCodes]="separatorKeysCodes"
+        [placeholder]="getPlaceholder()"
+        (focus)="onFocus()"
+        (matChipInputTokenEnd)="addItem($event)"
+      />
+    </mat-chip-grid>
+    <mat-autocomplete
+      #auto="matAutocomplete"
+      (optionSelected)="onSelected($event)"
+    >
+      @for (option of filteredOptions | async; track option) {
+        <mat-option [value]="option">
+          {{ option }}
+        </mat-option>
+      }
+    </mat-autocomplete>
+  </mat-form-field>
+
+  @if (items().length > 0) {
+    <div class="allocation-items-list mb-3">
+      @for (item of items(); track item) {
+        <div class="allocation-item-row d-flex align-items-center mb-2">
+          <div class="item-name flex-grow-1 text-truncate">
+            {{ item.name || item.code }}
+          </div>
+          <div class="item-weight ms-2">
+            <mat-form-field
+              appearance="outline"
+              class="weight-input without-hint"
+            >
+              <input
+                matInput
+                type="number"
+                [value]="item.weight"
+                (change)="updateWeight(item, +$any($event.target).value)"
+              />
+              <span matSuffix>%</span>
+            </mat-form-field>
+          </div>
+        </div>
+      }
+      <div class="text-end mt-2">
+        <button
+          color="accent"
+          mat-stroked-button
+          type="button"
+          (click)="distributeEvenly()"
+        >
+          <ng-container i18n>Distribute Evenly</ng-container>
+        </button>
+      </div>
+    </div>
+  }
+</div>

@@ -32,7 +32,18 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { ellipsisHorizontal, trashOutline } from 'ionicons/icons';
+import {
+  logoBitcoin,
+  businessOutline,
+  helpCircleOutline,
+  layersOutline,
+  leafOutline,
+  pieChartOutline,
+  receiptOutline,
+  walletOutline,
+  ellipsisHorizontal,
+  trashOutline
+} from 'ionicons/icons';
 import { isNumber } from 'lodash';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
@@ -85,7 +96,6 @@ export class GfBenchmarkComponent {
         : []),
       'date',
       'change',
-      'marketCondition',
       'actions'
     ];
   });
@@ -129,7 +139,18 @@ export class GfBenchmarkComponent {
         }
       });
 
-    addIcons({ ellipsisHorizontal, trashOutline });
+    addIcons({
+      businessOutline,
+      ellipsisHorizontal,
+      helpCircleOutline,
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
+      receiptOutline,
+      trashOutline,
+      walletOutline
+    });
   }
 
   protected onDeleteItem({ dataSource, symbol }: AssetProfileIdentifier) {

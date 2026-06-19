@@ -185,6 +185,10 @@ export class GfAllocationsPageComponent implements OnInit {
     this.initialize();
   }
 
+  public isDarkMode() {
+    return this.user?.settings?.colorScheme === 'DARK';
+  }
+
   public onAccountChartClicked({ symbol }: AssetProfileIdentifier) {
     if (symbol && symbol !== UNKNOWN_KEY) {
       this.router.navigate([], {
@@ -210,12 +214,12 @@ export class GfAllocationsPageComponent implements OnInit {
     assetSubClass: PortfolioPosition['assetProfile']['assetSubClass'];
     currency?: PortfolioPosition['assetProfile']['currency'];
   }) {
-    if (
-      assetClass === AssetClass.COMMODITY ||
-      assetSubClass === AssetSubClass.CRYPTOCURRENCY
-    ) {
-      // Commodities and cryptocurrencies have no meaningful currency exposure
-      return UNKNOWN_KEY;
+    if (assetClass === AssetClass.COMMODITY) {
+      return 'Commodity';
+    }
+
+    if (assetSubClass === AssetSubClass.CRYPTOCURRENCY) {
+      return 'Cryptocurrency';
     }
 
     return currency;
@@ -370,9 +374,16 @@ export class GfAllocationsPageComponent implements OnInit {
 
       // Prepare analysis data by continents, countries, holdings and sectors
 
+      const totalCountryWeight = position.assetProfile.countries.reduce(
+        (acc, c) => acc + c.weight,
+        0
+      );
+      const countryWeightDivisor = totalCountryWeight > 1.1 ? 100 : 1;
+
       if (position.assetProfile.countries.length > 0) {
         for (const country of position.assetProfile.countries) {
-          const { code, continent, weight } = country;
+          const { code, continent } = country;
+          const weight = country.weight / countryWeightDivisor;
 
           if (this.continents[continent]?.value) {
             this.continents[continent].value +=
@@ -452,9 +463,16 @@ export class GfAllocationsPageComponent implements OnInit {
         }
       }
 
+      const totalSectorWeight = position.assetProfile.sectors.reduce(
+        (acc, s) => acc + s.weight,
+        0
+      );
+      const sectorWeightDivisor = totalSectorWeight > 1.1 ? 100 : 1;
+
       if (position.assetProfile.sectors.length > 0) {
         for (const sector of position.assetProfile.sectors) {
-          const { name, weight } = sector;
+          const { name } = sector;
+          const weight = sector.weight / sectorWeightDivisor;
 
           if (this.sectors[name]?.value) {
             this.sectors[name].value +=

@@ -129,7 +129,7 @@ export class GfAppComponent implements OnInit {
             !this.currentSubRoute) ||
             (this.currentRoute === internalRoutes.home.path &&
               this.currentSubRoute ===
-                internalRoutes.home.subRoutes?.holdings.path) ||
+                internalRoutes.portfolio.subRoutes?.holdings.path) ||
             (this.currentRoute === internalRoutes.portfolio.path &&
               !this.currentSubRoute)) &&
           this.user?.settings?.viewMode !== 'ZEN'
@@ -142,7 +142,7 @@ export class GfAppComponent implements OnInit {
         if (
           (this.currentRoute === internalRoutes.home.path &&
             this.currentSubRoute ===
-              internalRoutes.home.subRoutes?.holdings.path) ||
+              internalRoutes.portfolio.subRoutes?.holdings.path) ||
           (this.currentRoute === internalRoutes.portfolio.path &&
             !this.currentSubRoute) ||
           (this.currentRoute === internalRoutes.portfolio.path &&
@@ -153,7 +153,7 @@ export class GfAppComponent implements OnInit {
               internalRoutes.portfolio.subRoutes?.allocations.path) ||
           (this.currentRoute === internalRoutes.zen.path &&
             this.currentSubRoute ===
-              internalRoutes.home.subRoutes?.holdings.path)
+              internalRoutes.portfolio.subRoutes?.holdings.path)
         ) {
           this.hasPermissionToChangeFilters = true;
         } else {
@@ -161,9 +161,7 @@ export class GfAppComponent implements OnInit {
         }
 
         this.hasTabs =
-          (this.currentRoute === publicRoutes.about.path ||
-            this.currentRoute === publicRoutes.faq.path ||
-            this.currentRoute === publicRoutes.resources.path ||
+          (this.currentRoute === publicRoutes.faq.path ||
             this.currentRoute === internalRoutes.account.path ||
             this.currentRoute === internalRoutes.adminControl.path ||
             this.currentRoute === internalRoutes.home.path ||

@@ -1,101 +1,608 @@
-<div
-  class="align-items-center container d-flex flex-column h-100 justify-content-center overview p-0 position-relative"
->
+<div class="overview p-3">
   @if (
     !hasImpersonationId() &&
     hasPermissionToCreateActivity() &&
     user()?.activitiesCount === 0
   ) {
-    <div class="justify-content-center row w-100">
-      <div class="col introduction">
-        <h4 i18n>Welcome to Ghostfolio</h4>
-        <p i18n>Ready to take control of your personal finances?</p>
-        <ol class="font-weight-bold">
-          <li class="mb-2" [class.text-muted]="user()?.accounts?.length > 1">
-            <a class="d-block" [routerLink]="routerLinkAccounts"
-              ><span i18n>Setup your accounts</span><br />
-              <span class="font-weight-normal" i18n
-                >Get a comprehensive financial overview by adding your bank and
-                brokerage accounts.</span
-              ></a
-            >
-          </li>
-          <li class="mb-2">
-            <a class="d-block" [routerLink]="routerLinkPortfolioActivities">
-              <span i18n>Capture your activities</span><br />
-              <span class="font-weight-normal" i18n
-                >Record your investment activities to keep your portfolio up to
-                date.</span
-              ></a
-            >
-          </li>
-          <li class="mb-2">
-            <a class="d-block" [routerLink]="routerLinkPortfolio">
-              <span i18n>Monitor and analyze your portfolio</span><br />
-              <span class="font-weight-normal" i18n
-                >Track your progress in real-time with comprehensive analysis
-                and insights.</span
+    <div
+      class="align-items-center d-flex flex-column h-100 justify-content-center"
+    >
+      <div class="justify-content-center row w-100">
+        <div class="col introduction">
+          <h4 i18n>Welcome to Ghostfolio</h4>
+          <p i18n>Ready to take control of your personal finances?</p>
+          <ol class="fw-bold">
+            <li class="mb-2" [class.text-muted]="user()?.accounts?.length > 1">
+              <a class="d-block" [routerLink]="routerLinkAccounts"
+                ><span i18n>Setup your accounts</span><br />
+                <span class="fw-normal" i18n
+                  >Get a comprehensive financial overview by adding your bank
+                  and brokerage accounts.</span
+                ></a
               >
-            </a>
-          </li>
-        </ol>
-        <div class="d-flex justify-content-center">
-          @if (user()?.accounts?.length === 1) {
-            <a
-              color="primary"
-              mat-flat-button
-              [routerLink]="routerLinkAccounts"
-            >
-              <ng-container i18n>Setup accounts</ng-container>
-            </a>
-          } @else if (user()?.accounts?.length > 1) {
-            <a
-              color="primary"
-              mat-flat-button
-              [routerLink]="routerLinkPortfolioActivities"
-            >
-              <ng-container i18n>Add activity</ng-container>
-            </a>
-          }
+            </li>
+            <li class="mb-2">
+              <a class="d-block" [routerLink]="routerLinkPortfolioActivities">
+                <span i18n>Capture your activities</span><br />
+                <span class="fw-normal" i18n
+                  >Record your investment activities to keep your portfolio up
+                  to date.</span
+                ></a
+              >
+            </li>
+            <li class="mb-2">
+              <a class="d-block" [routerLink]="routerLinkPortfolio">
+                <span i18n>Monitor and analyze your portfolio</span><br />
+                <span class="fw-normal" i18n
+                  >Track your progress in real-time with comprehensive analysis
+                  and insights.</span
+                >
+              </a>
+            </li>
+          </ol>
+          <div class="d-flex justify-content-center">
+            @if (user()?.accounts?.length === 1) {
+              <a
+                color="primary"
+                mat-flat-button
+                [routerLink]="routerLinkAccounts"
+              >
+                <ng-container i18n>Setup accounts</ng-container>
+              </a>
+            } @else if (user()?.accounts?.length > 1) {
+              <a
+                color="primary"
+                mat-flat-button
+                [routerLink]="routerLinkPortfolioActivities"
+              >
+                <ng-container i18n>Add activity</ng-container>
+              </a>
+            }
+          </div>
         </div>
       </div>
     </div>
   } @else {
-    <div class="row w-100">
-      <div class="col p-0">
-        <div class="chart-container mx-auto position-relative">
-          <gf-line-chart
-            class="position-absolute"
-            unit="%"
-            [class.pr-3]="deviceType() === 'mobile'"
-            [colorScheme]="user()?.settings?.colorScheme"
-            [hidden]="historicalDataItems()?.length === 0"
-            [historicalDataItems]="historicalDataItems()"
-            [isAnimated]="user()?.settings?.dateRange === '1d' ? false : true"
-            [label]="performanceLabel"
-            [locale]="user()?.settings?.locale"
-            [showGradient]="true"
-            [showLoader]="false"
-            [showXAxis]="false"
-            [showYAxis]="false"
-          />
+    <!-- PORTFOLIO SUMMARY section -->
+    <section class="dashboard-section mb-4">
+      <h2 class="section-title" i18n>Portfolio Summary</h2>
+      <div class="row g-3 align-items-stretch">
+        <!-- Hero card: portfolio value + chart -->
+        <div class="col-12 col-md-8">
+          <div class="hero-card">
+            <!-- Text overlay: top-left -->
+            <div class="hero-card__body">
+              <span class="hero-card__label" i18n>Total Portfolio Value</span>
+              <div class="hero-card__value-wrap">
+                <gf-portfolio-performance
+                  [deviceType]="deviceType()"
+                  [errors]="errors()"
+                  [isLoading]="isLoadingPerformance()"
+                  [locale]="user()?.settings?.locale"
+                  [performance]="performance()"
+                  [precision]="precision()"
+                  [showDetails]="false"
+                  [unit]="unit()"
+                />
+              </div>
+            </div>
+            <!-- YTD badge: top-right -->
+            @if (ytdPercent() !== null && !isLoadingPerformance()) {
+              <span
+                class="ytd-badge"
+                [class.ytd-badge--negative]="!ytdPositive()"
+                [class.ytd-badge--positive]="ytdPositive()"
+              >
+                <ion-icon
+                  [name]="
+                    ytdPositive()
+                      ? 'trending-up-outline'
+                      : 'trending-down-outline'
+                  "
+                />
+                {{ ytdPercentFormatted() }}
+              </span>
+            }
+            <!-- Full-height background chart -->
+            <div class="hero-card__chart">
+              <gf-line-chart
+                tooltipPosition="nearest"
+                unit="%"
+                [colorScheme]="user()?.settings?.colorScheme"
+                [hidden]="historicalDataItems()?.length === 0"
+                [historicalDataItems]="historicalDataItems()"
+                [isAnimated]="false"
+                [label]="performanceLabel"
+                [locale]="user()?.settings?.locale"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+                [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+                [overrideLineWidth]="2"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI cards column -->
+        <div class="col-12 col-md-4 d-flex flex-column gap-3">
+          <!-- Net Return YTD -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Net Return (YTD)</span>
+            <div
+              class="kpi-card__value kpi-large"
+              [class.kpi-negative]="
+                (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                  0) < 0
+              "
+              [class.kpi-positive]="
+                (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                  0) >= 0
+              "
+            >
+              @if (isLoadingPerformance()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '8rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [colorizeSign]="true"
+                  [isPercent]="true"
+                  [locale]="user()?.settings?.locale"
+                  [value]="
+                    performance()?.netPerformancePercentageWithCurrencyEffect
+                  "
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Annualized Performance -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Annualized Performance</span>
+            <div
+              class="kpi-card__value kpi-large"
+              [class.kpi-negative]="
+                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                  0) < 0
+              "
+              [class.kpi-positive]="
+                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                  0) >= 0
+              "
+            >
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '8rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [colorizeSign]="true"
+                  [isPercent]="true"
+                  [locale]="user()?.settings?.locale"
+                  [value]="
+                    summary()?.annualizedPerformancePercentWithCurrencyEffect
+                  "
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Annual Dividends -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Annual Dividends</span>
+            <div class="kpi-card__value kpi-large">
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '7rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [isCurrency]="true"
+                  [locale]="user()?.settings?.locale"
+                  [unit]="user()?.settings?.baseCurrency"
+                  [value]="summary()?.dividendInBaseCurrency"
+                />
+              }
+            </div>
+          </div>
+
+          <!-- Available Cash -->
+          <div class="kpi-card flex-fill">
+            <span class="kpi-card__label" i18n>Available Cash</span>
+            <div class="kpi-card__value kpi-large">
+              @if (isLoadingDetails()) {
+                <ngx-skeleton-loader
+                  animation="pulse"
+                  [theme]="{ height: '2rem', width: '7rem' }"
+                />
+              } @else {
+                <gf-value
+                  size="large"
+                  [isCurrency]="true"
+                  [locale]="user()?.settings?.locale"
+                  [unit]="user()?.settings?.baseCurrency"
+                  [value]="summary()?.cash"
+                />
+              }
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class="overview-container row mt-1">
-      <div class="col">
-        <gf-portfolio-performance
-          class="pb-4"
-          [deviceType]="deviceType()"
-          [errors]="errors()"
-          [isLoading]="isLoadingPerformance()"
-          [locale]="user()?.settings?.locale"
-          [performance]="performance()"
-          [precision]="precision()"
-          [showDetails]="showDetails()"
-          [unit]="unit()"
-        />
+    </section>
+
+    <!-- ASSET ALLOCATION section -->
+    <section class="dashboard-section mb-4">
+      <h2 class="section-title" i18n>Asset Allocation</h2>
+      <div class="row g-3 align-items-stretch mb-3">
+        <!-- Donut chart with legend -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card">
+            <div class="allocation-chart-wrap">
+              <div class="donut-container">
+                <gf-portfolio-proportion-chart
+                  [baseCurrency]="user()?.settings?.baseCurrency"
+                  [colorScheme]="user()?.settings?.colorScheme"
+                  [data]="holdingsMap()"
+                  [glow]="true"
+                  [hollow]="true"
+                  [isInPercentage]="true"
+                  [keys]="['assetClass']"
+                  [locale]="user()?.settings?.locale"
+                  [separateSegments]="isDarkMode()"
+                  [showLabels]="false"
+                />
+              </div>
+              <div class="donut-legend">
+                @for (item of holdingsLegend(); track item.key) {
+                  <div class="legend-item">
+                    <span
+                      class="legend-dot"
+                      [style.background-color]="item.color"
+                    ></span>
+                    <span class="legend-name">{{ item.name }}</span>
+                    <span class="legend-pct">{{ item.pct }}%</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- World map -->
+        <div class="col-12 col-md-6">
+          <div class="dashboard-card map-card">
+            <gf-world-map-chart
+              format="{0}%"
+              [countries]="countriesMap()"
+              [isInPercentage]="true"
+              [locale]="user()?.settings?.locale"
+            />
+          </div>
+        </div>
       </div>
-    </div>
+
+      <!-- Detail widgets: Buying Power, Emergency Fund, Excluded -->
+      <div class="row g-3 align-items-stretch">
+        <!-- Buying Power -->
+        <div class="col-12 col-md-4">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
+            <div class="card-text-block">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <span class="kpi-card__label mb-0" i18n
+                  >Buying Power (Cash)</span
+                >
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="buyingPowerPercentage()"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.cash"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-success opacity-75">
+              <ion-icon class="font-size-xxxl" name="cash-outline" />
+            </div>
+          </div>
+        </div>
+
+        <!-- Emergency Fund -->
+        <div class="col-12 col-md-4">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
+            <div class="card-text-block">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <span class="kpi-card__label mb-0" i18n>Emergency Fund</span>
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="emergencyFundPercentage()"
+                  />
+                }
+              </div>
+              <h3
+                class="card-value mb-0 font-weight-bold font-size-lg mt-1 d-flex align-items-center"
+              >
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  @if (
+                    hasPermissionToUpdateUserSettings() &&
+                    !user()?.settings?.isRestrictedView &&
+                    user()?.subscription?.type !== 'Basic'
+                  ) {
+                    <ion-icon
+                      class="me-2 cursor-pointer text-muted font-size-medium"
+                      name="ellipsis-horizontal-circle-outline"
+                      (click)="onEditEmergencyFund()"
+                    />
+                  }
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.emergencyFund?.total"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-info opacity-75">
+              <ion-icon
+                class="font-size-xxxl"
+                name="shield-checkmark-outline"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Excluded from Analysis -->
+        <div class="col-12 col-md-4">
+          <div
+            class="dashboard-card p-4 d-flex justify-content-between align-items-center"
+          >
+            <div class="card-text-block">
+              <div
+                class="d-flex justify-content-between align-items-center mb-1"
+              >
+                <span class="kpi-card__label mb-0" i18n
+                  >Excluded from Analysis</span
+                >
+                @if (
+                  !hasImpersonationId() &&
+                  summary()?.totalValueInBaseCurrency > 0 &&
+                  user()?.settings?.isExperimentalFeatures
+                ) {
+                  <gf-value
+                    class="badge bg-light small"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="excludedFromAnalysisPercentage()"
+                  />
+                }
+              </div>
+              <h3 class="card-value mb-0 font-weight-bold font-size-lg mt-1">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [precision]="precision()"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.excludedAccountsAndActivities"
+                  />
+                }
+              </h3>
+            </div>
+            <div class="card-icon-aside ms-3 text-warning opacity-75">
+              <ion-icon class="font-size-xxxl" name="eye-off-outline" />
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ACTIVITIES section -->
+    <section class="dashboard-section">
+      <h2 class="section-title" i18n>Activities</h2>
+      <div class="row g-3 align-items-stretch">
+        <!-- Row 1: Time in Market -->
+        <div class="col-12 col-md-6">
+          <div
+            class="dashboard-card d-flex flex-row align-items-center justify-content-between p-4"
+          >
+            <div class="card-text-block">
+              <span class="kpi-card__label mb-1 block" i18n
+                >Time in Market: {{ timeInMarket() }}</span
+              >
+              <h3
+                class="card-value d-flex align-items-center mb-0 mt-1 font-weight-bold font-size-xl"
+              >
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '6rem' }"
+                  />
+                } @else {
+                  {{ summary()?.activityCount }}
+                  <span
+                    class="ms-1 font-size-medium font-weight-normal text-muted"
+                  >
+                    <ng-container i18n>{summary()?.activityCount, plural,
+                      =1 {activity}
+                      other {activities}
+                    }</ng-container>
+                  </span>
+                  <span
+                    class="info-tooltip ms-2 align-items-center d-inline-flex cursor-pointer"
+                    matTooltipPosition="above"
+                    [matTooltip]="buyAndSellActivitiesTooltip"
+                  >
+                    <ion-icon name="information-circle-outline" />
+                  </span>
+                }
+              </h3>
+            </div>
+            <div class="card-sparkline">
+              <gf-line-chart
+                [colorScheme]="user()?.settings?.colorScheme"
+                [hidden]="
+                  !historicalDataItems() || historicalDataItems().length === 0
+                "
+                [historicalDataItems]="historicalDataItems()"
+                [isAnimated]="false"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
+                [overrideLineColor]="'rgba(59, 130, 246, 1)'"
+                [overrideLineWidth]="1.5"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 1: Buy / Sell Comparison -->
+        <div class="col-12 col-md-6">
+          <div
+            class="dashboard-card d-flex flex-row align-items-center justify-content-between p-4"
+          >
+            <div class="card-text-block w-75 pr-3 d-flex flex-column gap-2">
+              <div
+                class="d-flex justify-content-between align-items-center border-bottom pb-2"
+              >
+                <span
+                  class="kpi-card__label mb-0 d-flex align-items-center text-success"
+                  i18n
+                >
+                  Buy
+                  <span class="badge-icon badge-icon--buy ms-1 text-success">
+                    <ion-icon name="add-circle-outline" />
+                  </span>
+                </span>
+                <span
+                  class="card-sub-value text-success font-weight-bold font-size-large"
+                >
+                  @if (isLoadingDetails()) {
+                    <ngx-skeleton-loader
+                      animation="pulse"
+                      [theme]="{ height: '1.5rem', width: '5rem' }"
+                    />
+                  } @else {
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="user()?.settings?.locale"
+                      [precision]="precision()"
+                      [unit]="user()?.settings?.baseCurrency"
+                      [value]="summary()?.totalBuy"
+                    />
+                  }
+                </span>
+              </div>
+              <div
+                class="d-flex justify-content-between align-items-center pt-1"
+              >
+                <span
+                  class="kpi-card__label mb-0 d-flex align-items-center text-danger"
+                  i18n
+                >
+                  Sell
+                  <span class="badge-icon badge-icon--sell ms-1 text-danger">
+                    <ion-icon name="remove-circle-outline" />
+                  </span>
+                </span>
+                <span
+                  class="card-sub-value text-danger font-weight-bold font-size-large"
+                >
+                  @if (isLoadingDetails()) {
+                    <ngx-skeleton-loader
+                      animation="pulse"
+                      [theme]="{ height: '1.5rem', width: '5rem' }"
+                    />
+                  } @else {
+                    <gf-value
+                      [isCurrency]="true"
+                      [locale]="user()?.settings?.locale"
+                      [precision]="precision()"
+                      [unit]="user()?.settings?.baseCurrency"
+                      [value]="summary()?.totalSell"
+                    />
+                  }
+                </span>
+              </div>
+            </div>
+            <div
+              class="card-chart-bars d-flex align-items-end gap-2 w-25 justify-content-center"
+            >
+              <div
+                class="bar bar--buy"
+                matTooltip="Buy"
+                matTooltipPosition="above"
+                [style.height.%]="buyBarHeight()"
+              ></div>
+              <div
+                class="bar bar--sell"
+                matTooltip="Sell"
+                matTooltipPosition="above"
+                [style.height.%]="sellBarHeight()"
+              ></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
   }
 </div>

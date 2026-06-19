@@ -188,7 +188,8 @@ $gf-typography: (
 
   @include mat.card-overrides(
     (
-      outlined-container-color: var(--light-background),
+      outlined-container-color: var(--gf-card-bg-light),
+      outlined-container-shape: 16px,
       outlined-outline-color: rgba(var(--dark-dividers)),
       title-text-line-height: 1.2
     )
@@ -265,7 +266,8 @@ $gf-typography: (
 
   @include mat.card-overrides(
     (
-      outlined-container-color: var(--dark-background),
+      outlined-container-color: var(--gf-card-bg-dark),
+      outlined-container-shape: 16px,
       outlined-outline-color: rgba(var(--light-dividers)),
       title-text-line-height: 1.2
     )

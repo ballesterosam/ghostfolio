@@ -1,7 +1,12 @@
 import { GfPortfolioSummaryComponent } from '@ghostfolio/client/components/portfolio-summary/portfolio-summary.component';
 import { ImpersonationStorageService } from '@ghostfolio/client/services/impersonation-storage.service';
 import { UserService } from '@ghostfolio/client/services/user/user.service';
-import { PortfolioSummary, User } from '@ghostfolio/common/interfaces';
+import { DEFAULT_DATE_RANGE } from '@ghostfolio/common/config';
+import {
+  LineChartItem,
+  PortfolioSummary,
+  User
+} from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { DataService } from '@ghostfolio/ui/services';
 
@@ -33,6 +38,7 @@ export class GfHomeSummaryComponent implements OnInit {
   protected readonly isLoading = signal(true);
   protected readonly summary = signal<PortfolioSummary | undefined>(undefined);
   protected readonly user = signal<User | undefined>(undefined);
+  protected readonly historicalDataItems = signal<LineChartItem[] | null>(null);
 
   protected readonly deviceType = computed(
     () => this.deviceDetectorService.deviceInfo().deviceType
@@ -88,6 +94,25 @@ export class GfHomeSummaryComponent implements OnInit {
 
   private update() {
     this.isLoading.set(true);
+    this.historicalDataItems.set(null);
+
+    this.dataService
+      .fetchPortfolioPerformance({
+        range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ chart }) => {
+        this.historicalDataItems.set(
+          chart?.map(
+            ({ date, netPerformanceInPercentageWithCurrencyEffect }) => {
+              return {
+                date,
+                value: (netPerformanceInPercentageWithCurrencyEffect ?? 0) * 100
+              };
+            }
+          ) ?? null
+        );
+      });
 
     this.dataService
       .fetchPortfolioDetails()

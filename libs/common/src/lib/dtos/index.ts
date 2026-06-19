@@ -1,4 +1,5 @@
 import { AuthDeviceDto } from './auth-device.dto';
+import { ConnectIntegrationDto } from './connect-integration.dto';
 import { CreateAccessDto } from './create-access.dto';
 import { CreateAccountBalanceDto } from './create-account-balance.dto';
 import { CreateAccountWithBalancesDto } from './create-account-with-balances.dto';
@@ -49,5 +50,6 @@ export {
   UpdatePlatformDto,
   UpdatePropertyDto,
   UpdateTagDto,
-  UpdateUserSettingDto
+  UpdateUserSettingDto,
+  ConnectIntegrationDto
 };

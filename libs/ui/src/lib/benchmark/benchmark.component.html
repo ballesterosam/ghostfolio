@@ -10,11 +10,18 @@
     <ng-container matColumnDef="icon" sticky>
       <th *matHeaderCellDef class="px-1" mat-header-cell></th>
       <td *matCellDef="let element" class="px-1 text-center" mat-cell>
-        <gf-entity-logo
-          [dataSource]="element.dataSource"
-          [symbol]="element.symbol"
-          [tooltip]="element.name"
-        />
+        <div class="asset-icon-wrapper mx-auto">
+          @if (element.dataSource === 'MANUAL') {
+            <ion-icon name="help-circle-outline" />
+          } @else {
+            <gf-entity-logo
+              [dataSource]="element.dataSource"
+              [size]="'large'"
+              [symbol]="element.symbol"
+              [tooltip]="element.name"
+            />
+          }
+        </div>
       </td>
     </ng-container>
 
@@ -22,13 +29,13 @@
       <th *matHeaderCellDef class="px-1" mat-header-cell mat-sort-header>
         <ng-container i18n>Name</ng-container>
       </th>
-      <td *matCellDef="let element" class="px-1 text-nowrap" mat-cell>
-        <div class="text-truncate">
+      <td *matCellDef="let element" class="line-height-1 px-1" mat-cell>
+        <div class="fw-semibold text-main text-truncate">
           {{ element?.name }}
         </div>
         @if (showSymbol()) {
-          <div>
-            <small class="text-muted">{{ element?.symbol }}</small>
+          <div class="text-subtitle small mt-1">
+            {{ element?.symbol }}
           </div>
         }
       </td>
@@ -37,7 +44,7 @@
     <ng-container matColumnDef="trend50d">
       <th
         *matHeaderCellDef
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-header-cell
       >
         <ng-container i18n>50-Day Trend</ng-container>
@@ -66,7 +73,7 @@
     <ng-container matColumnDef="trend200d">
       <th
         *matHeaderCellDef
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-header-cell
       >
         <ng-container i18n>200-Day Trend</ng-container>
@@ -95,7 +102,7 @@
     <ng-container matColumnDef="date">
       <th
         *matHeaderCellDef
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-header-cell
       >
         <ng-container i18n>Last All Time High</ng-container>
@@ -129,32 +136,36 @@
         >
         <span class="d-block d-sm-none text-nowrap" i18n>from ATH</span>
       </th>
-      <td *matCellDef="let element" class="px-1 text-right" mat-cell>
-        @if (isNumber(element?.performances?.allTimeHigh?.performancePercent)) {
-          <gf-value
-            class="d-inline-block justify-content-end"
-            [class]="{
-              'text-danger':
-                element?.performances?.allTimeHigh?.performancePercent < 0,
-              'text-success':
-                element?.performances?.allTimeHigh?.performancePercent === 0
-            }"
-            [isPercent]="true"
-            [locale]="locale()"
-            [value]="element?.performances?.allTimeHigh?.performancePercent"
-          />
-        }
-      </td>
-    </ng-container>
-
-    <ng-container matColumnDef="marketCondition">
-      <th *matHeaderCellDef mat-header-cell></th>
-      <td *matCellDef="let element" class="px-0" mat-cell>
-        @if (element?.marketCondition) {
-          <div class="text-center" [title]="translate(element.marketCondition)">
-            {{ resolveMarketCondition(element.marketCondition).emoji }}
-          </div>
-        }
+      <td *matCellDef="let element" class="px-1" mat-cell>
+        <div class="d-flex justify-content-end">
+          @if (
+            isNumber(element?.performances?.allTimeHigh?.performancePercent)
+          ) {
+            <span
+              class="perf-badge"
+              [class.perf-badge--negative]="
+                (element?.performances?.allTimeHigh?.performancePercent ?? 0) <
+                0
+              "
+              [class.perf-badge--positive]="
+                (element?.performances?.allTimeHigh?.performancePercent ?? 0) >=
+                0
+              "
+            >
+              {{
+                (element?.performances?.allTimeHigh?.performancePercent ?? 0) >=
+                0
+                  ? '+'
+                  : ''
+              }}{{
+                (
+                  (element?.performances?.allTimeHigh?.performancePercent ??
+                    0) * 100
+                ).toFixed(2)
+              }}%
+            </span>
+          }
+        </div>
       </td>
     </ng-container>
 
@@ -183,7 +194,7 @@
             "
           >
             <span class="align-items-center d-flex">
-              <ion-icon class="mr-2" name="trash-outline" />
+              <ion-icon class="me-2" name="trash-outline" />
               <span i18n>Delete</span>
             </span>
           </button>

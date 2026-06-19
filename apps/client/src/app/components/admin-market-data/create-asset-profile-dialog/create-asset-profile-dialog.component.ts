@@ -4,6 +4,8 @@ import {
   PROPERTY_CURRENCIES
 } from '@ghostfolio/common/config';
 import type { AssetProfileIdentifier } from '@ghostfolio/common/interfaces';
+import { GfDialogFooterComponent } from '@ghostfolio/ui/dialog-footer';
+import { GfDialogHeaderComponent } from '@ghostfolio/ui/dialog-header';
 import { AdminService, DataService } from '@ghostfolio/ui/services';
 import { GfSymbolAutocompleteComponent } from '@ghostfolio/ui/symbol-autocomplete';
 
@@ -13,6 +15,7 @@ import {
   Component,
   DestroyRef,
   inject,
+  Inject,
   OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -27,7 +30,11 @@ import {
   Validators
 } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
-import { MatDialogModule, MatDialogRef } from '@angular/material/dialog';
+import {
+  MAT_DIALOG_DATA,
+  MatDialogModule,
+  MatDialogRef
+} from '@angular/material/dialog';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
@@ -37,14 +44,17 @@ import { switchMap } from 'rxjs';
 
 import type {
   CreateAssetProfileDialogMode,
-  CreateAssetProfileForm
+  CreateAssetProfileForm,
+  CreateAssetProfileDialogParams
 } from './interfaces/interfaces';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
-  host: { class: 'h-100' },
+  host: { class: 'd-flex flex-column h-100' },
   imports: [
     FormsModule,
+    GfDialogFooterComponent,
+    GfDialogHeaderComponent,
     GfSymbolAutocompleteComponent,
     MatButtonModule,
     MatDialogModule,
@@ -72,6 +82,10 @@ export class GfCreateAssetProfileDialogComponent implements OnInit {
   private readonly dialogRef =
     inject<MatDialogRef<GfCreateAssetProfileDialogComponent>>(MatDialogRef);
   private readonly formBuilder = inject(FormBuilder);
+
+  public constructor(
+    @Inject(MAT_DIALOG_DATA) protected data: CreateAssetProfileDialogParams
+  ) {}
 
   protected get showCurrencyErrorMessage() {
     const addCurrencyFormControl =
@@ -101,6 +115,22 @@ export class GfCreateAssetProfileDialogComponent implements OnInit {
         validators: this.atLeastOneValid
       }
     );
+
+    this.createAssetProfileForm.controls.addCurrency.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((value) => {
+        if (value) {
+          const transformed = value.trim().toUpperCase();
+          if (value !== transformed) {
+            this.createAssetProfileForm.controls.addCurrency.setValue(
+              transformed,
+              {
+                emitEvent: false
+              }
+            );
+          }
+        }
+      });
 
     this.mode = 'auto';
   }

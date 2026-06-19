@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.empty-state-container {
+  text-align: center;
+  padding: 3rem 1.5rem;
+  border: 1px dashed var(--gf-border-color, #e0e0e0);
+  background-color: var(--light-background, #ffffff);
+  border-radius: 12px;
+  margin-top: 1rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.02);
+
+  p {
+    font-size: 0.95rem;
+    color: var(--gf-text-secondary, #666666);
+    margin: 0;
+  }
+}
+
+:host-context(.theme-dark) {
+  .empty-state-container {
+    border-color: rgba(var(--light-dividers), 0.6) !important;
+    background-color: #222222 !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+
+    p {
+      color: rgba(var(--light-secondary-text), 0.8) !important;
+    }
+  }
+}

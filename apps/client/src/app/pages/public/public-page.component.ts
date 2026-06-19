@@ -184,9 +184,16 @@ export class GfPublicPageComponent implements OnInit {
       if (position.assetProfile.assetClass !== AssetClass.LIQUIDITY) {
         // Prepare analysis data by continents, countries, holdings and sectors except for liquidity
 
+        const totalCountryWeight = position.assetProfile.countries.reduce(
+          (acc, c) => acc + c.weight,
+          0
+        );
+        const countryWeightDivisor = totalCountryWeight > 1.1 ? 100 : 1;
+
         if (position.assetProfile.countries.length > 0) {
           for (const country of position.assetProfile.countries) {
-            const { code, continent, weight } = country;
+            const { code, continent } = country;
+            const weight = country.weight / countryWeightDivisor;
 
             if (this.continents[continent]?.value) {
               this.continents[continent].value +=
@@ -224,9 +231,16 @@ export class GfPublicPageComponent implements OnInit {
             0;
         }
 
+        const totalSectorWeight = position.assetProfile.sectors.reduce(
+          (acc, s) => acc + s.weight,
+          0
+        );
+        const sectorWeightDivisor = totalSectorWeight > 1.1 ? 100 : 1;
+
         if (position.assetProfile.sectors.length > 0) {
           for (const sector of position.assetProfile.sectors) {
-            const { name, weight } = sector;
+            const { name } = sector;
+            const weight = sector.weight / sectorWeightDivisor;
 
             if (this.sectors[name]?.value) {
               this.sectors[name].value +=

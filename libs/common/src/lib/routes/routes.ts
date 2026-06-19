@@ -66,6 +66,18 @@ export const internalRoutes = {
   accounts: {
     path: 'accounts',
     routerLink: ['/accounts'],
+    subRoutes: {
+      accounts: {
+        path: undefined, // Default sub route
+        routerLink: ['/accounts'],
+        title: $localize`Accounts`
+      },
+      integrations: {
+        path: 'integrations',
+        routerLink: ['/accounts', 'integrations'],
+        title: $localize`Integrations`
+      }
+    },
     title: $localize`Accounts`
   },
   api: {
@@ -83,33 +95,6 @@ export const internalRoutes = {
   home: {
     path: 'home',
     routerLink: ['/home'],
-    subRoutes: {
-      holdings: {
-        path: 'holdings',
-        routerLink: ['/home', 'holdings'],
-        title: $localize`Holdings`
-      },
-      markets: {
-        path: 'markets',
-        routerLink: ['/home', 'markets'],
-        title: $localize`Markets`
-      },
-      marketsPremium: {
-        path: 'markets-premium',
-        routerLink: ['/home', 'markets-premium'],
-        title: $localize`Markets`
-      },
-      summary: {
-        path: 'summary',
-        routerLink: ['/home', 'summary'],
-        title: $localize`Summary`
-      },
-      watchlist: {
-        path: 'watchlist',
-        routerLink: ['/home', 'watchlist'],
-        title: $localize`Watchlist`
-      }
-    },
     title: $localize`Overview`
   },
   i18n: {
@@ -141,6 +126,26 @@ export const internalRoutes = {
         path: 'fire',
         routerLink: ['/portfolio', 'fire'],
         title: 'FIRE'
+      },
+      holdings: {
+        path: 'holdings',
+        routerLink: ['/portfolio', 'holdings'],
+        title: $localize`Holdings`
+      },
+      markets: {
+        path: 'markets',
+        routerLink: ['/portfolio', 'markets'],
+        title: $localize`Markets`
+      },
+      marketsPremium: {
+        path: 'markets-premium',
+        routerLink: ['/portfolio', 'markets-premium'],
+        title: $localize`Markets`
+      },
+      watchlist: {
+        path: 'watchlist',
+        routerLink: ['/portfolio', 'watchlist'],
+        title: $localize`Watchlist`
       },
       xRay: {
         path: 'x-ray',

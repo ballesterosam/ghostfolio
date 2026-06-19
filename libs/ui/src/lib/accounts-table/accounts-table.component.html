@@ -6,7 +6,7 @@
       [disabled]="dataSource?.data.length < 2"
       (click)="onTransferBalance()"
     >
-      <ion-icon class="mr-2" name="arrow-redo-outline" />
+      <ion-icon class="me-2" name="arrow-redo-outline" />
       <span><ng-container i18n>Transfer Cash Balance</ng-container>...</span>
     </button>
   </div>
@@ -52,7 +52,7 @@
       <td *matCellDef="let element" class="px-1" mat-cell>
         @if (element.platform?.url) {
           <gf-entity-logo
-            class="d-inline d-sm-none mr-1"
+            class="d-inline d-sm-none me-1"
             [tooltip]="element.platform?.name"
             [url]="element.platform.url"
           />
@@ -100,7 +100,7 @@
         <div class="d-flex">
           @if (element.platform?.url) {
             <gf-entity-logo
-              class="mr-1"
+              class="me-1"
               [tooltip]="element.platform?.name"
               [url]="element.platform.url"
             />
@@ -125,10 +125,10 @@
         <span class="d-block d-sm-none">#</span>
         <span class="d-none d-sm-block" i18n>Activities</span>
       </th>
-      <td *matCellDef="let element" class="px-1 text-right" mat-cell>
+      <td *matCellDef="let element" class="px-1 text-end" mat-cell>
         {{ element.activitiesCount }}
       </td>
-      <td *matFooterCellDef class="px-1 text-right" mat-footer-cell>
+      <td *matFooterCellDef class="px-1 text-end" mat-footer-cell>
         {{ activitiesCount() }}
       </td>
     </ng-container>
@@ -144,7 +144,7 @@
       </th>
       <td
         *matCellDef="let element"
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-cell
       >
         <gf-value
@@ -156,7 +156,7 @@
       </td>
       <td
         *matFooterCellDef
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-footer-cell
       >
         <gf-value
@@ -179,7 +179,7 @@
       </th>
       <td
         *matCellDef="let element"
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-cell
       >
         <gf-value
@@ -191,7 +191,7 @@
       </td>
       <td
         *matFooterCellDef
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-footer-cell
       >
         <gf-value
@@ -214,7 +214,7 @@
       </th>
       <td
         *matCellDef="let element"
-        class="d-lg-none d-xl-none px-1 text-right"
+        class="d-lg-none d-xl-none px-1 text-end"
         mat-cell
       >
         <gf-value
@@ -226,7 +226,7 @@
       </td>
       <td
         *matFooterCellDef
-        class="d-lg-none d-xl-none px-1 text-right"
+        class="d-lg-none d-xl-none px-1 text-end"
         mat-footer-cell
       >
         <gf-value
@@ -249,7 +249,7 @@
       </th>
       <td
         *matCellDef="let element"
-        class="d-none d-lg-table-cell px-1 text-right"
+        class="d-none d-lg-table-cell px-1 text-end"
         mat-cell
       >
         <gf-value
@@ -310,13 +310,13 @@
         <mat-menu #accountMenu="matMenu" xPosition="before">
           <button mat-menu-item (click)="onOpenAccountDetailDialog(element.id)">
             <span class="align-items-center d-flex">
-              <ion-icon class="mr-2" name="wallet-outline" />
+              <ion-icon class="me-2" name="wallet-outline" />
               <span><ng-container i18n>View Details</ng-container>...</span>
             </span>
           </button>
           <button mat-menu-item (click)="onUpdateAccount(element)">
             <span class="align-items-center d-flex">
-              <ion-icon class="mr-2" name="create-outline" />
+              <ion-icon class="me-2" name="create-outline" />
               <span><ng-container i18n>Edit</ng-container>...</span>
             </span>
           </button>
@@ -327,8 +327,17 @@
             (click)="onDeleteAccount(element.id)"
           >
             <span class="align-items-center d-flex">
-              <ion-icon class="mr-2" name="trash-outline" />
+              <ion-icon class="me-2" name="trash-outline" />
               <span i18n>Delete</span>
+            </span>
+          </button>
+          <button
+            mat-menu-item
+            (click)="onDeleteAccountWithActivities(element.id)"
+          >
+            <span class="align-items-center d-flex text-danger">
+              <ion-icon class="me-2 text-danger" name="trash-bin-outline" />
+              <span i18n>Delete All Activities and Investments</span>
             </span>
           </button>
         </mat-menu>

@@ -58,7 +58,12 @@ export class AccountController {
   @Delete(':id')
   @HasPermission(permissions.deleteAccount)
   @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
-  public async deleteAccount(@Param('id') id: string): Promise<AccountModel> {
+  public async deleteAccount(
+    @Param('id') id: string,
+    @Query('cascade') cascade?: string
+  ): Promise<AccountModel> {
+    const isCascade = cascade === 'true';
+
     const account = await this.accountService.accountWithActivities(
       {
         id_userId: {
@@ -69,11 +74,27 @@ export class AccountController {
       { activities: true }
     );
 
-    if (!account || account?.activities.length > 0) {
+    if (!account) {
       throw new HttpException(
         getReasonPhrase(StatusCodes.FORBIDDEN),
         StatusCodes.FORBIDDEN
       );
+    }
+
+    if (!isCascade && account.activities.length > 0) {
+      throw new HttpException(
+        getReasonPhrase(StatusCodes.FORBIDDEN),
+        StatusCodes.FORBIDDEN
+      );
+    }
+
+    if (isCascade) {
+      return this.accountService.deleteAccountWithActivities({
+        id_userId: {
+          id,
+          userId: this.request.user.id
+        }
+      });
     }
 
     return this.accountService.deleteAccount({

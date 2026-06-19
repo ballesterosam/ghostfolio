@@ -4,13 +4,18 @@
 @use './styles/bootstrap';
 @use './styles/table' as table;
 @use './styles/variables' as variables;
+@use './styles/design-system';
 
 @use 'svgmap/style.min';
 
 :root {
-  --dark-background: rgb(25, 25, 25);
+  --dark-background: rgb(22, 24, 39);
   --font-family-sans-serif: 'Inter', Roboto, 'Helvetica Neue', sans-serif;
   --light-background: rgb(255, 255, 255);
+  --gf-surface-light: rgb(242, 244, 243);
+  --gf-surface-dark: rgb(22, 24, 39);
+  --gf-card-bg-light: rgb(255, 255, 255);
+  --gf-card-bg-dark: rgb(30, 34, 55);
 
   --dark-primary-text:
     #{color.channel(variables.$dark-primary-text, 'red')},
@@ -203,6 +208,15 @@ body {
   font-family: var(--font-family-sans-serif);
   margin: 0;
   min-height: 100%;
+  background: var(--gf-surface-light);
+
+  // Table styling variables (Light Mode)
+  --table-bg: var(--light-background);
+  --table-text: rgba(var(--dark-primary-text));
+  --table-border: var(--gf-border-color, #e0e0e0);
+  --table-header-bg: var(--gf-bg-header, #fcfcfc);
+  --table-header-text: var(--gf-text-secondary, #666666);
+  --table-hover-bg: var(--gf-bg-hover, #f8f9fa);
 
   a {
     color: var(--dark-primary-text);
@@ -230,6 +244,14 @@ body {
     background: var(--dark-background);
     color: rgba(var(--light-primary-text));
 
+    // Table styling variables (Dark Mode)
+    --table-bg: var(--gf-card-bg-dark);
+    --table-text: rgba(var(--light-primary-text));
+    --table-border: rgba(var(--light-dividers));
+    --table-header-bg: rgb(26, 30, 50);
+    --table-header-text: rgba(var(--light-secondary-text));
+    --table-hover-bg: rgb(38, 42, 65);
+
     a {
       color: var(--light-primary-text);
     }
@@ -251,9 +273,41 @@ body {
     .mat-mdc-dialog-container {
       --mat-dialog-container-color: var(--dark-background);
 
+      .mdc-dialog__surface {
+        border-color: rgba(var(--light-dividers), 0.15) !important;
+        box-shadow: 0 12px 48px rgba(0, 0, 0, 0.4) !important;
+      }
+
       .mdc-dialog__content {
         --mat-dialog-supporting-text-color: rgba(var(--light-primary-text));
       }
+
+      .mat-mdc-dialog-title {
+        color: rgba(var(--light-primary-text), 0.9);
+      }
+    }
+
+    .bg-light {
+      background-color: #2c2c2c !important;
+      color: rgba(var(--light-primary-text)) !important;
+      border-color: rgba(var(--light-dividers)) !important;
+    }
+
+    .badge.bg-light {
+      background-color: #333333 !important;
+      color: rgba(var(--light-primary-text)) !important;
+    }
+
+    .card.bg-light {
+      background-color: #2c2c2c !important;
+      color: rgba(var(--light-primary-text)) !important;
+      border: 1px solid rgba(var(--light-dividers)) !important;
+    }
+
+    .list-group-item {
+      background-color: #2c2c2c !important;
+      color: rgba(var(--light-primary-text)) !important;
+      border-color: rgba(var(--light-dividers)) !important;
     }
 
     .mat-mdc-fab,
@@ -404,8 +458,28 @@ ngx-skeleton-loader {
 }
 
 .mat-mdc-dialog-container {
+  .mdc-dialog__surface {
+    border-radius: 20px !important;
+    padding: 1.5rem !important;
+    border: 1px solid rgba(var(--dark-dividers), 0.1) !important;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.12) !important;
+  }
+
   .mdc-dialog__content {
     --mat-dialog-supporting-text-color: rgba(var(--dark-primary-text));
+    padding: 0 1rem 1.5rem !important;
+  }
+
+  .mat-mdc-dialog-title {
+    padding: 1rem 1rem 1.5rem !important;
+    font-weight: 700 !important;
+    font-size: 1.5rem !important;
+    letter-spacing: -0.02em;
+    color: rgba(var(--dark-primary-text), 0.9);
+  }
+
+  .mat-mdc-dialog-actions {
+    padding: 0.5rem 1rem 1rem !important;
   }
 }
 
@@ -434,7 +508,7 @@ ngx-skeleton-loader {
   }
 
   .mat-mdc-menu-item {
-    &.font-weight-bold {
+    &.fw-bold {
       .mat-mdc-menu-item-text {
         --mat-menu-item-label-text-weight: 700;
       }
@@ -523,5 +597,76 @@ ngx-skeleton-loader {
     .mat-mdc-select-placeholder {
       color: rgba(var(--dark-disabled-text));
     }
+  }
+}
+
+// Global Custom Table and Responsive Scroll Styles
+.table-responsive {
+  overflow-y: hidden !important;
+}
+
+.table {
+  width: 100% !important;
+  border-collapse: collapse;
+  background-color: var(--table-bg, var(--light-background)) !important;
+  border: 1px solid var(--table-border) !important;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 1rem;
+  color: var(--table-text) !important;
+
+  th,
+  td {
+    padding: 0.75rem 1rem !important;
+    vertical-align: middle;
+    border-top: none !important;
+    border-bottom: 1px solid var(--table-border) !important;
+    color: var(--table-text) !important;
+  }
+
+  td {
+    background-color: transparent !important;
+  }
+
+  th {
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 0.75rem !important;
+    letter-spacing: 0.05em;
+    color: var(--table-header-text) !important;
+    background-color: var(--table-header-bg) !important;
+    border-bottom-width: 2px !important;
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0 !important;
+  }
+
+  tbody tr {
+    transition: background-color 0.15s ease-in-out;
+
+    &:hover {
+      background-color: var(--table-hover-bg) !important;
+      cursor: pointer;
+
+      td {
+        background-color: var(--table-hover-bg) !important;
+      }
+    }
+  }
+}
+
+.badge {
+  font-weight: 500 !important;
+  padding: 0.4em 0.8em !important;
+  border-radius: 50px !important;
+  font-size: 0.75rem !important;
+}
+
+@media (min-width: 576px) {
+  html,
+  body {
+    overflow: hidden !important;
+    height: 100% !important;
   }
 }

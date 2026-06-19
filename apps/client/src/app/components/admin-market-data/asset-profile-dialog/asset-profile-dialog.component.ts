@@ -22,7 +22,13 @@ import {
 } from '@ghostfolio/common/interfaces';
 import { DateRange } from '@ghostfolio/common/types';
 import { jsonValidator, validateObjectForForm } from '@ghostfolio/common/utils';
+import {
+  AllocationItem,
+  GfAssetProfileAllocationEditorComponent
+} from '@ghostfolio/ui/asset-profile-allocation-editor';
 import { GfCurrencySelectorComponent } from '@ghostfolio/ui/currency-selector';
+import { GfDialogFooterComponent } from '@ghostfolio/ui/dialog-footer';
+import { GfDialogHeaderComponent } from '@ghostfolio/ui/dialog-header';
 import { GfEntityLogoComponent } from '@ghostfolio/ui/entity-logo';
 import { GfHistoricalMarketDataEditorComponent } from '@ghostfolio/ui/historical-market-data-editor';
 import { translate } from '@ghostfolio/ui/i18n';
@@ -39,6 +45,7 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   ElementRef,
   Inject,
@@ -83,13 +90,21 @@ import { format } from 'date-fns';
 import { StatusCodes } from 'http-status-codes';
 import { addIcons } from 'ionicons';
 import {
+  businessOutline,
   codeSlashOutline,
   createOutline,
   ellipsisVertical,
+  helpCircleOutline,
+  layersOutline,
+  leafOutline,
+  logoBitcoin,
+  pieChartOutline,
   readerOutline,
-  serverOutline
+  receiptOutline,
+  serverOutline,
+  walletOutline
 } from 'ionicons/icons';
-import { isBoolean } from 'lodash';
+import { isBoolean, last } from 'lodash';
 import ms from 'ms';
 import { EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -101,7 +116,10 @@ import { AssetProfileDialogParams } from './interfaces/interfaces';
   host: { class: 'd-flex flex-column h-100' },
   imports: [
     FormsModule,
+    GfAssetProfileAllocationEditorComponent,
     GfCurrencySelectorComponent,
+    GfDialogFooterComponent,
+    GfDialogHeaderComponent,
     GfEntityLogoComponent,
     GfHistoricalMarketDataEditorComponent,
     GfLineChartComponent,
@@ -121,6 +139,7 @@ import { AssetProfileDialogParams } from './interfaces/interfaces';
     TextFieldModule
   ],
   providers: [AdminMarketDataService],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'gf-asset-profile-dialog',
   styleUrls: ['./asset-profile-dialog.component.scss'],
   templateUrl: 'asset-profile-dialog.html'
@@ -153,12 +172,13 @@ export class GfAssetProfileDialogComponent implements OnInit {
     assetClass: new FormControl<AssetClass | null>(null),
     assetSubClass: new FormControl<AssetSubClass | null>(null),
     comment: '',
-    countries: ['', jsonValidator()],
+    countries: [[] as AllocationItem[]],
     currency: '',
     historicalData: this.formBuilder.group({
       csvString: ''
     }),
     isActive: [true],
+    isBenchmark: [false],
     name: ['', Validators.required],
     scraperConfiguration: this.formBuilder.group<
       Omit<ScraperConfiguration, 'headers'> & {
@@ -172,7 +192,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
       selector: '',
       url: ''
     }),
-    sectors: ['', jsonValidator()],
+    sectors: [[] as AllocationItem[]],
     symbolMapping: ['', jsonValidator()],
     url: ''
   });
@@ -225,6 +245,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
       value: 'max'
     }
   ];
+
   protected readonly getCountryName = getCountryName;
   protected historicalDataItems: LineChartItem[];
   protected isBenchmark = false;
@@ -232,6 +253,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
   protected isEditAssetProfileIdentifierMode = false;
   protected readonly isUUID = isUUID;
   protected marketDataItems: MarketData[] = [];
+  protected marketPrice: number;
 
   protected readonly modeValues = [
     {
@@ -252,6 +274,31 @@ export class GfAssetProfileDialogComponent implements OnInit {
 
   protected user: User;
 
+  public getAssetIcon = (assetSubClass: string, assetClass: string) => {
+    switch (assetSubClass) {
+      case 'CRYPTOCURRENCY':
+        return 'logo-bitcoin';
+      case 'ETF':
+        return 'pie-chart-outline';
+      case 'MUTUALFUND':
+      case 'MUTUAL_FUND':
+        return 'layers-outline';
+      case 'BOND':
+        return 'receipt-outline';
+      case 'PRECIOUS_METAL':
+        return 'leaf-outline';
+    }
+
+    switch (assetClass) {
+      case 'CASH':
+        return 'wallet-outline';
+      case 'EQUITY':
+        return 'business-outline';
+    }
+
+    return 'help-circle-outline';
+  };
+
   private benchmarks: Partial<SymbolProfile>[];
 
   public constructor(
@@ -268,16 +315,31 @@ export class GfAssetProfileDialogComponent implements OnInit {
     private userService: UserService
   ) {
     addIcons({
+      businessOutline,
       codeSlashOutline,
       createOutline,
       ellipsisVertical,
+      helpCircleOutline,
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
       readerOutline,
-      serverOutline
+      receiptOutline,
+      serverOutline,
+      walletOutline
     });
   }
 
   protected get canSaveAssetProfileIdentifier() {
     return !this.assetProfileForm.dirty && this.canEditAssetProfile;
+  }
+
+  protected get hasAllocationData(): boolean {
+    return (
+      (this.assetProfileForm.controls.countries.value?.length ?? 0) > 0 ||
+      (this.assetProfileForm.controls.sectors.value?.length ?? 0) > 0
+    );
   }
 
   public ngOnInit() {
@@ -333,6 +395,40 @@ export class GfAssetProfileDialogComponent implements OnInit {
         this.changeDetectorRef.markForCheck();
       });
 
+    this.assetProfileForm.controls.countries.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((countriesValue: AllocationItem[]) => {
+        this.countries = {};
+
+        if (countriesValue) {
+          for (const { code, name, weight } of countriesValue) {
+            this.countries[code || name] = {
+              name: name || getCountryName({ code, locale: this.data.locale }),
+              value: weight
+            };
+          }
+        }
+
+        this.changeDetectorRef.markForCheck();
+      });
+
+    this.assetProfileForm.controls.sectors.valueChanges
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((sectorsValue: AllocationItem[]) => {
+        this.sectors = {};
+
+        if (sectorsValue) {
+          for (const { name, weight } of sectorsValue) {
+            this.sectors[name] = {
+              name: translate(name),
+              value: weight
+            };
+          }
+        }
+
+        this.changeDetectorRef.markForCheck();
+      });
+
     this.dataService
       .fetchMarketDataBySymbol({
         dataSource: this.data.dataSource,
@@ -365,6 +461,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
         });
 
         this.marketDataItems = marketData;
+        this.marketPrice = last(marketData)?.marketPrice;
         this.sectors = {};
 
         if (
@@ -395,11 +492,10 @@ export class GfAssetProfileDialogComponent implements OnInit {
           assetClass: this.assetProfile.assetClass ?? null,
           assetSubClass: this.assetProfile.assetSubClass ?? null,
           comment: this.assetProfile?.comment ?? '',
-          countries: JSON.stringify(
+          countries:
             this.assetProfile?.countries?.map(({ code, weight }) => {
               return { code, weight };
-            }) ?? []
-          ),
+            }) ?? [],
           currency: this.assetProfile?.currency ?? null,
           historicalData: {
             csvString: GfAssetProfileDialogComponent.HISTORICAL_DATA_TEMPLATE
@@ -407,6 +503,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
           isActive: isBoolean(this.assetProfile?.isActive)
             ? this.assetProfile.isActive
             : null,
+          isBenchmark: this.isBenchmark,
           name: this.assetProfile.name ?? this.assetProfile.symbol ?? null,
           scraperConfiguration: {
             defaultMarketPrice:
@@ -420,7 +517,7 @@ export class GfAssetProfileDialogComponent implements OnInit {
             selector: this.assetProfile?.scraperConfiguration?.selector ?? '',
             url: this.assetProfile?.scraperConfiguration?.url ?? ''
           },
-          sectors: JSON.stringify(this.assetProfile?.sectors ?? []),
+          sectors: this.assetProfile?.sectors ?? [],
           symbolMapping: JSON.stringify(this.assetProfile?.symbolMapping ?? {}),
           url: this.assetProfile?.url ?? ''
         });
@@ -487,19 +584,6 @@ export class GfAssetProfileDialogComponent implements OnInit {
     }
   }
 
-  protected onSetBenchmark({ dataSource, symbol }: AssetProfileIdentifier) {
-    this.dataService
-      .postBenchmark({ dataSource, symbol })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.dataService.updateInfo();
-
-        this.isBenchmark = true;
-
-        this.changeDetectorRef.markForCheck();
-      });
-  }
-
   protected onSetEditAssetProfileIdentifierMode() {
     this.isEditAssetProfileIdentifierMode = true;
 
@@ -515,11 +599,8 @@ export class GfAssetProfileDialogComponent implements OnInit {
     let sectors: Prisma.InputJsonArray = [];
     let symbolMapping: Record<string, string> = {};
 
-    try {
-      countries = JSON.parse(
-        this.assetProfileForm.controls.countries.value ?? '[]'
-      ) as Prisma.InputJsonArray;
-    } catch {}
+    countries = (this.assetProfileForm.controls.countries.value ??
+      []) as unknown as Prisma.InputJsonArray;
 
     try {
       scraperConfiguration = {
@@ -561,11 +642,8 @@ export class GfAssetProfileDialogComponent implements OnInit {
       return;
     }
 
-    try {
-      sectors = JSON.parse(
-        this.assetProfileForm.controls.sectors.value ?? '[]'
-      ) as Prisma.InputJsonArray;
-    } catch {}
+    sectors = (this.assetProfileForm.controls.sectors.value ??
+      []) as unknown as Prisma.InputJsonArray;
 
     try {
       symbolMapping = JSON.parse(
@@ -608,6 +686,30 @@ export class GfAssetProfileDialogComponent implements OnInit {
       );
 
       return;
+    }
+
+    if (this.assetProfileForm.controls.isBenchmark.dirty) {
+      if (this.assetProfileForm.controls.isBenchmark.value) {
+        this.dataService
+          .postBenchmark({
+            dataSource: this.data.dataSource,
+            symbol: this.data.symbol
+          })
+          .subscribe(() => {
+            this.dataService.updateInfo();
+            this.isBenchmark = true;
+          });
+      } else {
+        this.dataService
+          .deleteBenchmark({
+            dataSource: this.data.dataSource,
+            symbol: this.data.symbol
+          })
+          .subscribe(() => {
+            this.dataService.updateInfo();
+            this.isBenchmark = false;
+          });
+      }
     }
 
     this.adminService
@@ -756,30 +858,8 @@ export class GfAssetProfileDialogComponent implements OnInit {
   }
 
   protected onToggleIsActive({ checked }: MatCheckboxChange) {
-    if (checked) {
-      this.assetProfileForm.controls.isActive.setValue(true);
-    } else {
-      this.assetProfileForm.controls.isActive.setValue(false);
-    }
-
-    if (checked === this.assetProfile.isActive) {
-      this.assetProfileForm.controls.isActive.markAsPristine();
-    } else {
-      this.assetProfileForm.controls.isActive.markAsDirty();
-    }
-  }
-
-  protected onUnsetBenchmark({ dataSource, symbol }: AssetProfileIdentifier) {
-    this.dataService
-      .deleteBenchmark({ dataSource, symbol })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => {
-        this.dataService.updateInfo();
-
-        this.isBenchmark = false;
-
-        this.changeDetectorRef.markForCheck();
-      });
+    this.assetProfileForm.controls.isActive.setValue(checked);
+    this.assetProfileForm.controls.isActive.markAsDirty();
   }
 
   protected onTriggerSubmitAssetProfileForm() {

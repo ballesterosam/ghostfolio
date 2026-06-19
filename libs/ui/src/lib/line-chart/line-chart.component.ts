@@ -64,10 +64,15 @@ export class GfLineChartComponent
   @Input() showXAxis = false;
   @Input() showYAxis = false;
   @Input() unit: string;
+  @Input() maintainAspectRatio = true;
   @Input() yMax: number;
   @Input() yMaxLabel: string;
   @Input() yMin: number;
   @Input() yMinLabel: string;
+  @Input() overrideLineColor?: string;
+  @Input() overrideGradientColor?: string;
+  @Input() overrideLineWidth?: number;
+  @Input() tooltipPosition = 'top';
 
   @ViewChild('chartCanvas') chartCanvas: ElementRef<HTMLCanvasElement>;
 
@@ -141,12 +146,49 @@ export class GfLineChartComponent
       );
 
     if (gradient && this.showGradient) {
-      gradient.addColorStop(
-        0,
-        `rgba(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b}, 0.01)`
-      );
-      gradient.addColorStop(1, getBackgroundColor(this.colorScheme));
+      if (this.overrideGradientColor) {
+        const endColor = this.overrideGradientColor.replace(
+          /,\s*[\d]+\)$/,
+          ', 0.15)'
+        );
+        gradient.addColorStop(0, this.overrideGradientColor);
+        gradient.addColorStop(1, endColor);
+      } else if (this.overrideLineColor) {
+        let transparentColor = 'rgba(255, 255, 255, 0.25)';
+        if (this.overrideLineColor.startsWith('rgb')) {
+          transparentColor = this.overrideLineColor
+            .replace('rgb(', 'rgba(')
+            .replace('rgb', 'rgba')
+            .replace(')', ', 0.25)');
+        } else if (this.overrideLineColor.startsWith('#')) {
+          const hex = this.overrideLineColor.substring(1);
+          if (hex.length === 3) {
+            const r = parseInt(hex[0] + hex[0], 16);
+            const g = parseInt(hex[1] + hex[1], 16);
+            const b = parseInt(hex[2] + hex[2], 16);
+            transparentColor = `rgba(${r}, ${g}, ${b}, 0.25)`;
+          } else if (hex.length === 6) {
+            const r = parseInt(hex.substring(0, 2), 16);
+            const g = parseInt(hex.substring(2, 4), 16);
+            const b = parseInt(hex.substring(4, 6), 16);
+            transparentColor = `rgba(${r}, ${g}, ${b}, 0.25)`;
+          }
+        }
+        const endColor = transparentColor.replace(/,\s*[\d]+\)$/, ', 0.15)');
+        gradient.addColorStop(0, transparentColor);
+        gradient.addColorStop(1, endColor);
+      } else {
+        gradient.addColorStop(
+          0,
+          `rgba(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b}, 0.01)`
+        );
+        gradient.addColorStop(1, getBackgroundColor(this.colorScheme));
+      }
     }
+
+    const lineColor =
+      this.overrideLineColor ||
+      `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`;
 
     const data = {
       labels,
@@ -162,10 +204,10 @@ export class GfLineChartComponent
         },
         {
           backgroundColor: gradient,
-          borderColor: `rgb(${primaryColorRgb.r}, ${primaryColorRgb.g}, ${primaryColorRgb.b})`,
-          borderWidth: 2,
+          borderColor: lineColor,
+          borderWidth: this.overrideLineWidth || 1,
           data: marketPrices,
-          fill: true,
+          fill: 'start',
           label: this.label,
           pointRadius: 0
         }
@@ -194,6 +236,7 @@ export class GfLineChartComponent
           options: {
             animations: this.isAnimated ? animations : undefined,
             aspectRatio: 16 / 9,
+            maintainAspectRatio: this.maintainAspectRatio,
             elements: {
               point: {
                 hoverBackgroundColor: getBackgroundColor(this.colorScheme),
@@ -209,13 +252,13 @@ export class GfLineChartComponent
               },
               tooltip: this.getTooltipPluginConfiguration(),
               verticalHoverLine: {
-                color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`
+                color: `rgba(${getTextColor(this.colorScheme)}, 0.2)`
               }
             },
             scales: {
               x: {
                 border: {
-                  color: `rgba(${getTextColor(this.colorScheme)}, 0.1)`
+                  color: `rgba(${getTextColor(this.colorScheme)}, 0.2)`
                 },
                 display: this.showXAxis,
                 grid: {
@@ -241,7 +284,7 @@ export class GfLineChartComponent
                       tick.value === this.yMax ||
                       tick.value === this.yMin
                     ) {
-                      return `rgba(${getTextColor(this.colorScheme)}, 0.1)`;
+                      return `rgba(${getTextColor(this.colorScheme)}, 0.2)`;
                     }
 
                     return 'transparent';
@@ -329,7 +372,7 @@ export class GfLineChartComponent
         unit: this.unit
       }),
       mode: 'index',
-      position: 'top',
+      position: this.tooltipPosition as any,
       xAlign: 'center',
       yAlign: 'bottom'
     };

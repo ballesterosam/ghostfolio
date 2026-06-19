@@ -65,9 +65,16 @@ import { format, isSameMonth, isToday, parseISO } from 'date-fns';
 import { addIcons } from 'ionicons';
 import {
   arrowDownCircleOutline,
+  businessOutline,
   createOutline,
   flagOutline,
+  helpCircleOutline,
+  layersOutline,
+  leafOutline,
+  logoBitcoin,
+  pieChartOutline,
   readerOutline,
+  receiptOutline,
   serverOutline,
   swapVerticalOutline,
   walletOutline
@@ -125,6 +132,29 @@ export class GfHoldingDetailDialogComponent implements OnInit {
   public dividendInBaseCurrencyPrecision = 2;
   public dividendYieldPercentWithCurrencyEffect: number;
   public feeInBaseCurrency: number;
+  public getAssetIcon = (assetSubClass: string, assetClass: string) => {
+    switch (assetSubClass) {
+      case 'CRYPTOCURRENCY':
+        return 'logo-bitcoin';
+      case 'ETF':
+        return 'pie-chart-outline';
+      case 'MUTUAL_FUND':
+        return 'layers-outline';
+      case 'BOND':
+        return 'receipt-outline';
+      case 'PRECIOUS_METAL':
+        return 'leaf-outline';
+    }
+
+    switch (assetClass) {
+      case 'CASH':
+        return 'wallet-outline';
+      case 'EQUITY':
+        return 'business-outline';
+    }
+
+    return 'help-circle-outline';
+  };
   public getCountryName = getCountryName;
   public hasPermissionToCreateOwnTag: boolean;
   public hasPermissionToReadMarketDataOfOwnAssetProfile: boolean;
@@ -178,9 +208,16 @@ export class GfHoldingDetailDialogComponent implements OnInit {
   ) {
     addIcons({
       arrowDownCircleOutline,
+      businessOutline,
       createOutline,
       flagOutline,
+      helpCircleOutline,
+      layersOutline,
+      leafOutline,
+      logoBitcoin,
+      pieChartOutline,
       readerOutline,
+      receiptOutline,
       serverOutline,
       swapVerticalOutline,
       walletOutline
