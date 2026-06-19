@@ -86,6 +86,31 @@
     }
   }
 
+  // Net Worth hero card variant (green tint)
+  .hero-card--networth {
+    background: linear-gradient(160deg, #2d7a5e 0%, #1a4a38 100%);
+  }
+
+  // gf-value override inside the net worth hero card
+  .hero-card__nw-value {
+    margin-top: 0.25rem;
+
+    ::ng-deep {
+      .value {
+        font-size: 2.6rem !important;
+        font-weight: 700 !important;
+        color: #fff !important;
+        line-height: 1 !important;
+        margin: 0 !important;
+      }
+
+      .align-items-center.d-flex > .ms-1 {
+        font-size: 1.1rem !important;
+        color: rgba(255, 255, 255, 0.75) !important;
+      }
+    }
+  }
+
   // YTD badge (positioned absolute inside hero-card)
   .ytd-badge {
     position: absolute;
@@ -201,6 +226,36 @@
     }
   }
 
+  // KPI card right-side icon
+  .kpi-icon-aside {
+    font-size: 2.2rem;
+    flex-shrink: 0;
+    margin-left: 1rem;
+    opacity: 0.6;
+
+    &--blue {
+      color: #60a5fa;
+    }
+    &--indigo {
+      color: #818cf8;
+    }
+    &--green {
+      color: #34d399;
+    }
+    &--amber {
+      color: #fbbf24;
+    }
+    &--teal {
+      color: #2dd4bf;
+    }
+    &--orange {
+      color: #fb923c;
+    }
+    &--muted {
+      color: #94a3b8;
+    }
+  }
+
   .card-text-block {
     flex: 1;
   }
@@ -299,6 +354,10 @@
 :host-context(.theme-dark) {
   .hero-card {
     background: linear-gradient(160deg, #3a5f8a 0%, #1e334d 100%);
+  }
+
+  .hero-card--networth {
+    background: linear-gradient(160deg, #1f5c44 0%, #112e22 100%);
   }
 
   .info-tooltip {
