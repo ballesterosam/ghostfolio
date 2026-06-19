@@ -370,6 +370,7 @@ model PlatformIntegration {
   provider             IntegrationProvider
   encryptedCredentials String                // Token cifrado (AES-256-GCM)
   credentialsIv        String                // IV para descifrado
+  credentialsKdfSalt   String?               // Sal por credencial para scrypt KDF (null = legacy SHA-256)
   credentialsTag       String                // Authentication Tag para descifrado
   lastSyncAt           DateTime?
   lastSyncStatus       IntegrationSyncStatus @default(PENDING)

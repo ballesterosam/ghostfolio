@@ -141,6 +141,7 @@ export class PlatformIntegrationController {
           data: {
             isActive: true,
             credentialsIv: encrypted.iv,
+            credentialsKdfSalt: encrypted.kdfSalt,
             credentialsTag: encrypted.tag,
             encryptedCredentials: encrypted.encrypted,
             lastSyncError: null,
@@ -195,6 +196,7 @@ export class PlatformIntegrationController {
             data: {
               accountId: account.id,
               credentialsIv: encrypted.iv,
+              credentialsKdfSalt: encrypted.kdfSalt,
               credentialsTag: encrypted.tag,
               encryptedCredentials: encrypted.encrypted,
               externalAccountId: extAcc.id,

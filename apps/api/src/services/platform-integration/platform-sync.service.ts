@@ -68,7 +68,8 @@ export class PlatformSyncService {
       const credentials = this.encryptionService.decrypt(
         integration.encryptedCredentials,
         integration.credentialsIv,
-        integration.credentialsTag
+        integration.credentialsTag,
+        integration.credentialsKdfSalt
       );
 
       const provider = this.integrationProviderRegistry.getProvider(
@@ -317,7 +318,7 @@ export class PlatformSyncService {
       await this.prismaService.platformIntegration
         .update({
           data: {
-            lastSyncError: error.message,
+            lastSyncError: this.sanitizeSyncError(error),
             lastSyncStatus: 'ERROR'
           },
           where: { id: integrationId }
@@ -326,6 +327,24 @@ export class PlatformSyncService {
           this.logger.error(`Failed to update error status: ${e.message}`)
         );
     }
+  }
+
+  private sanitizeSyncError(error: unknown): string {
+    // Solo exponer información genérica; los detalles (stack, credenciales parciales,
+    // hostnames internos) se registran en el logger del servidor y no se devuelven al cliente.
+    if (error instanceof Error) {
+      const msg = error.message;
+      // Permitir mensajes cortos sin patrones de credenciales/infraestructura
+      const isSafe =
+        msg.length <= 120 &&
+        !/key|token|secret|password|bearer|authorization|host|localhost|prisma|sql/i.test(
+          msg
+        );
+      if (isSafe) {
+        return msg;
+      }
+    }
+    return 'Sync failed. See server logs for details.';
   }
 
   private mapAssetClass(
