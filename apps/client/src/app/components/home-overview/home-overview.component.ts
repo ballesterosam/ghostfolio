@@ -47,14 +47,21 @@ import { formatDistanceToNow } from 'date-fns';
 import { addIcons } from 'ionicons';
 import {
   addCircleOutline,
+  analyticsOutline,
+  briefcaseOutline,
   cashOutline,
+  diamondOutline,
   ellipsisHorizontalCircleOutline,
   eyeOffOutline,
+  gridOutline,
   informationCircleOutline,
+  leafOutline,
   removeCircleOutline,
   shieldCheckmarkOutline,
+  statsChartOutline,
   trendingDownOutline,
-  trendingUpOutline
+  trendingUpOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
@@ -82,10 +89,14 @@ export class GfHomeOverviewComponent implements OnInit {
   protected readonly errors = signal<AssetProfileIdentifier[]>([]);
   protected readonly hasImpersonationId = signal(false);
   protected readonly historicalDataItems = signal<LineChartItem[] | null>(null);
+  protected readonly netWorthHistoricalData = signal<LineChartItem[] | null>(
+    null
+  );
   protected readonly isLoadingPerformance = signal(true);
   protected readonly isLoadingDetails = signal(true);
   protected readonly performance = signal<PortfolioPerformance | null>(null);
   protected readonly performanceLabel = $localize`Performance`;
+  protected readonly netWorthLabel = $localize`Net Worth`;
   protected readonly buyAndSellActivitiesTooltip = translate(
     'BUY_AND_SELL_ACTIVITIES_TOOLTIP'
   );
@@ -207,6 +218,79 @@ export class GfHomeOverviewComponent implements OnInit {
       : 0;
   });
 
+  protected readonly totalInvestedInFunds = computed(() => {
+    return Object.values(this.holdingsMap())
+      .filter(
+        (h) =>
+          h.assetSubClass === AssetSubClass.MUTUALFUND ||
+          h.assetSubClass === AssetSubClass.ETF
+      )
+      .reduce((sum, h) => sum + (h.value || 0), 0);
+  });
+
+  protected readonly totalInvestedInStocks = computed(() => {
+    return Object.values(this.holdingsMap())
+      .filter((h) => h.assetSubClass === AssetSubClass.STOCK)
+      .reduce((sum, h) => sum + (h.value || 0), 0);
+  });
+
+  protected readonly totalInvestedInCrypto = computed(() => {
+    return Object.values(this.holdingsMap())
+      .filter((h) => h.assetSubClass === AssetSubClass.CRYPTOCURRENCY)
+      .reduce((sum, h) => sum + (h.value || 0), 0);
+  });
+
+  protected readonly totalInvestedInOthers = computed(() => {
+    const mainSubClasses = new Set<string>([
+      AssetSubClass.MUTUALFUND,
+      AssetSubClass.ETF,
+      AssetSubClass.STOCK,
+      AssetSubClass.CRYPTOCURRENCY
+    ]);
+    return Object.values(this.holdingsMap())
+      .filter((h) => !mainSubClasses.has(h.assetSubClass))
+      .reduce((sum, h) => sum + (h.value || 0), 0);
+  });
+
+  protected readonly yoyNetWorthPercent = computed(() => {
+    const data = this.netWorthHistoricalData();
+    if (!data || data.length < 2) {
+      return null;
+    }
+
+    const oneYearAgo = new Date();
+    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
+    const oneYearAgoStr = oneYearAgo.toISOString().slice(0, 10);
+
+    let yearAgoItem = data[0];
+    for (const item of data) {
+      if (item.date <= oneYearAgoStr) {
+        yearAgoItem = item;
+      }
+    }
+
+    const currentItem = data[data.length - 1];
+    if (!yearAgoItem?.value || !currentItem?.value) {
+      return null;
+    }
+
+    return ((currentItem.value - yearAgoItem.value) / yearAgoItem.value) * 100;
+  });
+
+  protected readonly yoyPositive = computed(() => {
+    const yoy = this.yoyNetWorthPercent();
+    return yoy !== null && yoy >= 0;
+  });
+
+  protected readonly yoyFormatted = computed(() => {
+    const yoy = this.yoyNetWorthPercent();
+    if (yoy === null) {
+      return '';
+    }
+    const sign = yoy > 0 ? '+' : yoy < 0 ? '-' : '';
+    return `${sign}${Math.abs(yoy).toFixed(1)}%`;
+  });
+
   // Color palette matching GfPortfolioProportionChartComponent order
   private readonly chartPalette = [
     '#339af0',
@@ -262,14 +346,21 @@ export class GfHomeOverviewComponent implements OnInit {
   public constructor() {
     addIcons({
       addCircleOutline,
+      analyticsOutline,
+      briefcaseOutline,
       cashOutline,
+      diamondOutline,
       ellipsisHorizontalCircleOutline,
       eyeOffOutline,
+      gridOutline,
       informationCircleOutline,
+      leafOutline,
       removeCircleOutline,
       shieldCheckmarkOutline,
+      statsChartOutline,
       trendingDownOutline,
-      trendingUpOutline
+      trendingUpOutline,
+      walletOutline
     });
 
     this.userService.stateChanged
@@ -325,6 +416,7 @@ export class GfHomeOverviewComponent implements OnInit {
 
   private update() {
     this.historicalDataItems.set(null);
+    this.netWorthHistoricalData.set(null);
     this.isLoadingPerformance.set(true);
     this.isLoadingDetails.set(true);
 
@@ -346,6 +438,25 @@ export class GfHomeOverviewComponent implements OnInit {
               };
             }
           ) ?? null
+        );
+
+        this.netWorthHistoricalData.set(
+          chart
+            ?.map(
+              ({
+                date,
+                netWorth,
+                totalAccountBalance,
+                totalInvestmentValueWithCurrencyEffect
+              }) => ({
+                date,
+                value:
+                  netWorth ??
+                  (totalInvestmentValueWithCurrencyEffect ?? 0) +
+                    (totalAccountBalance ?? 0)
+              })
+            )
+            .filter((item) => item.value > 0) ?? null
         );
 
         this.precision.set(2);

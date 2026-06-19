@@ -65,11 +65,347 @@
   } @else {
     <!-- PORTFOLIO SUMMARY section -->
     <section class="dashboard-section mb-4">
-      <h2 class="section-title" i18n>Portfolio Summary</h2>
+      <h2 class="section-title" i18n>Summary</h2>
       <div class="row g-3 align-items-stretch">
-        <!-- Hero card: portfolio value + chart -->
+        <!-- Hero card: total net worth + absolute chart (blue) -->
         <div class="col-12 col-md-8">
           <div class="hero-card">
+            <!-- Text overlay: top-left -->
+            <div class="hero-card__body">
+              <span class="hero-card__label" i18n>Total Net Worth</span>
+              <div class="hero-card__nw-value">
+                @if (isLoadingPerformance()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{
+                      height: '3rem',
+                      width: '10rem',
+                      background: 'rgba(255,255,255,0.1)'
+                    }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="
+                      performance()?.currentNetWorth ??
+                      summary()?.totalValueInBaseCurrency
+                    "
+                  />
+                }
+              </div>
+            </div>
+            <!-- YoY badge: top-right -->
+            @if (yoyNetWorthPercent() !== null && !isLoadingPerformance()) {
+              <span
+                class="ytd-badge"
+                [class.ytd-badge--negative]="!yoyPositive()"
+                [class.ytd-badge--positive]="yoyPositive()"
+              >
+                <ion-icon
+                  [name]="
+                    yoyPositive()
+                      ? 'trending-up-outline'
+                      : 'trending-down-outline'
+                  "
+                />
+                {{ yoyFormatted() }}
+              </span>
+            }
+            <!-- Full-height background chart -->
+            <div class="hero-card__chart">
+              <gf-line-chart
+                tooltipPosition="nearest"
+                [colorScheme]="user()?.settings?.colorScheme"
+                [hidden]="netWorthHistoricalData()?.length === 0"
+                [historicalDataItems]="netWorthHistoricalData()"
+                [isAnimated]="false"
+                [label]="netWorthLabel"
+                [locale]="user()?.settings?.locale"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
+                [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+                [overrideLineWidth]="2"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+                [unit]="user()?.settings?.baseCurrency"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI cards column -->
+        <div class="col-12 col-md-4 d-flex flex-column gap-3">
+          <!-- Net Return YTD -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Net Return (YTD)</span>
+              <div
+                class="kpi-card__value kpi-large"
+                [class.kpi-negative]="
+                  (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                    0) < 0
+                "
+                [class.kpi-positive]="
+                  (performance()?.netPerformancePercentageWithCurrencyEffect ??
+                    0) >= 0
+                "
+              >
+                @if (isLoadingPerformance()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [colorizeSign]="true"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="
+                      performance()?.netPerformancePercentageWithCurrencyEffect
+                    "
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--blue"
+              name="stats-chart-outline"
+            />
+          </div>
+
+          <!-- Annualized Performance -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Annualized Performance</span>
+              <div
+                class="kpi-card__value kpi-large"
+                [class.kpi-negative]="
+                  (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                    0) < 0
+                "
+                [class.kpi-positive]="
+                  (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
+                    0) >= 0
+                "
+              >
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [colorizeSign]="true"
+                    [isPercent]="true"
+                    [locale]="user()?.settings?.locale"
+                    [value]="
+                      summary()?.annualizedPerformancePercentWithCurrencyEffect
+                    "
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--indigo"
+              name="analytics-outline"
+            />
+          </div>
+
+          <!-- Annual Dividends -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Annual Dividends</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.dividendInBaseCurrency"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--green"
+              name="leaf-outline"
+            />
+          </div>
+
+          <!-- Available Cash -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Available Cash</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '7rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="summary()?.cash"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--amber"
+              name="wallet-outline"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Second summary row: Asset breakdown KPIs (left) + Net Worth chart (right) -->
+      <div class="row g-3 align-items-stretch mt-3">
+        <!-- KPI cards column (left, 1/3) -->
+        <div class="col-12 col-md-4 d-flex flex-column gap-3">
+          <!-- Funds -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Invested in Funds</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="totalInvestedInFunds()"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--teal"
+              name="briefcase-outline"
+            />
+          </div>
+
+          <!-- Stocks -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Invested in Stocks</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="totalInvestedInStocks()"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--blue"
+              name="trending-up-outline"
+            />
+          </div>
+
+          <!-- Crypto -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Invested in Crypto</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="totalInvestedInCrypto()"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--orange"
+              name="diamond-outline"
+            />
+          </div>
+
+          <!-- Others -->
+          <div
+            class="kpi-card flex-fill d-flex align-items-center justify-content-between"
+          >
+            <div>
+              <span class="kpi-card__label" i18n>Invested in Others</span>
+              <div class="kpi-card__value kpi-large">
+                @if (isLoadingDetails()) {
+                  <ngx-skeleton-loader
+                    animation="pulse"
+                    [theme]="{ height: '2rem', width: '8rem' }"
+                  />
+                } @else {
+                  <gf-value
+                    size="large"
+                    [isCurrency]="true"
+                    [locale]="user()?.settings?.locale"
+                    [unit]="user()?.settings?.baseCurrency"
+                    [value]="totalInvestedInOthers()"
+                  />
+                }
+              </div>
+            </div>
+            <ion-icon
+              class="kpi-icon-aside kpi-icon-aside--muted"
+              name="grid-outline"
+            />
+          </div>
+        </div>
+
+        <!-- Total Portfolio Value Hero Chart (right, 2/3) — green -->
+        <div class="col-12 col-md-8">
+          <div class="hero-card hero-card--networth">
             <!-- Text overlay: top-left -->
             <div class="hero-card__body">
               <span class="hero-card__label" i18n>Total Portfolio Value</span>
@@ -115,125 +451,14 @@
                 [label]="performanceLabel"
                 [locale]="user()?.settings?.locale"
                 [maintainAspectRatio]="false"
-                [overrideGradientColor]="'rgba(147, 197, 253, 0.4)'"
-                [overrideLineColor]="'rgba(147, 197, 253, 1)'"
+                [overrideGradientColor]="'rgba(167, 243, 208, 0.3)'"
+                [overrideLineColor]="'rgba(167, 243, 208, 1)'"
                 [overrideLineWidth]="2"
                 [showGradient]="true"
                 [showLoader]="false"
                 [showXAxis]="false"
                 [showYAxis]="false"
               />
-            </div>
-          </div>
-        </div>
-
-        <!-- KPI cards column -->
-        <div class="col-12 col-md-4 d-flex flex-column gap-3">
-          <!-- Net Return YTD -->
-          <div class="kpi-card flex-fill">
-            <span class="kpi-card__label" i18n>Net Return (YTD)</span>
-            <div
-              class="kpi-card__value kpi-large"
-              [class.kpi-negative]="
-                (performance()?.netPerformancePercentageWithCurrencyEffect ??
-                  0) < 0
-              "
-              [class.kpi-positive]="
-                (performance()?.netPerformancePercentageWithCurrencyEffect ??
-                  0) >= 0
-              "
-            >
-              @if (isLoadingPerformance()) {
-                <ngx-skeleton-loader
-                  animation="pulse"
-                  [theme]="{ height: '2rem', width: '8rem' }"
-                />
-              } @else {
-                <gf-value
-                  size="large"
-                  [colorizeSign]="true"
-                  [isPercent]="true"
-                  [locale]="user()?.settings?.locale"
-                  [value]="
-                    performance()?.netPerformancePercentageWithCurrencyEffect
-                  "
-                />
-              }
-            </div>
-          </div>
-
-          <!-- Annualized Performance -->
-          <div class="kpi-card flex-fill">
-            <span class="kpi-card__label" i18n>Annualized Performance</span>
-            <div
-              class="kpi-card__value kpi-large"
-              [class.kpi-negative]="
-                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
-                  0) < 0
-              "
-              [class.kpi-positive]="
-                (summary()?.annualizedPerformancePercentWithCurrencyEffect ??
-                  0) >= 0
-              "
-            >
-              @if (isLoadingDetails()) {
-                <ngx-skeleton-loader
-                  animation="pulse"
-                  [theme]="{ height: '2rem', width: '8rem' }"
-                />
-              } @else {
-                <gf-value
-                  size="large"
-                  [colorizeSign]="true"
-                  [isPercent]="true"
-                  [locale]="user()?.settings?.locale"
-                  [value]="
-                    summary()?.annualizedPerformancePercentWithCurrencyEffect
-                  "
-                />
-              }
-            </div>
-          </div>
-
-          <!-- Annual Dividends -->
-          <div class="kpi-card flex-fill">
-            <span class="kpi-card__label" i18n>Annual Dividends</span>
-            <div class="kpi-card__value kpi-large">
-              @if (isLoadingDetails()) {
-                <ngx-skeleton-loader
-                  animation="pulse"
-                  [theme]="{ height: '2rem', width: '7rem' }"
-                />
-              } @else {
-                <gf-value
-                  size="large"
-                  [isCurrency]="true"
-                  [locale]="user()?.settings?.locale"
-                  [unit]="user()?.settings?.baseCurrency"
-                  [value]="summary()?.dividendInBaseCurrency"
-                />
-              }
-            </div>
-          </div>
-
-          <!-- Available Cash -->
-          <div class="kpi-card flex-fill">
-            <span class="kpi-card__label" i18n>Available Cash</span>
-            <div class="kpi-card__value kpi-large">
-              @if (isLoadingDetails()) {
-                <ngx-skeleton-loader
-                  animation="pulse"
-                  [theme]="{ height: '2rem', width: '7rem' }"
-                />
-              } @else {
-                <gf-value
-                  size="large"
-                  [isCurrency]="true"
-                  [locale]="user()?.settings?.locale"
-                  [unit]="user()?.settings?.baseCurrency"
-                  [value]="summary()?.cash"
-                />
-              }
             </div>
           </div>
         </div>
