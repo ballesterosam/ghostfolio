@@ -70,7 +70,9 @@ import {
   settingsOutline,
   shieldCheckmarkOutline,
   sparklesOutline,
-  swapVerticalOutline
+  swapVerticalOutline,
+  syncOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { EMPTY } from 'rxjs';
 import { catchError } from 'rxjs/operators';
@@ -191,7 +193,9 @@ export class GfHeaderComponent implements OnChanges {
       settingsOutline,
       shieldCheckmarkOutline,
       sparklesOutline,
-      swapVerticalOutline
+      swapVerticalOutline,
+      syncOutline,
+      walletOutline
     });
   }
 

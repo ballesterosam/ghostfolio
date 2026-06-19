@@ -66,6 +66,18 @@ export const internalRoutes = {
   accounts: {
     path: 'accounts',
     routerLink: ['/accounts'],
+    subRoutes: {
+      accounts: {
+        path: undefined, // Default sub route
+        routerLink: ['/accounts'],
+        title: $localize`Accounts`
+      },
+      integrations: {
+        path: 'integrations',
+        routerLink: ['/accounts', 'integrations'],
+        title: $localize`Integrations`
+      }
+    },
     title: $localize`Accounts`
   },
   api: {

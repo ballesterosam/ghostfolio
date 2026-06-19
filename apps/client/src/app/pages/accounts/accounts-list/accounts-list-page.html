@@ -1,0 +1,72 @@
+<div class="overview p-3">
+  <div class="row">
+    <div class="col">
+      <div class="pt-4">
+        <gf-accounts-table
+          [accounts]="accounts"
+          [activitiesCount]="activitiesCount"
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [locale]="user?.settings?.locale"
+          [showActions]="
+            !hasImpersonationId &&
+            hasPermissionToUpdateAccount &&
+            !user.settings.isRestrictedView
+          "
+          [totalBalanceInBaseCurrency]="totalBalanceInBaseCurrency"
+          [totalValueInBaseCurrency]="totalValueInBaseCurrency"
+          (accountDeleted)="onDeleteAccount($event, false)"
+          (accountDeletedWithActivities)="onDeleteAccount($event, true)"
+          (accountToUpdate)="onUpdateAccount($event)"
+          (transferBalance)="onTransferBalance()"
+        />
+      </div>
+    </div>
+  </div>
+
+  <div class="proportion-charts row mt-4">
+    <div class="col-md-6 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 text-truncate" i18n>By Account</h3>
+        <gf-portfolio-proportion-chart
+          cursor="pointer"
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="accountsChartData"
+          [glow]="true"
+          [hollow]="true"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['id']"
+          [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
+          [showLegend]="true"
+          (proportionChartClicked)="onAccountChartClicked($event)"
+        />
+      </div>
+    </div>
+    <div class="col-md-6 mb-3">
+      <div class="dashboard-card">
+        <h3 class="h5 mb-3 text-truncate" i18n>By Platform</h3>
+        <gf-portfolio-proportion-chart
+          [baseCurrency]="user?.settings?.baseCurrency"
+          [colorScheme]="user?.settings?.colorScheme"
+          [data]="platforms"
+          [glow]="true"
+          [hollow]="true"
+          [isInPercentage]="showValuesInPercentage()"
+          [keys]="['id']"
+          [locale]="user?.settings?.locale"
+          [separateSegments]="isDarkMode()"
+          [showLegend]="true"
+        />
+      </div>
+    </div>
+  </div>
+
+  @if (
+    !hasImpersonationId &&
+    hasPermissionToCreateAccount &&
+    !user.settings.isRestrictedView
+  ) {
+    <gf-fab [queryParams]="{ createDialog: true }" />
+  }
+</div>

@@ -1,0 +1,150 @@
+<div class="overview p-3">
+  <div class="row">
+    <div class="col">
+      <div class="pt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+          <p class="m-0 text-muted" i18n>
+            Connect external APIs to automatically synchronize your accounts and
+            transactions.
+          </p>
+          <button
+            color="primary"
+            mat-flat-button
+            [queryParams]="{ addIntegrationDialog: true }"
+            [routerLink]="[]"
+          >
+            <span i18n>Add Integration</span>
+          </button>
+        </div>
+
+        @if (integrations?.length > 0) {
+          <div class="overflow-x-auto">
+            <table class="gf-table w-100" mat-table [dataSource]="integrations">
+              <ng-container matColumnDef="accountName">
+                <th *matHeaderCellDef class="px-1" mat-header-cell>
+                  <ng-container i18n>Account</ng-container>
+                </th>
+                <td *matCellDef="let element" class="px-1" mat-cell>
+                  <div class="fw-semibold text-main">
+                    {{ element.accountName }}
+                  </div>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="provider">
+                <th *matHeaderCellDef class="px-1" mat-header-cell>
+                  <ng-container i18n>Provider</ng-container>
+                </th>
+                <td *matCellDef="let element" class="px-1" mat-cell>
+                  <span class="badge bg-light">{{ element.provider }}</span>
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="externalAccountId">
+                <th *matHeaderCellDef class="px-1" mat-header-cell>
+                  <ng-container i18n>External ID</ng-container>
+                </th>
+                <td *matCellDef="let element" class="px-1" mat-cell>
+                  {{ element.externalAccountId }}
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="lastSyncAt">
+                <th *matHeaderCellDef class="px-1" mat-header-cell>
+                  <ng-container i18n>Last Sync</ng-container>
+                </th>
+                <td *matCellDef="let element" class="px-1" mat-cell>
+                  @if (element.lastSyncAt) {
+                    {{ element.lastSyncAt | date: 'short' }}
+                  } @else {
+                    <span class="text-muted">-</span>
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="status">
+                <th *matHeaderCellDef class="px-1" mat-header-cell>
+                  <ng-container i18n>Status</ng-container>
+                </th>
+                <td *matCellDef="let element" class="px-1" mat-cell>
+                  @switch (element.lastSyncStatus) {
+                    @case ('SUCCESS') {
+                      <span class="badge bg-success" i18n>Success</span>
+                    }
+                    @case ('SYNCING') {
+                      <span class="badge bg-warning text-dark" i18n
+                        >Syncing...</span
+                      >
+                    }
+                    @case ('ERROR') {
+                      <span
+                        class="badge bg-danger"
+                        i18n
+                        [title]="element.lastSyncError || ''"
+                        >Error</span
+                      >
+                    }
+                    @case ('PENDING') {
+                      <span class="badge bg-secondary" i18n>Pending</span>
+                    }
+                  }
+                </td>
+              </ng-container>
+
+              <ng-container matColumnDef="actions" stickyEnd>
+                <th
+                  *matHeaderCellDef
+                  class="px-1 text-center"
+                  mat-header-cell
+                ></th>
+                <td *matCellDef="let element" class="px-1 text-center" mat-cell>
+                  <button
+                    class="mx-1 no-min-width px-2"
+                    mat-button
+                    [matMenuTriggerFor]="integrationMenu"
+                  >
+                    <ion-icon name="ellipsis-horizontal" />
+                  </button>
+                  <mat-menu #integrationMenu="matMenu" xPosition="before">
+                    <button
+                      mat-menu-item
+                      [disabled]="element.lastSyncStatus === 'SYNCING'"
+                      (click)="onSyncIntegration(element.id)"
+                    >
+                      <span class="align-items-center d-flex">
+                        <ion-icon class="me-2" name="sync-outline" />
+                        <span i18n>Sync now</span>
+                      </span>
+                    </button>
+                    <button
+                      mat-menu-item
+                      (click)="onDisconnectIntegration(element.id)"
+                    >
+                      <span class="align-items-center d-flex text-danger">
+                        <ion-icon
+                          class="me-2 text-danger"
+                          name="trash-outline"
+                        />
+                        <span i18n>Disconnect</span>
+                      </span>
+                    </button>
+                  </mat-menu>
+                </td>
+              </ng-container>
+
+              <tr *matHeaderRowDef="displayedColumns" mat-header-row></tr>
+              <tr *matRowDef="let row; columns: displayedColumns" mat-row></tr>
+            </table>
+          </div>
+        } @else {
+          <div class="empty-state-container mt-4">
+            <p i18n>
+              No active integrations. Click "Add Integration" to connect your
+              first API account.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
