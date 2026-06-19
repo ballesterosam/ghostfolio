@@ -7,90 +7,134 @@
 
 <div class="flex-grow-1" mat-dialog-content>
   <div class="container p-0">
-    <div class="row">
-      <div class="col-12 d-flex justify-content-center mb-3">
-        <gf-value
-          size="large"
-          [isCurrency]="true"
-          [locale]="user?.settings?.locale"
-          [unit]="user?.settings?.baseCurrency"
-          [value]="valueInBaseCurrency"
-        />
+    <div class="row mb-4">
+      <div class="col-12">
+        <div
+          class="dashboard-card text-center d-flex flex-column align-items-center"
+        >
+          @if (platform?.url) {
+            <div class="asset-icon-wrapper mb-2 align-self-center">
+              <gf-entity-logo
+                [size]="'large'"
+                [tooltip]="platformName"
+                [url]="platform.url"
+              />
+            </div>
+          } @else {
+            <div class="asset-icon-wrapper mb-2 align-self-center">
+              <ion-icon name="wallet-outline" />
+            </div>
+          }
+          <gf-value
+            size="large"
+            [isCurrency]="true"
+            [locale]="user?.settings?.locale"
+            [unit]="user?.settings?.baseCurrency"
+            [value]="valueInBaseCurrency"
+          />
+        </div>
       </div>
     </div>
 
-    <div class="chart-container mb-3">
-      <gf-investment-chart
-        class="h-100"
-        [currency]="user?.settings?.baseCurrency"
-        [historicalDataItems]="historicalDataItems"
-        [isInPercentage]="showValuesInPercentage()"
-        [isLoading]="isLoadingChart"
-        [locale]="user?.settings?.locale"
-      />
+    <div class="row mb-4">
+      <div class="col-12">
+        <div class="dashboard-card">
+          <div class="chart-container">
+            <gf-investment-chart
+              class="h-100"
+              [currency]="user?.settings?.baseCurrency"
+              [historicalDataItems]="historicalDataItems"
+              [isInPercentage]="showValuesInPercentage()"
+              [isLoading]="isLoadingChart"
+              [locale]="user?.settings?.locale"
+            />
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="mb-3 row">
-      <div class="col-6 mb-3">
-        <gf-value
-          i18n
-          size="medium"
-          [isCurrency]="true"
-          [locale]="user?.settings?.locale"
-          [precision]="balancePrecision"
-          [unit]="currency"
-          [value]="balance"
-          >Cash Balance</gf-value
-        >
+    <div class="mb-4 row">
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Cash Balance</div>
+          <div class="kpi-card__value">
+            <gf-value
+              size="medium"
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [precision]="balancePrecision"
+              [unit]="currency"
+              [value]="balance"
+            />
+          </div>
+        </div>
       </div>
-      <div class="col-6 mb-3">
-        <gf-value
-          i18n
-          size="medium"
-          [isCurrency]="true"
-          [locale]="user?.settings?.locale"
-          [precision]="equityPrecision"
-          [unit]="currency"
-          [value]="equity"
-          >Equity</gf-value
-        >
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Equity</div>
+          <div class="kpi-card__value">
+            <gf-value
+              size="medium"
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [precision]="equityPrecision"
+              [unit]="currency"
+              [value]="equity"
+            />
+          </div>
+        </div>
       </div>
-      <div class="col-6 mb-3">
-        <gf-value
-          i18n
-          size="medium"
-          [isCurrency]="true"
-          [locale]="user?.settings?.locale"
-          [precision]="interestInBaseCurrencyPrecision"
-          [unit]="user?.settings?.baseCurrency"
-          [value]="interestInBaseCurrency"
-          >Interest</gf-value
-        >
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Interest</div>
+          <div class="kpi-card__value">
+            <gf-value
+              size="medium"
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [precision]="interestInBaseCurrencyPrecision"
+              [unit]="user?.settings?.baseCurrency"
+              [value]="interestInBaseCurrency"
+            />
+          </div>
+        </div>
       </div>
-      <div class="col-6 mb-3">
-        <gf-value
-          i18n
-          size="medium"
-          [isCurrency]="true"
-          [locale]="user?.settings?.locale"
-          [precision]="dividendInBaseCurrencyPrecision"
-          [unit]="user?.settings?.baseCurrency"
-          [value]="dividendInBaseCurrency"
-          >Dividend</gf-value
-        >
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Dividend</div>
+          <div class="kpi-card__value">
+            <gf-value
+              size="medium"
+              [isCurrency]="true"
+              [locale]="user?.settings?.locale"
+              [precision]="dividendInBaseCurrencyPrecision"
+              [unit]="user?.settings?.baseCurrency"
+              [value]="dividendInBaseCurrency"
+            />
+          </div>
+        </div>
       </div>
-      <div class="col-6 mb-3">
-        <gf-value i18n size="medium" [value]="activitiesCount"
-          >Activities</gf-value
-        >
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Activities</div>
+          <div class="kpi-card__value">
+            <gf-value size="medium" [value]="activitiesCount" />
+          </div>
+        </div>
       </div>
-      <div class="col-6 mb-3">
-        <gf-value i18n size="medium" [value]="platformName">Platform</gf-value>
+      <div class="col-6 col-md-4 mb-3">
+        <div class="kpi-card">
+          <div class="kpi-card__label" i18n>Platform</div>
+          <div class="kpi-card__value text-truncate" [title]="platformName">
+            {{ platformName }}
+          </div>
+        </div>
       </div>
     </div>
 
     <mat-tab-group
       animationDuration="0ms"
+      class="mb-4"
       [class.d-none]="isLoadingActivities"
       [mat-stretch-tabs]="false"
     >
