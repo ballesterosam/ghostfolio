@@ -20,6 +20,7 @@ import type { FilterGroup } from './filter-group.interface';
 import type { Filter } from './filter.interface';
 import type { FireCalculationCompleteEvent } from './fire-calculation-complete-event.interface';
 import type { FireWealth } from './fire-wealth.interface';
+import type { GoalYear } from './goal-year.interface';
 import type { HistoricalDataItem } from './historical-data-item.interface';
 import type { HoldingWithParents } from './holding-with-parents.interface';
 import type { Holding } from './holding.interface';
@@ -150,6 +151,7 @@ export {
   FilterGroup,
   FireCalculationCompleteEvent,
   FireWealth,
+  GoalYear,
   HistoricalDataItem,
   HistoricalResponse,
   Holding,

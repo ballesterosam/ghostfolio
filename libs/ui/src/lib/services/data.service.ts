@@ -549,12 +549,18 @@ export class DataService {
 
   public fetchPortfolioDetails({
     filters,
+    range,
     withMarkets = false
   }: {
     filters?: Filter[];
+    range?: DateRange;
     withMarkets?: boolean;
   } = {}): Observable<PortfolioDetails> {
     let params = this.buildFiltersAsQueryParams({ filters });
+
+    if (range) {
+      params = params.append('range', range);
+    }
 
     if (withMarkets) {
       params = params.append('withMarkets', withMarkets);

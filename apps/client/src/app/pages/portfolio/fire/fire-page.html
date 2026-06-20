@@ -33,7 +33,21 @@
           (projectedTotalAmountChanged)="onProjectedTotalAmountChange($event)"
           (retirementDateChanged)="onRetirementDateChange($event)"
           (savingsRateChanged)="onSavingsRateChange($event)"
+          (yearlyProjectionsChanged)="onYearlyProjectionsChange($event)"
         />
+
+        @if (
+          fireProjections.length > 0 &&
+          !hasImpersonationId &&
+          hasPermissionToUpdateUserSettings
+        ) {
+          <div class="d-flex justify-content-end mt-3">
+            <button color="primary" mat-flat-button (click)="onSetAsGoals()">
+              <ion-icon class="me-1" name="flag-outline" />
+              <span i18n>Add as my goals</span>
+            </button>
+          </div>
+        }
       </div>
     </div>
   </div>

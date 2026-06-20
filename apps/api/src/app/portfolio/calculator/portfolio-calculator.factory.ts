@@ -8,6 +8,7 @@ import {
   Filter,
   HistoricalDataItem
 } from '@ghostfolio/common/interfaces';
+import { DateRange } from '@ghostfolio/common/types/date-range.type';
 import { PerformanceCalculationType } from '@ghostfolio/common/types/performance-calculation-type.type';
 
 import { Injectable } from '@nestjs/common';
@@ -33,6 +34,7 @@ export class PortfolioCalculatorFactory {
     activities,
     calculationType,
     currency,
+    dateRange = 'max',
     filters = [],
     userId
   }: {
@@ -40,6 +42,7 @@ export class PortfolioCalculatorFactory {
     activities: Activity[];
     calculationType: PerformanceCalculationType;
     currency: string;
+    dateRange?: DateRange;
     filters?: Filter[];
     userId: string;
   }): PortfolioCalculator {
@@ -49,6 +52,7 @@ export class PortfolioCalculatorFactory {
           accountBalanceItems,
           activities,
           currency,
+          dateRange,
           filters,
           userId,
           configurationService: this.configurationService,
@@ -63,6 +67,7 @@ export class PortfolioCalculatorFactory {
           accountBalanceItems,
           activities,
           currency,
+          dateRange,
           filters,
           userId,
           configurationService: this.configurationService,
@@ -77,6 +82,7 @@ export class PortfolioCalculatorFactory {
           accountBalanceItems,
           activities,
           currency,
+          dateRange,
           filters,
           userId,
           configurationService: this.configurationService,
@@ -91,6 +97,7 @@ export class PortfolioCalculatorFactory {
           accountBalanceItems,
           activities,
           currency,
+          dateRange,
           filters,
           userId,
           configurationService: this.configurationService,

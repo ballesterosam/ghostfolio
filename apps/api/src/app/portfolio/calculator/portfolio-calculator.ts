@@ -36,6 +36,7 @@ import {
 } from '@ghostfolio/common/interfaces';
 import { PortfolioSnapshot, TimelinePosition } from '@ghostfolio/common/models';
 import { GroupBy } from '@ghostfolio/common/types';
+import { DateRange } from '@ghostfolio/common/types/date-range.type';
 import { PerformanceCalculationType } from '@ghostfolio/common/types/performance-calculation-type.type';
 
 import { Logger } from '@nestjs/common';
@@ -89,6 +90,7 @@ export abstract class PortfolioCalculator {
     configurationService,
     currency,
     currentRateService,
+    dateRange = 'max',
     exchangeRateDataService,
     filters,
     portfolioSnapshotService,
@@ -100,6 +102,7 @@ export abstract class PortfolioCalculator {
     configurationService: ConfigurationService;
     currency: string;
     currentRateService: CurrentRateService;
+    dateRange?: DateRange;
     exchangeRateDataService: ExchangeRateDataService;
     filters: Filter[];
     portfolioSnapshotService: PortfolioSnapshotService;
@@ -162,7 +165,7 @@ export abstract class PortfolioCalculator {
     this.userId = userId;
 
     const { endDate, startDate } = getIntervalFromDateRange({
-      dateRange: 'max',
+      dateRange,
       startDate: subDays(dateOfFirstActivity, 1)
     });
 
@@ -1093,6 +1096,14 @@ export abstract class PortfolioCalculator {
   @LogPerformance
   private async initialize() {
     const startTimeTotal = performance.now();
+
+    // For historical date ranges (endDate before today), bypass the shared
+    // cache and queue — they are keyed only by userId+filters and always store
+    // a snapshot computed at today's prices, which would return wrong values.
+    if (isBefore(this.endDate, startOfDay(new Date()))) {
+      this.snapshot = await this.computeSnapshot();
+      return;
+    }
 
     let cachedPortfolioSnapshot: PortfolioSnapshot;
     let isCachedPortfolioSnapshotExpired = false;

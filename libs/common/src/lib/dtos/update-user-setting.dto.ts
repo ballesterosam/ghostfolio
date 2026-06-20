@@ -1,4 +1,4 @@
-import { XRayRulesSettings } from '@ghostfolio/common/interfaces';
+import { GoalYear, XRayRulesSettings } from '@ghostfolio/common/interfaces';
 import type {
   ColorScheme,
   DateRange,
@@ -55,6 +55,10 @@ export class UpdateUserSettingDto {
   @IsNumber()
   @IsOptional()
   emergencyFund?: number;
+
+  @IsArray()
+  @IsOptional()
+  goals?: GoalYear[] | null;
 
   @IsArray()
   @IsOptional()

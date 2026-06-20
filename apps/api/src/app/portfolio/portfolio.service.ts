@@ -507,6 +507,7 @@ export class PortfolioService {
 
     const portfolioCalculator = this.calculatorFactory.createCalculator({
       activities,
+      dateRange,
       filters,
       userId,
       calculationType: this.getUserPerformanceCalculationType(user),

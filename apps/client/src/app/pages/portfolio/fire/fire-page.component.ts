@@ -4,9 +4,11 @@ import { SubscriptionType } from '@ghostfolio/common/enums';
 import {
   FireCalculationCompleteEvent,
   FireWealth,
+  GoalYear,
   User
 } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
+import { internalRoutes } from '@ghostfolio/common/routes/routes';
 import { GfFireCalculatorComponent } from '@ghostfolio/ui/fire-calculator';
 import { GfPremiumIndicatorComponent } from '@ghostfolio/ui/premium-indicator';
 import { DataService } from '@ghostfolio/ui/services';
@@ -24,7 +26,12 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { FormControl } from '@angular/forms';
+import { MatButtonModule } from '@angular/material/button';
+import { Router } from '@angular/router';
+import { IonIcon } from '@ionic/angular/standalone';
 import { Big } from 'big.js';
+import { addIcons } from 'ionicons';
+import { flagOutline } from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
@@ -35,6 +42,8 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
     GfFireCalculatorComponent,
     GfPremiumIndicatorComponent,
     GfValueComponent,
+    IonIcon,
+    MatButtonModule,
     NgxSkeletonLoaderModule,
     ReactiveFormsModule
   ],
@@ -47,6 +56,7 @@ export class GfFirePageComponent implements OnInit {
     () => this.deviceDetectorService.deviceInfo().deviceType
   );
 
+  protected fireProjections: { totalAmount: number; year: number }[] = [];
   protected fireWealth: FireWealth;
   protected hasImpersonationId: boolean;
   protected hasPermissionToUpdateUserSettings: boolean;
@@ -73,7 +83,12 @@ export class GfFirePageComponent implements OnInit {
   private readonly impersonationStorageService = inject(
     ImpersonationStorageService
   );
+  private readonly router = inject(Router);
   private readonly userService = inject(UserService);
+
+  public constructor() {
+    addIcons({ flagOutline });
+  }
 
   public ngOnInit() {
     this.isLoading = true;
@@ -167,6 +182,32 @@ export class GfFirePageComponent implements OnInit {
     this.calculateWithdrawalRatesProjected();
 
     this.isLoading = false;
+  }
+
+  protected onYearlyProjectionsChange(
+    projections: { totalAmount: number; year: number }[]
+  ) {
+    this.fireProjections = projections;
+    this.changeDetectorRef.markForCheck();
+  }
+
+  protected onSetAsGoals() {
+    const goals: GoalYear[] = this.fireProjections.map((p) => ({
+      targetAmount: p.totalAmount,
+      year: p.year
+    }));
+
+    this.dataService
+      .putUserSetting({ goals })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.userService
+          .get(true)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe(() => {
+            this.router.navigate(internalRoutes.myGoals.routerLink);
+          });
+      });
   }
 
   protected onProjectedTotalAmountChange(projectedTotalAmount: number) {

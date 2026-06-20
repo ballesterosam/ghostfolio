@@ -98,18 +98,43 @@
           <a
             class="dropdown-link"
             routerLinkActive="active"
-            [routerLink]="['/portfolio', 'fire']"
-          >
-            <ion-icon name="calculator-outline"></ion-icon>
-            <span i18n>FIRE</span>
-          </a>
-          <a
-            class="dropdown-link"
-            routerLinkActive="active"
             [routerLink]="['/portfolio', 'x-ray']"
           >
             <ion-icon name="scan-outline"></ion-icon>
             <span i18n>X-ray</span>
+          </a>
+        </div>
+      </li>
+
+      <!-- My Goals -->
+      <li class="list-inline-item nav-item-dropdown">
+        <a
+          class="d-none d-sm-block rounded nav-link-btn"
+          i18n
+          mat-button
+          [class.nav-pill-active]="
+            currentRoute() === internalRoutes.myGoals.path
+          "
+          [routerLink]="routerLinkMyGoals"
+          >My Goals</a
+        >
+        <div class="contextual-dropdown">
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/my-goals']"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <ion-icon name="flag-outline"></ion-icon>
+            <span i18n>My Goals</span>
+          </a>
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/my-goals', 'fire']"
+          >
+            <ion-icon name="calculator-outline"></ion-icon>
+            <span i18n>FIRE</span>
           </a>
         </div>
       </li>
