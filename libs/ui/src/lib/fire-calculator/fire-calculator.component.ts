@@ -112,6 +112,8 @@ export class GfFireCalculatorComponent implements OnChanges, OnDestroy {
   protected readonly projectedTotalAmountChanged = output<number>();
   protected readonly retirementDateChanged = output<Date>();
   protected readonly savingsRateChanged = output<number>();
+  protected readonly yearlyProjectionsChanged =
+    output<{ totalAmount: number; year: number }[]>();
 
   private readonly CONTRIBUTION_PERIOD = 12;
 
@@ -368,6 +370,16 @@ export class GfFireCalculatorComponent implements OnChanges, OnDestroy {
         });
       }
     }
+
+    const projections = (chartData.labels as number[]).map((year, i) => ({
+      totalAmount: Math.round(
+        ((chartData.datasets[0].data[i] as number) ?? 0) +
+          ((chartData.datasets[1].data[i] as number) ?? 0) +
+          ((chartData.datasets[2].data[i] as number) ?? 0)
+      ),
+      year
+    }));
+    this.yearlyProjectionsChanged.emit(projections);
 
     this.isLoading = false;
   }

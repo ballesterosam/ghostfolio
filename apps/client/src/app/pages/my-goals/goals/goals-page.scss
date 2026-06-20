@@ -1,0 +1,155 @@
+// ── Layout ────────────────────────────────────────────────────────────────────
+.goals-layout {
+  align-items: flex-start;
+  display: flex;
+  gap: 1.5rem;
+
+  @media (max-width: 767px) {
+    flex-direction: column;
+  }
+}
+
+// ── Table card (left, auto-width) ─────────────────────────────────────────────
+.goals-table-card {
+  flex-shrink: 0;
+  padding: 0; // override dashboard-card padding; table has its own spacing
+}
+
+.goals-table {
+  border-collapse: collapse;
+  width: auto;
+
+  th,
+  td {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+    padding: 0.6rem 1.25rem;
+    white-space: nowrap;
+  }
+
+  th {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    opacity: 0.5;
+    padding-top: 1rem;
+    text-transform: uppercase;
+  }
+
+  tr:first-child th {
+    padding-top: 1.25rem;
+  }
+
+  tr:last-child td {
+    border-bottom: none;
+    padding-bottom: 1.25rem;
+  }
+
+  tbody tr:hover {
+    background: rgba(0, 0, 0, 0.025);
+  }
+}
+
+// ── Badge ─────────────────────────────────────────────────────────────────────
+.goal-badge {
+  border-radius: 999px;
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.15rem 0.6rem;
+
+  &.badge-ahead {
+    background: rgba(34, 197, 94, 0.14);
+    color: #16a34a;
+  }
+
+  &.badge-on-track {
+    background: rgba(234, 179, 8, 0.14);
+    color: #b45309;
+  }
+
+  &.badge-behind {
+    background: rgba(239, 68, 68, 0.14);
+    color: #dc2626;
+  }
+}
+
+// ── Charts column (right, grows to fill) ──────────────────────────────────────
+.goals-charts {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 1.5rem;
+  min-width: 0;
+}
+
+// Chart card: label + fixed-height canvas
+.chart-card {
+  display: flex;
+  flex-direction: column;
+}
+
+.chart-label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  margin-bottom: 0.75rem;
+  opacity: 0.55;
+  text-transform: uppercase;
+}
+
+.chart-canvas-wrap {
+  height: 280px;
+  position: relative;
+  width: 100%;
+}
+
+// ── Edit form ─────────────────────────────────────────────────────────────────
+.year-field {
+  width: 110px;
+}
+
+.amount-field {
+  width: 220px;
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.empty-state .empty-icon {
+  color: rgba(0, 0, 0, 0.2);
+  display: block;
+  font-size: 3.5rem;
+}
+
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+:host-context(.theme-dark) {
+  .goals-table {
+    th,
+    td {
+      border-bottom-color: rgba(255, 255, 255, 0.07);
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.04);
+    }
+  }
+
+  .goal-badge {
+    &.badge-ahead {
+      background: rgba(34, 197, 94, 0.2);
+      color: #4ade80;
+    }
+
+    &.badge-on-track {
+      background: rgba(234, 179, 8, 0.2);
+      color: #fbbf24;
+    }
+
+    &.badge-behind {
+      background: rgba(239, 68, 68, 0.2);
+      color: #f87171;
+    }
+  }
+
+  .empty-state .empty-icon {
+    color: rgba(255, 255, 255, 0.2);
+  }
+}

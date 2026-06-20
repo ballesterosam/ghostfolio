@@ -97,6 +97,23 @@ export const internalRoutes = {
     routerLink: ['/home'],
     title: $localize`Overview`
   },
+  myGoals: {
+    path: 'my-goals',
+    routerLink: ['/my-goals'],
+    subRoutes: {
+      fire: {
+        path: 'fire',
+        routerLink: ['/my-goals', 'fire'],
+        title: 'FIRE'
+      },
+      goals: {
+        path: undefined, // Default sub-route
+        routerLink: ['/my-goals'],
+        title: $localize`My Goals`
+      }
+    },
+    title: $localize`My Goals`
+  },
   i18n: {
     excludeFromAssistant: true,
     path: 'i18n',

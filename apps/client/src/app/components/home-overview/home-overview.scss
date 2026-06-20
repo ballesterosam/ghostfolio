@@ -348,6 +348,27 @@
   .font-size-xxxl {
     font-size: 2.2rem;
   }
+
+  // ─── Goal deviation chart ────────────────────────────────────────────────
+  .chart-card {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .chart-label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.75rem;
+    opacity: 0.55;
+    text-transform: uppercase;
+  }
+
+  .goal-deviation-canvas-wrap {
+    height: 240px;
+    position: relative;
+    width: 100%;
+  }
 }
 
 // ─── Dark mode overrides ────────────────────────────────────────────────────

@@ -127,7 +127,7 @@ export class GfAppComponent implements OnInit {
         if (
           ((this.currentRoute === internalRoutes.home.path &&
             !this.currentSubRoute) ||
-            (this.currentRoute === internalRoutes.home.path &&
+            (this.currentRoute === internalRoutes.portfolio.path &&
               this.currentSubRoute ===
                 internalRoutes.portfolio.subRoutes?.holdings.path) ||
             (this.currentRoute === internalRoutes.portfolio.path &&
@@ -140,7 +140,7 @@ export class GfAppComponent implements OnInit {
         }
 
         if (
-          (this.currentRoute === internalRoutes.home.path &&
+          (this.currentRoute === internalRoutes.portfolio.path &&
             this.currentSubRoute ===
               internalRoutes.portfolio.subRoutes?.holdings.path) ||
           (this.currentRoute === internalRoutes.portfolio.path &&
@@ -165,6 +165,7 @@ export class GfAppComponent implements OnInit {
             this.currentRoute === internalRoutes.account.path ||
             this.currentRoute === internalRoutes.adminControl.path ||
             this.currentRoute === internalRoutes.home.path ||
+            this.currentRoute === internalRoutes.myGoals.path ||
             this.currentRoute === internalRoutes.portfolio.path ||
             this.currentRoute === internalRoutes.zen.path) &&
           this.deviceType !== 'mobile';

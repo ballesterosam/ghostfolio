@@ -1,0 +1,156 @@
+<div class="overview p-3">
+  <!-- Edit mode -->
+  @if (isEditMode()) {
+    <div class="mb-4">
+      <div class="d-flex align-items-center justify-content-between mb-3">
+        <h2 class="section-title mb-0" i18n>Set Your Goals</h2>
+        <div class="d-flex gap-2">
+          <button i18n mat-stroked-button (click)="onCancelEdit()">
+            Cancel
+          </button>
+          <button color="primary" mat-flat-button (click)="onSaveGoals()">
+            <ion-icon class="me-1" name="save-outline"></ion-icon>
+            <span i18n>Save</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="dashboard-card">
+        <div class="goals-form-rows">
+          @for (goal of editGoals(); track $index) {
+            <div class="d-flex align-items-center gap-3 mb-2">
+              <mat-form-field appearance="outline" class="year-field">
+                <mat-label i18n>Year</mat-label>
+                <input
+                  matInput
+                  max="2100"
+                  min="2000"
+                  type="number"
+                  [(ngModel)]="goal.year"
+                />
+              </mat-form-field>
+              <mat-form-field appearance="outline" class="amount-field">
+                <mat-label i18n>Target Wealth</mat-label>
+                <input
+                  matInput
+                  min="0"
+                  type="number"
+                  [(ngModel)]="goal.targetAmount"
+                />
+                @if (currency()) {
+                  <span matTextSuffix>{{ currency() }}</span>
+                }
+              </mat-form-field>
+              <button
+                color="warn"
+                mat-icon-button
+                (click)="onRemoveRow($index)"
+              >
+                <ion-icon name="remove-circle-outline"></ion-icon>
+              </button>
+            </div>
+          }
+        </div>
+
+        <button class="mt-2" mat-stroked-button (click)="onAddRow()">
+          <ion-icon class="me-1" name="add-outline"></ion-icon>
+          <span i18n>Add Year</span>
+        </button>
+      </div>
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading() && !isEditMode()) {
+    <ngx-skeleton-loader
+      count="5"
+      [theme]="{ height: '20px' }"
+    ></ngx-skeleton-loader>
+  }
+
+  <!-- Empty state -->
+  @if (!isLoading() && !isEditMode() && !hasGoals) {
+    <div class="dashboard-card empty-state text-center py-5">
+      <ion-icon class="empty-icon mb-3" name="flag-outline"></ion-icon>
+      <h3 i18n>No goals set yet</h3>
+      <p class="text-muted" i18n>
+        Define your yearly wealth targets to track your progress.
+      </p>
+      <button color="primary" mat-flat-button (click)="onStartEdit()">
+        <ion-icon class="me-1" name="add-outline"></ion-icon>
+        <span i18n>Add Goals</span>
+      </button>
+    </div>
+  }
+
+  <!-- Goals view -->
+  @if (!isLoading() && !isEditMode() && hasGoals) {
+    <div class="d-flex align-items-start justify-content-between mb-4">
+      <h2 class="section-title mb-0" i18n>My Goals</h2>
+      <button mat-stroked-button (click)="onStartEdit()">
+        <ion-icon class="me-1" name="create-outline"></ion-icon>
+        <span i18n>Edit Goals</span>
+      </button>
+    </div>
+
+    <div class="goals-layout">
+      <!-- Table card (narrow, auto-width) -->
+      <div class="dashboard-card goals-table-card">
+        <table class="goals-table">
+          <thead>
+            <tr>
+              <th i18n>Year</th>
+              <th class="text-end" i18n>Target</th>
+              <th class="text-end" i18n>Actual</th>
+              <th class="text-end" i18n>Diff</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of tableRows(); track row.year) {
+              <tr>
+                <td class="fw-semibold">{{ row.year }}</td>
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.target) }}
+                </td>
+                <td class="text-end text-nowrap">
+                  {{ formatCurrency(row.actual) }}
+                </td>
+                <td class="text-end">
+                  @if (row.pct !== null) {
+                    <span
+                      class="goal-badge"
+                      [class.badge-ahead]="row.status === 'ahead'"
+                      [class.badge-behind]="row.status === 'behind'"
+                      [class.badge-on-track]="row.status === 'on-track'"
+                      >{{ formatPct(row.pct) }}</span
+                    >
+                  } @else {
+                    <span class="text-muted">–</span>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Charts column -->
+      <div class="goals-charts">
+        <!-- Chart 1: % deviation (0-centered) -->
+        <div class="dashboard-card chart-card">
+          <p class="chart-label" i18n>Goal deviation (%)</p>
+          <div class="chart-canvas-wrap">
+            <canvas #deviationChartCanvas></canvas>
+          </div>
+        </div>
+        <!-- Chart 2: goal vs actual absolute values -->
+        <div class="dashboard-card chart-card">
+          <p class="chart-label" i18n>Target vs. actual wealth</p>
+          <div class="chart-canvas-wrap">
+            <canvas #comparisonChartCanvas></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  }
+</div>

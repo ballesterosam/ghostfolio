@@ -1,3 +1,4 @@
+import { GoalYear } from '@ghostfolio/common/interfaces/goal-year.interface';
 import { XRayRulesSettings } from '@ghostfolio/common/interfaces/x-ray-rules-settings.interface';
 import {
   ColorScheme,
@@ -16,6 +17,7 @@ export interface UserSettings {
   colorScheme?: ColorScheme;
   dateRange?: DateRange;
   emergencyFund?: number;
+  goals?: GoalYear[];
   'filters.accounts'?: string[];
   'filters.assetClasses'?: AssetClass[];
   'filters.dataSource'?: string;

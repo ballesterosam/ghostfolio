@@ -2,7 +2,6 @@ import { UserService } from '@ghostfolio/client/services/user/user.service';
 import { WebAuthnService } from '@ghostfolio/client/services/web-authn.service';
 import { InfoItem } from '@ghostfolio/common/interfaces';
 import { internalRoutes, publicRoutes } from '@ghostfolio/common/routes/routes';
-import { DataService } from '@ghostfolio/ui/services';
 
 import {
   HTTP_INTERCEPTORS,
@@ -12,7 +11,7 @@ import {
   HttpInterceptor,
   HttpRequest
 } from '@angular/common/http';
-import { inject, Injectable } from '@angular/core';
+import { inject, Injectable, Injector } from '@angular/core';
 import {
   MatSnackBar,
   MatSnackBarRef,
@@ -29,14 +28,12 @@ export class HttpResponseInterceptor implements HttpInterceptor {
   private readonly info: InfoItem;
   private snackBarRef: MatSnackBarRef<TextOnlySnackBar> | undefined;
 
-  private readonly dataService = inject(DataService);
+  private readonly injector = inject(Injector);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly userService = inject(UserService);
-  private readonly webAuthnService = inject(WebAuthnService);
 
   public constructor() {
-    this.info = this.dataService.fetchInfo();
+    this.info = (window as any).info;
   }
 
   public intercept<T>(
@@ -109,10 +106,13 @@ export class HttpResponseInterceptor implements HttpInterceptor {
           }
         } else if (error.status === StatusCodes.UNAUTHORIZED) {
           if (!error.url?.includes('/data-providers/ghostfolio/status')) {
-            if (this.webAuthnService.isEnabled()) {
+            const webAuthnService = this.injector.get(WebAuthnService);
+            const userService = this.injector.get(UserService);
+
+            if (webAuthnService.isEnabled()) {
               this.router.navigate(internalRoutes.webauthn.routerLink);
             } else {
-              this.userService.signOut();
+              userService.signOut();
             }
           }
         }

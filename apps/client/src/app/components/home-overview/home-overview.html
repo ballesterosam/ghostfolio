@@ -463,6 +463,20 @@
           </div>
         </div>
       </div>
+
+      <!-- Goal Deviation chart (full-width, only when goals are configured) -->
+      @if (hasGoals()) {
+        <div class="row g-3 mt-3">
+          <div class="col-12">
+            <div class="dashboard-card chart-card">
+              <p class="chart-label" i18n>Goal deviation (%)</p>
+              <div class="goal-deviation-canvas-wrap">
+                <canvas #goalDeviationCanvas></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
     </section>
 
     <!-- ASSET ALLOCATION section -->

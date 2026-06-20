@@ -50,6 +50,7 @@ import {
   bookmarkOutline,
   calculatorOutline,
   closeOutline,
+  flagOutline,
   documentTextOutline,
   flashOutline,
   happyOutline,
@@ -139,6 +140,7 @@ export class GfHeaderComponent implements OnChanges {
     internalRoutes.adminControl.routerLink;
   protected readonly routerLinkFeatures = publicRoutes.features.routerLink;
   protected readonly routerLinkMarkets = publicRoutes.markets.routerLink;
+  protected readonly routerLinkMyGoals = internalRoutes.myGoals.routerLink;
   protected readonly routerLinkPortfolio = internalRoutes.portfolio.routerLink;
   protected readonly routerLinkPricing = publicRoutes.pricing.routerLink;
   protected readonly routerLinkRegister = publicRoutes.register.routerLink;
@@ -174,6 +176,7 @@ export class GfHeaderComponent implements OnChanges {
       calculatorOutline,
       closeOutline,
       documentTextOutline,
+      flagOutline,
       flashOutline,
       happyOutline,
       informationCircleOutline,

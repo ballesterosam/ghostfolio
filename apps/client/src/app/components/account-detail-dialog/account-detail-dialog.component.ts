@@ -20,6 +20,7 @@ import { GfAccountBalancesComponent } from '@ghostfolio/ui/account-balances';
 import { GfActivitiesTableComponent } from '@ghostfolio/ui/activities-table';
 import { GfDialogFooterComponent } from '@ghostfolio/ui/dialog-footer';
 import { GfDialogHeaderComponent } from '@ghostfolio/ui/dialog-header';
+import { GfEntityLogoComponent } from '@ghostfolio/ui/entity-logo';
 import { GfHoldingsTableComponent } from '@ghostfolio/ui/holdings-table';
 import { DataService } from '@ghostfolio/ui/services';
 import { GfValueComponent } from '@ghostfolio/ui/value';
@@ -43,13 +44,15 @@ import { MatTableDataSource } from '@angular/material/table';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Router } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
+import { Platform } from '@prisma/client';
 import { Big } from 'big.js';
 import { format, parseISO } from 'date-fns';
 import { addIcons } from 'ionicons';
 import {
   albumsOutline,
   cashOutline,
-  swapVerticalOutline
+  swapVerticalOutline,
+  walletOutline
 } from 'ionicons/icons';
 import { isNumber } from 'lodash';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
@@ -65,6 +68,7 @@ import { AccountDetailDialogParams } from './interfaces/interfaces';
     GfActivitiesTableComponent,
     GfDialogFooterComponent,
     GfDialogHeaderComponent,
+    GfEntityLogoComponent,
     GfHoldingsTableComponent,
     GfInvestmentChartComponent,
     GfValueComponent,
@@ -100,6 +104,7 @@ export class GfAccountDetailDialogComponent implements OnInit {
   protected name: string | null;
   protected pageIndex = 0;
   protected pageSize = DEFAULT_PAGE_SIZE;
+  protected platform: Platform | null;
   protected platformName: string;
   protected sortColumn = 'date';
   protected sortDirection: SortDirection = 'desc';
@@ -133,7 +138,12 @@ export class GfAccountDetailDialogComponent implements OnInit {
         }
       });
 
-    addIcons({ albumsOutline, cashOutline, swapVerticalOutline });
+    addIcons({
+      albumsOutline,
+      cashOutline,
+      swapVerticalOutline,
+      walletOutline
+    });
   }
 
   public ngOnInit() {
@@ -286,6 +296,7 @@ export class GfAccountDetailDialogComponent implements OnInit {
           }
 
           this.name = name;
+          this.platform = platform;
           this.platformName = platform?.name ?? '-';
           this.valueInBaseCurrency = valueInBaseCurrency;
 

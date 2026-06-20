@@ -11,12 +11,14 @@ import {
 import { getCountryName, getDateFnsLocale } from '@ghostfolio/common/helper';
 import {
   AssetProfileIdentifier,
+  GoalYear,
   LineChartItem,
   PortfolioDetails,
   PortfolioPerformance,
   PortfolioPosition,
   PortfolioSummary,
-  User
+  User,
+  UserSettings
 } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { internalRoutes } from '@ghostfolio/common/routes/routes';
@@ -30,12 +32,16 @@ import { GfWorldMapChartComponent } from '@ghostfolio/ui/world-map-chart';
 
 import {
   ChangeDetectionStrategy,
+  ChangeDetectorRef,
   Component,
   computed,
   DestroyRef,
+  ElementRef,
   inject,
+  OnDestroy,
   OnInit,
-  signal
+  signal,
+  viewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
@@ -43,6 +49,14 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { AssetClass, AssetSubClass } from '@prisma/client';
+import {
+  BarController,
+  BarElement,
+  CategoryScale,
+  Chart,
+  LinearScale,
+  Tooltip
+} from 'chart.js';
 import { formatDistanceToNow } from 'date-fns';
 import { addIcons } from 'ionicons';
 import {
@@ -85,7 +99,13 @@ import { switchMap } from 'rxjs';
   styleUrls: ['./home-overview.scss'],
   templateUrl: './home-overview.html'
 })
-export class GfHomeOverviewComponent implements OnInit {
+export class GfHomeOverviewComponent implements OnInit, OnDestroy {
+  protected readonly goalDeviationCanvas = viewChild<
+    ElementRef<HTMLCanvasElement>
+  >('goalDeviationCanvas');
+
+  private goalDeviationChart: Chart<'bar'> | null = null;
+
   protected readonly errors = signal<AssetProfileIdentifier[]>([]);
   protected readonly hasImpersonationId = signal(false);
   protected readonly historicalDataItems = signal<LineChartItem[] | null>(null);
@@ -252,6 +272,11 @@ export class GfHomeOverviewComponent implements OnInit {
       .reduce((sum, h) => sum + (h.value || 0), 0);
   });
 
+  protected readonly hasGoals = computed(() => {
+    const goals = (this.user()?.settings as UserSettings)?.goals;
+    return Array.isArray(goals) && goals.length > 0;
+  });
+
   protected readonly yoyNetWorthPercent = computed(() => {
     const data = this.netWorthHistoricalData();
     if (!data || data.length < 2) {
@@ -333,6 +358,7 @@ export class GfHomeOverviewComponent implements OnInit {
       }));
   });
 
+  private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly dataService = inject(DataService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly deviceDetectorService = inject(DeviceDetectorService);
@@ -344,6 +370,14 @@ export class GfHomeOverviewComponent implements OnInit {
   private readonly userService = inject(UserService);
 
   public constructor() {
+    Chart.register(
+      BarController,
+      BarElement,
+      CategoryScale,
+      LinearScale,
+      Tooltip
+    );
+
     addIcons({
       addCircleOutline,
       analyticsOutline,
@@ -371,6 +405,10 @@ export class GfHomeOverviewComponent implements OnInit {
           this.update();
         }
       });
+  }
+
+  public ngOnDestroy() {
+    this.goalDeviationChart?.destroy();
   }
 
   protected onChangeEmergencyFund(emergencyFund: number) {
@@ -470,11 +508,17 @@ export class GfHomeOverviewComponent implements OnInit {
         }
 
         this.isLoadingPerformance.set(false);
+
+        setTimeout(() => {
+          this.renderGoalDeviationChart();
+          this.changeDetectorRef.markForCheck();
+        }, 0);
       });
 
     this.dataService
       .fetchPortfolioDetails({
-        filters: this.userService.getFilters()
+        filters: this.userService.getFilters(),
+        range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe((portfolioDetails: PortfolioDetails) => {
@@ -492,6 +536,93 @@ export class GfHomeOverviewComponent implements OnInit {
 
         this.isLoadingDetails.set(false);
       });
+  }
+
+  private renderGoalDeviationChart() {
+    const canvas = this.goalDeviationCanvas()?.nativeElement;
+    const goals: GoalYear[] =
+      (this.user()?.settings as UserSettings)?.goals ?? [];
+
+    if (!canvas || goals.length === 0) {
+      return;
+    }
+
+    const netWorthData = this.netWorthHistoricalData() ?? [];
+    const yearMap: Record<number, number> = {};
+    for (const item of netWorthData) {
+      yearMap[new Date(item.date).getFullYear()] = item.value;
+    }
+
+    const currentYear = new Date().getFullYear();
+    const currentNetWorth = netWorthData[netWorthData.length - 1]?.value ?? 0;
+
+    const rows = goals
+      .slice()
+      .sort((a, b) => a.year - b.year)
+      .map((goal) => {
+        const actual =
+          goal.year < currentYear
+            ? (yearMap[goal.year] ?? null)
+            : currentNetWorth;
+        const pct =
+          actual != null && goal.targetAmount > 0
+            ? ((actual - goal.targetAmount) / goal.targetAmount) * 100
+            : null;
+        return { year: goal.year, pct };
+      });
+
+    const isDark =
+      document.documentElement.classList.contains('theme-dark') ||
+      document.body.classList.contains('theme-dark');
+    const textColor = isDark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.7)';
+    const gridColor = isDark ? 'rgba(255,255,255,0.08)' : 'rgba(0,0,0,0.08)';
+
+    const labels = rows.map((r) => String(r.year));
+    const pctData = rows.map((r) => r.pct ?? 0);
+    const barColors = pctData.map((v) =>
+      v >= 0 ? 'rgba(34, 197, 94, 0.85)' : 'rgba(239, 68, 68, 0.85)'
+    );
+
+    this.goalDeviationChart?.destroy();
+
+    this.goalDeviationChart = new Chart(canvas, {
+      type: 'bar',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: $localize`Goal deviation`,
+            data: pctData,
+            backgroundColor: barColors,
+            borderColor: barColors.map((c) => c.replace('0.85', '1')),
+            borderWidth: 1,
+            borderRadius: 4
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            callbacks: {
+              label: (ctx) => {
+                const val = ctx.raw as number;
+                return ` ${val > 0 ? '+' : ''}${val.toFixed(1)}%`;
+              }
+            }
+          }
+        },
+        scales: {
+          x: { ticks: { color: textColor }, grid: { color: gridColor } },
+          y: {
+            ticks: { color: textColor, callback: (v) => `${v}%` },
+            grid: { color: gridColor }
+          }
+        }
+      }
+    });
   }
 
   private buildHoldingsMap(

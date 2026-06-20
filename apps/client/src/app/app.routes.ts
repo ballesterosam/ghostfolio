@@ -75,6 +75,11 @@ export const routes: Routes = [
       import('./pages/home/home-page.routes').then((m) => m.routes)
   },
   {
+    path: internalRoutes.myGoals.path,
+    loadChildren: () =>
+      import('./pages/my-goals/my-goals-page.routes').then((m) => m.routes)
+  },
+  {
     canActivate: [AuthGuard],
     loadComponent: () =>
       import('./pages/i18n/i18n-page.component').then(
