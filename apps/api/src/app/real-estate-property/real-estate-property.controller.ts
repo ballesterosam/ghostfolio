@@ -3,7 +3,10 @@ import { HasPermissionGuard } from '@ghostfolio/api/guards/has-permission.guard'
 import {
   CreateRealEstatePropertyDto,
   CreateRealEstatePropertyValuationDto,
-  UpdateRealEstatePropertyDto
+  UpdateRealEstatePropertyDto,
+  CreateMortgageDto,
+  UpdateMortgageDto,
+  CreateMortgageAmortizationDto
 } from '@ghostfolio/common/dtos';
 import { permissions } from '@ghostfolio/common/permissions';
 import type { RequestWithUser } from '@ghostfolio/common/types';
@@ -23,7 +26,9 @@ import { REQUEST } from '@nestjs/core';
 import { AuthGuard } from '@nestjs/passport';
 import {
   RealEstateProperty as RealEstatePropertyModel,
-  RealEstatePropertyValuation as RealEstatePropertyValuationModel
+  RealEstatePropertyValuation as RealEstatePropertyValuationModel,
+  Mortgage as MortgageModel,
+  MortgageAmortization as MortgageAmortizationModel
 } from '@prisma/client';
 
 import { RealEstatePropertyService } from './real-estate-property.service';
@@ -115,6 +120,74 @@ export class RealEstatePropertyController {
       this.request.user.id,
       propertyId,
       valuationId
+    );
+  }
+
+  @HasPermission(permissions.createMortgage)
+  @Post(':id/mortgage')
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async createMortgage(
+    @Param('id') propertyId: string,
+    @Body() dto: CreateMortgageDto
+  ): Promise<MortgageModel> {
+    return this.realEstatePropertyService.createMortgage(
+      this.request.user.id,
+      propertyId,
+      dto
+    );
+  }
+
+  @HasPermission(permissions.updateMortgage)
+  @Put(':id/mortgage')
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async updateMortgage(
+    @Param('id') propertyId: string,
+    @Body() dto: UpdateMortgageDto
+  ): Promise<MortgageModel> {
+    return this.realEstatePropertyService.updateMortgage(
+      this.request.user.id,
+      propertyId,
+      dto
+    );
+  }
+
+  @HasPermission(permissions.deleteMortgage)
+  @Delete(':id/mortgage')
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async deleteMortgage(
+    @Param('id') propertyId: string
+  ): Promise<MortgageModel> {
+    return this.realEstatePropertyService.deleteMortgage(
+      this.request.user.id,
+      propertyId
+    );
+  }
+
+  @HasPermission(permissions.createMortgageAmortization)
+  @Post(':id/mortgage/amortization')
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async createAmortization(
+    @Param('id') propertyId: string,
+    @Body() dto: CreateMortgageAmortizationDto
+  ): Promise<MortgageAmortizationModel> {
+    return this.realEstatePropertyService.createAmortization(
+      this.request.user.id,
+      propertyId,
+      dto
+    );
+  }
+
+  @HasPermission(permissions.deleteMortgageAmortization)
+  @Delete(':id/mortgage/amortization/:amortId')
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async deleteAmortization(
+    @Param('id') propertyId: string,
+    @Param('amortId') amortizationId: string
+  ): Promise<MortgageAmortizationModel> {
+    return this.realEstatePropertyService.deleteAmortization(
+      this.request.user.id,
+      propertyId,
+      amortizationId
     );
   }
 }

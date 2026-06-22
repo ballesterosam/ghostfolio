@@ -18,7 +18,10 @@ import {
   UpdateRealEstatePropertyDto,
   UpdateTagDto,
   UpdateUserSettingDto,
-  ConnectIntegrationDto
+  ConnectIntegrationDto,
+  CreateMortgageDto,
+  UpdateMortgageDto,
+  CreateMortgageAmortizationDto
 } from '@ghostfolio/common/dtos';
 import { DATE_FORMAT } from '@ghostfolio/common/helper';
 import {
@@ -62,7 +65,9 @@ import {
   PlatformIntegrationDetails,
   RealEstateProperty,
   RealEstatePropertyValuation,
-  ConnectIntegrationResponse
+  ConnectIntegrationResponse,
+  Mortgage,
+  MortgageAmortization
 } from '@ghostfolio/common/interfaces';
 import { filterGlobalPermissions } from '@ghostfolio/common/permissions';
 import type {
@@ -273,6 +278,51 @@ export class DataService {
   ): Observable<void> {
     return this.http.delete<void>(
       `/api/v1/real-estate-property/${propertyId}/valuation/${valuationId}`
+    );
+  }
+
+  public postMortgage(
+    propertyId: string,
+    dto: CreateMortgageDto
+  ): Observable<Mortgage> {
+    return this.http.post<Mortgage>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`,
+      dto
+    );
+  }
+
+  public putMortgage(
+    propertyId: string,
+    dto: UpdateMortgageDto
+  ): Observable<Mortgage> {
+    return this.http.put<Mortgage>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`,
+      dto
+    );
+  }
+
+  public deleteMortgage(propertyId: string): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`
+    );
+  }
+
+  public postMortgageAmortization(
+    propertyId: string,
+    dto: CreateMortgageAmortizationDto
+  ): Observable<MortgageAmortization> {
+    return this.http.post<MortgageAmortization>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage/amortization`,
+      dto
+    );
+  }
+
+  public deleteMortgageAmortization(
+    propertyId: string,
+    amortizationId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage/amortization/${amortizationId}`
     );
   }
 

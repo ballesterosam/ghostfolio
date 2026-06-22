@@ -384,6 +384,7 @@ model RealEstateProperty {
   user                User                        @relation(fields: [userId], onDelete: Cascade, references: [id])
   userId              String
   valuations          RealEstatePropertyValuation[]
+  mortgage            Mortgage?
 
   @@unique([id, userId])
   @@index([userId])
@@ -447,3 +448,32 @@ enum IntegrationSyncStatus {
   ERROR
   SYNCING
 }
+
+model Mortgage {
+  id              String                  @id @default(uuid())
+  createdAt       DateTime                @default(now())
+  updatedAt       DateTime                @updatedAt
+  startDate       DateTime                // Fecha de inicio de la hipoteca
+  installments    Int                     // Número total de cuotas (meses)
+  principal       Float                   // Importe de la hipoteca (capital prestado)
+  interestRate    Float                   // Tipo de interés anual fijo (ej: 2.5 = 2.5%)
+  property        RealEstateProperty      @relation(fields: [propertyId], onDelete: Cascade, references: [id])
+  propertyId      String                  @unique
+  amortizations   MortgageAmortization[]
+
+  @@index([propertyId])
+}
+
+model MortgageAmortization {
+  id          String    @id @default(uuid())
+  createdAt   DateTime  @default(now())
+  date        DateTime  // Fecha de la amortización anticipada
+  amount      Float     // Importe amortizado
+  reduceTerm  Boolean   @default(true)  // true = reduce plazo, false = mantiene plazo
+  mortgage    Mortgage  @relation(fields: [mortgageId], onDelete: Cascade, references: [id])
+  mortgageId  String
+
+  @@index([mortgageId])
+  @@index([date])
+}
+

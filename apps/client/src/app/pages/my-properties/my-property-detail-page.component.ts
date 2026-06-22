@@ -4,9 +4,11 @@ import {
   LineChartItem
 } from '@ghostfolio/common/interfaces';
 import { GfLineChartComponent } from '@ghostfolio/ui/line-chart';
+import { GfMortgageThermometerComponent } from '@ghostfolio/ui/mortgage-thermometer';
 import { GfPortfolioProportionChartComponent } from '@ghostfolio/ui/portfolio-proportion-chart';
 import { DataService } from '@ghostfolio/ui/services';
 
+import { DatePipe } from '@angular/common';
 import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
@@ -19,24 +21,35 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { DomSanitizer, SafeResourceUrl } from '@angular/platform-browser';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
-import { arrowBackOutline, locationOutline, saveOutline } from 'ionicons/icons';
+import {
+  arrowBackOutline,
+  createOutline,
+  locationOutline,
+  saveOutline,
+  trashOutline,
+  addOutline
+} from 'ionicons/icons';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
   host: { class: 'page' },
   imports: [
+    DatePipe,
     FormsModule,
     GfLineChartComponent,
     GfPortfolioProportionChartComponent,
+    GfMortgageThermometerComponent,
     IonIcon,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     NgxSkeletonLoaderModule,
@@ -62,16 +75,29 @@ export class GfMyPropertyDetailPageComponent implements OnInit {
   protected isSavingLocation = false;
   protected geocodeError = false;
 
+  // Amortization form fields
+  protected showAddAmortizationForm = false;
+  protected amortizationDate = '';
+  protected amortizationAmount: number | null = null;
+  protected amortizationReduceTerm = true;
+
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly dataService = inject(DataService);
   private readonly destroyRef = inject(DestroyRef);
-  private readonly locale = getLocale();
+  protected readonly locale = getLocale();
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly sanitizer = inject(DomSanitizer);
 
   public constructor() {
-    addIcons({ arrowBackOutline, locationOutline, saveOutline });
+    addIcons({
+      arrowBackOutline,
+      createOutline,
+      locationOutline,
+      saveOutline,
+      trashOutline,
+      addOutline
+    });
   }
 
   public ngOnInit(): void {
@@ -125,15 +151,29 @@ export class GfMyPropertyDetailPageComponent implements OnInit {
   }
 
   protected adjustedValue(p: RealEstateProperty): number {
+    let baseValue = p.value;
     if (p.propertyType === 'BARE_OWNERSHIP') {
       let reduction = 40;
       if (p.usufructuaryAge !== undefined && p.usufructuaryAge !== null) {
         reduction = Math.max(10, 89 - p.usufructuaryAge);
       }
-      const reducedValue = p.value * (1 - reduction / 100);
-      return (reducedValue * p.ownershipPercentage) / 100;
+      baseValue = p.value * (1 - reduction / 100);
     }
-    return (p.value * p.ownershipPercentage) / 100;
+    if (p.mortgage) {
+      const realPatrimony =
+        baseValue -
+        p.mortgage.outstandingPrincipal -
+        p.mortgage.remainingInterest;
+      return Math.max(0, (realPatrimony * p.ownershipPercentage) / 100);
+    }
+    return (baseValue * p.ownershipPercentage) / 100;
+  }
+
+  protected onEdit(): void {
+    const p = this.property();
+    if (p) {
+      this.router.navigate(['/my-properties'], { queryParams: { edit: p.id } });
+    }
   }
 
   protected onAutoDetect(): void {
@@ -196,6 +236,45 @@ export class GfMyPropertyDetailPageComponent implements OnInit {
     }
   }
 
+  protected onAddAmortization(): void {
+    const p = this.property();
+    if (
+      !p ||
+      !this.amortizationDate ||
+      this.amortizationAmount === null ||
+      this.amortizationAmount <= 0
+    ) {
+      return;
+    }
+    this.dataService
+      .postMortgageAmortization(p.id, {
+        date: this.amortizationDate,
+        amount: this.amortizationAmount,
+        reduceTerm: this.amortizationReduceTerm
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.showAddAmortizationForm = false;
+        this.amortizationDate = '';
+        this.amortizationAmount = null;
+        this.amortizationReduceTerm = true;
+        this.loadProperty(p.id);
+      });
+  }
+
+  protected onDeleteAmortization(amortizationId: string): void {
+    const p = this.property();
+    if (!p) {
+      return;
+    }
+    this.dataService
+      .deleteMortgageAmortization(p.id, amortizationId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.loadProperty(p.id);
+      });
+  }
+
   private loadProperty(id: string): void {
     this.dataService
       .fetchRealEstateProperty(id)
@@ -240,17 +319,38 @@ export class GfMyPropertyDetailPageComponent implements OnInit {
   }
 
   private buildDonutData(p: RealEstateProperty): void {
-    this.donutData = {
-      mine: { name: $localize`My share`, value: p.ownershipPercentage / 100 },
-      ...(p.ownershipPercentage < 100
-        ? {
-            other: {
-              name: $localize`Other`,
-              value: (100 - p.ownershipPercentage) / 100
+    if (p.mortgage) {
+      const ownPct = p.ownershipPercentage;
+      const debt =
+        p.mortgage.outstandingPrincipal + p.mortgage.remainingInterest;
+      const debtVal = debt / p.value;
+      const equityVal = Math.max(0, ownPct / 100 - debtVal);
+
+      this.donutData = {
+        mine: { name: $localize`My equity`, value: equityVal },
+        mortgage: { name: $localize`Mortgage debt`, value: debtVal },
+        ...(ownPct < 100
+          ? {
+              other: {
+                name: $localize`Other`,
+                value: (100 - ownPct) / 100
+              }
             }
-          }
-        : {})
-    };
+          : {})
+      };
+    } else {
+      this.donutData = {
+        mine: { name: $localize`My share`, value: p.ownershipPercentage / 100 },
+        ...(p.ownershipPercentage < 100
+          ? {
+              other: {
+                name: $localize`Other`,
+                value: (100 - p.ownershipPercentage) / 100
+              }
+            }
+          : {})
+      };
+    }
   }
 
   private updateMap(lat: number, lon: number): void {

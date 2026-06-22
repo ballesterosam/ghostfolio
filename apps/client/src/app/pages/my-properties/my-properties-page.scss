@@ -134,3 +134,14 @@
 .valuation-delete:hover {
   color: var(--warn-color, #f44336);
 }
+
+.badge-soft-warning {
+  background-color: rgba(255, 193, 7, 0.25);
+  color: #ffc107;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}

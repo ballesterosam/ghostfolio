@@ -24,10 +24,11 @@ import {
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
 import {
@@ -38,6 +39,7 @@ import {
   trashOutline
 } from 'ionicons/icons';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { of, switchMap, Observable } from 'rxjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -47,6 +49,7 @@ import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
     GfLineChartComponent,
     IonIcon,
     MatButtonModule,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatInputModule,
     MatSelectModule,
@@ -70,11 +73,20 @@ export class GfMyPropertiesPageComponent implements OnInit {
   protected editingId: string | null = null;
   protected valuationEditId: string | null = null;
 
+  // Mortgage form fields
+  protected hasMortgage = false;
+  protected mortgageStartDate = '';
+  protected mortgageInstallments: number | null = null;
+  protected mortgagePrincipal: number | null = null;
+  protected mortgageInterestRate: number | null = null;
+
   private chartDataMap = new Map<
     string,
     { items: LineChartItem[]; yMin: number }
   >();
 
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
   private readonly dataService = inject(DataService);
   private readonly destroyRef = inject(DestroyRef);
@@ -103,6 +115,11 @@ export class GfMyPropertiesPageComponent implements OnInit {
       propertyType: 'OWNERSHIP',
       value: 0
     };
+    this.hasMortgage = false;
+    this.mortgageStartDate = '';
+    this.mortgageInstallments = null;
+    this.mortgagePrincipal = null;
+    this.mortgageInterestRate = null;
     this.resetValuationForm();
     this.isEditing.set(true);
   }
@@ -110,6 +127,24 @@ export class GfMyPropertiesPageComponent implements OnInit {
   protected onEdit(p: RealEstateProperty): void {
     this.editingId = p.id;
     this.formData = { ...p };
+
+    if (p.mortgage) {
+      this.hasMortgage = true;
+      this.mortgagePrincipal = p.mortgage.principal;
+      this.mortgageInterestRate = p.mortgage.interestRate;
+      this.mortgageInstallments = p.mortgage.installments;
+      this.mortgageStartDate =
+        typeof p.mortgage.startDate === 'string'
+          ? p.mortgage.startDate.substring(0, 10)
+          : new Date(p.mortgage.startDate).toISOString().substring(0, 10);
+    } else {
+      this.hasMortgage = false;
+      this.mortgageStartDate = '';
+      this.mortgageInstallments = null;
+      this.mortgagePrincipal = null;
+      this.mortgageInterestRate = null;
+    }
+
     this.resetValuationForm();
     this.isEditing.set(true);
   }
@@ -120,6 +155,11 @@ export class GfMyPropertiesPageComponent implements OnInit {
     this.editingId = null;
     this.valuationEditId = null;
     this.resetValuationForm();
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { edit: null },
+      queryParamsHandling: 'merge'
+    });
   }
 
   protected onSave(): void {
@@ -149,7 +189,13 @@ export class GfMyPropertiesPageComponent implements OnInit {
 
       this.dataService
         .putRealEstateProperty(this.editingId!, dto)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(
+          switchMap((property) => {
+            const originalMortgage = this.formData.mortgage;
+            return this.saveMortgageLocker(property.id, originalMortgage);
+          }),
+          takeUntilDestroyed(this.destroyRef)
+        )
         .subscribe(() => {
           this.onCancel();
           this.loadProperties();
@@ -177,12 +223,47 @@ export class GfMyPropertiesPageComponent implements OnInit {
 
       this.dataService
         .postRealEstateProperty(dto)
-        .pipe(takeUntilDestroyed(this.destroyRef))
+        .pipe(
+          switchMap((property) => {
+            return this.saveMortgageLocker(property.id, null);
+          }),
+          takeUntilDestroyed(this.destroyRef)
+        )
         .subscribe(() => {
           this.onCancel();
           this.loadProperties();
         });
     }
+  }
+
+  private saveMortgageLocker(
+    propertyId: string,
+    originalMortgage: any
+  ): Observable<any> {
+    if (this.hasMortgage) {
+      if (originalMortgage) {
+        const mortgageDto = {
+          startDate: this.mortgageStartDate,
+          installments: Number(this.mortgageInstallments),
+          principal: Number(this.mortgagePrincipal),
+          interestRate: Number(this.mortgageInterestRate)
+        };
+        return this.dataService.putMortgage(propertyId, mortgageDto);
+      } else {
+        const mortgageDto = {
+          startDate: this.mortgageStartDate,
+          installments: Number(this.mortgageInstallments),
+          principal: Number(this.mortgagePrincipal),
+          interestRate: Number(this.mortgageInterestRate)
+        };
+        return this.dataService.postMortgage(propertyId, mortgageDto);
+      }
+    } else {
+      if (originalMortgage) {
+        return this.dataService.deleteMortgage(propertyId);
+      }
+    }
+    return of(null);
   }
 
   protected onDelete(id: string): void {
@@ -270,15 +351,22 @@ export class GfMyPropertiesPageComponent implements OnInit {
   }
 
   protected adjustedValue(p: RealEstateProperty): number {
+    let baseValue = p.value;
     if (p.propertyType === 'BARE_OWNERSHIP') {
       let reduction = 40;
       if (p.usufructuaryAge !== undefined && p.usufructuaryAge !== null) {
         reduction = Math.max(10, 89 - p.usufructuaryAge);
       }
-      const reducedValue = p.value * (1 - reduction / 100);
-      return (reducedValue * p.ownershipPercentage) / 100;
+      baseValue = p.value * (1 - reduction / 100);
     }
-    return (p.value * p.ownershipPercentage) / 100;
+    if (p.mortgage) {
+      const realPatrimony =
+        baseValue -
+        p.mortgage.outstandingPrincipal -
+        p.mortgage.remainingInterest;
+      return Math.max(0, (realPatrimony * p.ownershipPercentage) / 100);
+    }
+    return (baseValue * p.ownershipPercentage) / 100;
   }
 
   protected propertyTypeLabel(type: string): string {
@@ -375,6 +463,15 @@ export class GfMyPropertiesPageComponent implements OnInit {
           const updated = properties.find((p) => p.id === this.editingId);
           if (updated) {
             this.formData = { ...updated };
+          }
+        }
+        if (!keepEditing) {
+          const editId = this.route.snapshot.queryParamMap.get('edit');
+          if (editId) {
+            const p = properties.find((prop) => prop.id === editId);
+            if (p) {
+              this.onEdit(p);
+            }
           }
         }
         this.changeDetectorRef.markForCheck();

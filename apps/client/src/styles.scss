@@ -266,6 +266,10 @@ body {
       }
     }
 
+    .text-muted {
+      color: rgba(var(--light-secondary-text)) !important;
+    }
+
     .gf-table {
       @include table.gf-table(true);
     }

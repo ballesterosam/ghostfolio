@@ -5,6 +5,38 @@ export interface RealEstatePropertyValuation {
   propertyId: string;
 }
 
+export interface MortgageAmortization {
+  id: string;
+  date: string;
+  amount: number;
+  reduceTerm: boolean;
+  mortgageId: string;
+}
+
+export interface Mortgage {
+  id: string;
+  startDate: string;
+  installments: number;
+  principal: number;
+  interestRate: number;
+  propertyId: string;
+  amortizations?: MortgageAmortization[];
+}
+
+export interface MortgageWithCalculations extends Mortgage {
+  monthlyPayment: number;
+  totalCost: number;
+  totalInterest: number;
+  remainingInterest: number;
+  endDate: string;
+  installmentsPaid: number;
+  installmentsRemaining: number;
+  totalAmortized: number;
+  outstandingPrincipal: number;
+  paidPrincipal: number;
+  mortgageOwnershipPercentage: number;
+}
+
 export interface RealEstateProperty {
   id: string;
   createdAt: string;
@@ -24,4 +56,5 @@ export interface RealEstateProperty {
   usufructuaryAge?: number | null;
   userId: string;
   valuations?: RealEstatePropertyValuation[];
+  mortgage?: MortgageWithCalculations | null;
 }

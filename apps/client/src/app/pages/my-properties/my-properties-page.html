@@ -96,6 +96,57 @@
             <input matInput [(ngModel)]="formData.addressCountry" />
           </mat-form-field>
         </div>
+        <!-- Mortgage toggle checkbox -->
+        <div class="col-12">
+          <mat-checkbox i18n [(ngModel)]="hasMortgage">
+            This property has a mortgage
+          </mat-checkbox>
+        </div>
+
+        <!-- Mortgage fields (conditional) -->
+        @if (hasMortgage) {
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Mortgage Start Date</mat-label>
+              <input matInput type="date" [(ngModel)]="mortgageStartDate" />
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Installments (Months)</mat-label>
+              <input
+                matInput
+                min="1"
+                type="number"
+                [(ngModel)]="mortgageInstallments"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Mortgage Principal</mat-label>
+              <input
+                matInput
+                min="0"
+                type="number"
+                [(ngModel)]="mortgagePrincipal"
+              />
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Annual Interest Rate (%)</mat-label>
+              <input
+                matInput
+                min="0"
+                step="0.01"
+                type="number"
+                [(ngModel)]="mortgageInterestRate"
+              />
+            </mat-form-field>
+          </div>
+        }
+
         <div class="col-12 d-flex justify-content-end gap-2">
           <button i18n mat-button (click)="onCancel()">Cancel</button>
           <button color="primary" mat-flat-button (click)="onSave()">
@@ -236,9 +287,18 @@
               <div class="property-card__value">
                 {{ formatCurrency(adjustedValue(p), p.currency) }}
               </div>
-              <div class="property-card__footer">
-                {{ propertyTypeLabel(p.propertyType) }}
-                {{ p.ownershipPercentage }}%
+              <div
+                class="property-card__footer d-flex align-items-center gap-1 flex-wrap"
+              >
+                <span
+                  >{{ propertyTypeLabel(p.propertyType) }}
+                  {{ p.ownershipPercentage }}%</span
+                >
+                @if (p.mortgage) {
+                  <span class="badge badge-soft-warning ms-1" i18n
+                    >Mortgage</span
+                  >
+                }
               </div>
             </div>
             @if (p.valuations && p.valuations.length >= 2) {

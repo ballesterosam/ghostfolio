@@ -44,7 +44,10 @@ import type { PortfolioSummary } from './portfolio-summary.interface';
 import type { Product } from './product';
 import type {
   RealEstateProperty,
-  RealEstatePropertyValuation
+  RealEstatePropertyValuation,
+  Mortgage,
+  MortgageAmortization,
+  MortgageWithCalculations
 } from './real-estate-property.interface';
 import type { AccessTokenResponse } from './responses/access-token-response.interface';
 import type { AccountBalancesResponse } from './responses/account-balances-response.interface';
@@ -192,6 +195,9 @@ export {
   ResponseError,
   RealEstateProperty,
   RealEstatePropertyValuation,
+  Mortgage,
+  MortgageAmortization,
+  MortgageWithCalculations,
   RuleSettings,
   ScraperConfiguration,
   Statistics,
