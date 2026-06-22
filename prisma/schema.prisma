@@ -281,7 +281,8 @@ model User {
   updatedAt     DateTime        @updatedAt
   watchlist     SymbolProfile[] @relation("UserWatchlist")
   SymbolProfile SymbolProfile[]
-  platformIntegrations PlatformIntegration[]
+  platformIntegrations  PlatformIntegration[]
+  realEstateProperties  RealEstateProperty[]
 
   @@index([accessToken])
   @@index([createdAt])
@@ -363,6 +364,43 @@ enum ViewMode {
   ZEN
 }
 
+model RealEstateProperty {
+  id                  String                      @id @default(uuid())
+  createdAt           DateTime                    @default(now())
+  updatedAt           DateTime                    @updatedAt
+  name                String
+  addressStreet       String?
+  addressZipCode      String?
+  addressCity         String?
+  addressProvince     String?
+  addressCountry      String?
+  currency            String
+  ownershipPercentage Float                       @default(100)
+  propertyType        PropertyType
+  value               Float
+  latitude            Float?
+  longitude           Float?
+  user                User                        @relation(fields: [userId], onDelete: Cascade, references: [id])
+  userId              String
+  valuations          RealEstatePropertyValuation[]
+
+  @@unique([id, userId])
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model RealEstatePropertyValuation {
+  id         String              @id @default(uuid())
+  createdAt  DateTime            @default(now())
+  date       DateTime
+  value      Float
+  property   RealEstateProperty  @relation(fields: [propertyId], onDelete: Cascade, references: [id])
+  propertyId String
+
+  @@index([propertyId])
+  @@index([date])
+}
+
 model PlatformIntegration {
   id                   String                @id @default(uuid())
   createdAt            DateTime              @default(now())
@@ -394,6 +432,12 @@ model PlatformIntegration {
 enum IntegrationProvider {
   INDEXA_CAPITAL
   ETORO
+}
+
+enum PropertyType {
+  OWNERSHIP
+  BARE_OWNERSHIP
+  OTHER
 }
 
 enum IntegrationSyncStatus {

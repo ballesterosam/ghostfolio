@@ -75,6 +75,13 @@ export const routes: Routes = [
       import('./pages/home/home-page.routes').then((m) => m.routes)
   },
   {
+    path: internalRoutes.myProperties.path,
+    loadChildren: () =>
+      import('./pages/my-properties/my-properties-page.routes').then(
+        (m) => m.routes
+      )
+  },
+  {
     path: internalRoutes.myGoals.path,
     loadChildren: () =>
       import('./pages/my-goals/my-goals-page.routes').then((m) => m.routes)

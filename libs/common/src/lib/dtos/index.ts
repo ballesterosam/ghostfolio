@@ -8,6 +8,8 @@ import { CreateAssetProfileWithMarketDataDto } from './create-asset-profile-with
 import { CreateAssetProfileDto } from './create-asset-profile.dto';
 import { CreateOrderDto } from './create-order.dto';
 import { CreatePlatformDto } from './create-platform.dto';
+import { CreateRealEstatePropertyValuationDto } from './create-real-estate-property-valuation.dto';
+import { CreateRealEstatePropertyDto } from './create-real-estate-property.dto';
 import { CreateTagDto } from './create-tag.dto';
 import { CreateWatchlistItemDto } from './create-watchlist-item.dto';
 import { DeleteOwnUserDto } from './delete-own-user.dto';
@@ -22,6 +24,7 @@ import { UpdateOrderDto } from './update-order.dto';
 import { UpdateOwnAccessTokenDto } from './update-own-access-token.dto';
 import { UpdatePlatformDto } from './update-platform.dto';
 import { UpdatePropertyDto } from './update-property.dto';
+import { UpdateRealEstatePropertyDto } from './update-real-estate-property.dto';
 import { UpdateTagDto } from './update-tag.dto';
 import { UpdateUserSettingDto } from './update-user-setting.dto';
 
@@ -51,5 +54,8 @@ export {
   UpdatePropertyDto,
   UpdateTagDto,
   UpdateUserSettingDto,
-  ConnectIntegrationDto
+  ConnectIntegrationDto,
+  CreateRealEstatePropertyDto,
+  CreateRealEstatePropertyValuationDto,
+  UpdateRealEstatePropertyDto
 };

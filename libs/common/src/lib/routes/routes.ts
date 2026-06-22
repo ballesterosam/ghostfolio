@@ -97,6 +97,11 @@ export const internalRoutes = {
     routerLink: ['/home'],
     title: $localize`Overview`
   },
+  myProperties: {
+    path: 'my-properties',
+    routerLink: ['/my-properties'],
+    title: $localize`My Properties`
+  },
   myGoals: {
     path: 'my-goals',
     routerLink: ['/my-goals'],

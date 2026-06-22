@@ -139,6 +139,41 @@
         </div>
       </li>
 
+      <!-- My Properties -->
+      <li class="list-inline-item nav-item-dropdown">
+        <a
+          class="d-none d-sm-block rounded nav-link-btn"
+          i18n
+          mat-button
+          [class.nav-pill-active]="
+            currentRoute() === internalRoutes.myProperties.path
+          "
+          [routerLink]="routerLinkMyProperties"
+          >My Properties</a
+        >
+        <div class="contextual-dropdown">
+          <a
+            class="dropdown-link"
+            routerLinkActive="active"
+            [routerLink]="['/my-properties']"
+            [routerLinkActiveOptions]="{ exact: true }"
+          >
+            <ion-icon name="home-outline"></ion-icon>
+            <span i18n>All Properties</span>
+          </a>
+          @for (p of realEstateProperties(); track p.id) {
+            <a
+              class="dropdown-link"
+              routerLinkActive="active"
+              [routerLink]="['/my-properties', p.id]"
+            >
+              <ion-icon name="home-outline"></ion-icon>
+              <span>{{ p.name }}</span>
+            </a>
+          }
+        </div>
+      </li>
+
       <!-- Accounts -->
       <li class="list-inline-item nav-item-dropdown">
         <a

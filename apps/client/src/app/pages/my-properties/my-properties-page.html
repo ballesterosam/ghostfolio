@@ -1,0 +1,253 @@
+<div class="overview p-3">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="section-title mb-0" i18n>My Properties</h2>
+    <button color="primary" mat-flat-button (click)="onAddNew()">
+      <ion-icon name="add-outline" />
+      <span i18n>Add Property</span>
+    </button>
+  </div>
+
+  @if (isEditing()) {
+    <div class="dashboard-card mb-4 p-3">
+      <div class="row g-3">
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Name</mat-label>
+            <input matInput [(ngModel)]="formData.name" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Property type</mat-label>
+            <mat-select [(ngModel)]="formData.propertyType">
+              <mat-option i18n value="OWNERSHIP">Ownership</mat-option>
+              <mat-option i18n value="BARE_OWNERSHIP"
+                >Bare ownership</mat-option
+              >
+              <mat-option i18n value="OTHER">Other</mat-option>
+            </mat-select>
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Market value</mat-label>
+            <input matInput type="number" [(ngModel)]="formData.value" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Currency</mat-label>
+            <input matInput [(ngModel)]="formData.currency" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Ownership %</mat-label>
+            <input
+              matInput
+              max="100"
+              min="0"
+              type="number"
+              [(ngModel)]="formData.ownershipPercentage"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Street address</mat-label>
+            <input matInput [(ngModel)]="formData.addressStreet" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>ZIP code</mat-label>
+            <input matInput [(ngModel)]="formData.addressZipCode" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>City</mat-label>
+            <input matInput [(ngModel)]="formData.addressCity" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Province / State</mat-label>
+            <input matInput [(ngModel)]="formData.addressProvince" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Country</mat-label>
+            <input matInput [(ngModel)]="formData.addressCountry" />
+          </mat-form-field>
+        </div>
+        <div class="col-12 d-flex justify-content-end gap-2">
+          <button i18n mat-button (click)="onCancel()">Cancel</button>
+          <button color="primary" mat-flat-button (click)="onSave()">
+            <ion-icon name="save-outline" />
+            <span i18n>Save</span>
+          </button>
+        </div>
+      </div>
+
+      @if (editingId) {
+        <hr class="mt-2 mb-3" />
+        <h3 class="valuations-title mb-3" i18n>Price history</h3>
+
+        @if (getEditingProperty()?.valuations?.length) {
+          <div class="valuations-list mb-3">
+            @for (v of getEditingProperty()!.valuations!; track v.id) {
+              <div
+                class="valuation-row d-flex align-items-center gap-2"
+                [class.bg-light]="valuationEditId === v.id"
+              >
+                <span class="valuation-date">{{
+                  v.date | date: 'dd/MM/yyyy'
+                }}</span>
+                <span class="valuation-value flex-grow-1">{{
+                  formatCurrency(v.value, formData.currency!)
+                }}</span>
+                <div class="valuation-actions">
+                  <button
+                    class="valuation-edit"
+                    mat-icon-button
+                    (click)="onEditValuation(v)"
+                  >
+                    <ion-icon name="create-outline" />
+                  </button>
+                  <button
+                    class="valuation-delete"
+                    mat-icon-button
+                    (click)="onDeleteValuation(v.id)"
+                  >
+                    <ion-icon name="trash-outline" />
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <div class="row g-2 align-items-center">
+          <div class="col-12 col-md-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Date</mat-label>
+              <input matInput type="date" [(ngModel)]="valuationForm.date" />
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-4">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Value</mat-label>
+              <input matInput type="number" [(ngModel)]="valuationForm.value" />
+            </mat-form-field>
+          </div>
+          <div class="col-12 col-md-4 d-flex gap-2 mb-3">
+            @if (valuationEditId) {
+              <button
+                class="flex-grow-1"
+                i18n
+                mat-button
+                (click)="onCancelValuationEdit()"
+              >
+                Cancel
+              </button>
+            }
+            <button
+              class="flex-grow-1"
+              color="primary"
+              mat-flat-button
+              (click)="onAddValuation()"
+            >
+              <ion-icon
+                [name]="valuationEditId ? 'save-outline' : 'add-outline'"
+              />
+              <span>{{ valuationEditId ? 'Update' : 'Add valuation' }}</span>
+            </button>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (isLoading()) {
+    <div class="row g-3">
+      @for (_ of [1, 2, 3]; track $index) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <ngx-skeleton-loader
+            appearance="line"
+            [theme]="{ height: '14rem', 'border-radius': '16px' }"
+          />
+        </div>
+      }
+    </div>
+  } @else if (!isEditing() && properties().length === 0) {
+    <div class="dashboard-card empty-state text-center py-5">
+      <ion-icon
+        class="mb-3"
+        name="home-outline"
+        style="font-size: 3rem; opacity: 0.3"
+      />
+      <p class="text-muted mb-3" i18n>No properties added yet.</p>
+      <button color="primary" mat-flat-button (click)="onAddNew()">
+        <ion-icon name="add-outline" />
+        <span i18n>Add your first property</span>
+      </button>
+    </div>
+  } @else {
+    <div class="row g-3">
+      @for (p of properties(); track p.id) {
+        <div class="col-12 col-md-6 col-lg-4">
+          <div
+            class="property-card property-card--{{ cssClass(p.propertyType) }}"
+            style="cursor: pointer"
+            [routerLink]="['/my-properties', p.id]"
+          >
+            <div class="property-card__actions">
+              <button
+                mat-icon-button
+                (click)="onEdit(p); $event.stopPropagation()"
+              >
+                <ion-icon name="create-outline" />
+              </button>
+              <button
+                mat-icon-button
+                (click)="onDelete(p.id); $event.stopPropagation()"
+              >
+                <ion-icon name="trash-outline" />
+              </button>
+            </div>
+            <div class="property-card__body">
+              <div class="property-card__name">{{ p.name }}</div>
+              <div class="property-card__value">
+                {{ formatCurrency(adjustedValue(p), p.currency) }}
+              </div>
+              <div class="property-card__footer">
+                {{ propertyTypeLabel(p.propertyType) }}
+                {{ p.ownershipPercentage }}%
+              </div>
+            </div>
+            @if (p.valuations && p.valuations.length >= 2) {
+              <div class="property-card__chart">
+                <gf-line-chart
+                  style="height: 100%"
+                  [historicalDataItems]="getChartItems(p.id)"
+                  [isAnimated]="false"
+                  [maintainAspectRatio]="false"
+                  [overrideGradientColor]="'rgba(255,255,255,0.2)'"
+                  [overrideLineColor]="'rgba(255,255,255,0.9)'"
+                  [overrideLineWidth]="2"
+                  [showGradient]="true"
+                  [showLoader]="false"
+                  [showXAxis]="false"
+                  [showYAxis]="false"
+                  [yMin]="getChartYMin(p.id)"
+                />
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>

@@ -58,6 +58,7 @@ import { InfoModule } from './info/info.module';
 import { LogoModule } from './logo/logo.module';
 import { PlatformModule } from './platform/platform.module';
 import { PortfolioModule } from './portfolio/portfolio.module';
+import { RealEstatePropertyModule } from './real-estate-property/real-estate-property.module';
 import { RedisCacheModule } from './redis-cache/redis-cache.module';
 import { SubscriptionModule } from './subscription/subscription.module';
 import { SymbolModule } from './symbol/symbol.module';
@@ -127,6 +128,7 @@ import { UserModule } from './user/user.module';
     PlatformsModule,
     PortfolioModule,
     PortfolioSnapshotQueueModule,
+    RealEstatePropertyModule,
     PlatformSyncQueueModule,
     PrismaModule,
     PropertyModule,

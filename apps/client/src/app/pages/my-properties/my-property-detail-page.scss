@@ -1,0 +1,71 @@
+:host {
+  display: block;
+}
+
+.detail-title {
+  font-size: 1.6rem;
+  font-weight: 700;
+}
+
+.detail-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.detail-value {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-top: 0.15rem;
+
+  &--highlight {
+    font-size: 1.25rem;
+    font-weight: 700;
+  }
+}
+
+.chart-section-title {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  opacity: 0.6;
+  text-transform: uppercase;
+}
+
+.chart-container {
+  height: 260px;
+  position: relative;
+
+  gf-line-chart {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.donut-container {
+  width: 100%;
+  max-width: 300px;
+  margin: 0 auto;
+  aspect-ratio: 1;
+
+  gf-portfolio-proportion-chart {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+}
+
+.map-container {
+  border-radius: 8px;
+  overflow: hidden;
+  height: 300px;
+
+  iframe {
+    width: 100%;
+    height: 100%;
+    border: none;
+  }
+}

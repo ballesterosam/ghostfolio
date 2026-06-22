@@ -3,6 +3,8 @@ import {
   CreateAccountBalanceDto,
   CreateAccountDto,
   CreateOrderDto,
+  CreateRealEstatePropertyDto,
+  CreateRealEstatePropertyValuationDto,
   CreateTagDto,
   CreateWatchlistItemDto,
   DeleteOwnUserDto,
@@ -13,6 +15,7 @@ import {
   UpdateOrderDto,
   UpdateOwnAccessTokenDto,
   UpdatePropertyDto,
+  UpdateRealEstatePropertyDto,
   UpdateTagDto,
   UpdateUserSettingDto,
   ConnectIntegrationDto
@@ -57,6 +60,8 @@ import {
   UserItem,
   WatchlistResponse,
   PlatformIntegrationDetails,
+  RealEstateProperty,
+  RealEstatePropertyValuation,
   ConnectIntegrationResponse
 } from '@ghostfolio/common/interfaces';
 import { filterGlobalPermissions } from '@ghostfolio/common/permissions';
@@ -217,6 +222,58 @@ export class DataService {
     const params = this.buildFiltersAsQueryParams({ filters });
 
     return this.http.get<AccountsResponse>('/api/v1/account', { params });
+  }
+
+  public fetchRealEstateProperties(): Observable<RealEstateProperty[]> {
+    return this.http.get<RealEstateProperty[]>('/api/v1/real-estate-property');
+  }
+
+  public fetchRealEstateProperty(id: string): Observable<RealEstateProperty> {
+    return this.http.get<RealEstateProperty>(
+      `/api/v1/real-estate-property/${id}`
+    );
+  }
+
+  public postRealEstateProperty(
+    dto: CreateRealEstatePropertyDto
+  ): Observable<RealEstateProperty> {
+    return this.http.post<RealEstateProperty>(
+      '/api/v1/real-estate-property',
+      dto
+    );
+  }
+
+  public putRealEstateProperty(
+    id: string,
+    dto: UpdateRealEstatePropertyDto
+  ): Observable<RealEstateProperty> {
+    return this.http.put<RealEstateProperty>(
+      `/api/v1/real-estate-property/${id}`,
+      dto
+    );
+  }
+
+  public deleteRealEstateProperty(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/real-estate-property/${id}`);
+  }
+
+  public postRealEstatePropertyValuation(
+    propertyId: string,
+    dto: CreateRealEstatePropertyValuationDto
+  ): Observable<RealEstatePropertyValuation> {
+    return this.http.post<RealEstatePropertyValuation>(
+      `/api/v1/real-estate-property/${propertyId}/valuation`,
+      dto
+    );
+  }
+
+  public deleteRealEstatePropertyValuation(
+    propertyId: string,
+    valuationId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/valuation/${valuationId}`
+    );
   }
 
   public fetchActivities({

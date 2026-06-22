@@ -1,0 +1,198 @@
+<div class="overview p-3">
+  <div class="d-flex align-items-center gap-2 mb-4">
+    <a mat-icon-button [routerLink]="['/my-properties']">
+      <ion-icon name="arrow-back-outline" />
+    </a>
+    @if (isLoading()) {
+      <ngx-skeleton-loader
+        appearance="line"
+        [theme]="{ height: '2rem', width: '200px' }"
+      />
+    } @else {
+      <h2 class="detail-title mb-0">{{ property()?.name }}</h2>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="row g-3">
+      <div class="col-12">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '8rem', 'border-radius': '12px' }"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '18rem', 'border-radius': '12px' }"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '18rem', 'border-radius': '12px' }"
+        />
+      </div>
+    </div>
+  } @else if (property(); as p) {
+    <!-- Details card -->
+    <div class="dashboard-card detail-card mb-4 p-4">
+      <div class="row g-3">
+        @if (fullAddress(p)) {
+          <div class="col-12 col-md-6">
+            <div class="detail-label" i18n>Address</div>
+            <div class="detail-value">{{ fullAddress(p) }}</div>
+          </div>
+        }
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Type</div>
+          <div class="detail-value">
+            {{ propertyTypeLabel(p.propertyType) }}
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Ownership</div>
+          <div class="detail-value">{{ p.ownershipPercentage }}%</div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Market value</div>
+          <div class="detail-value">
+            {{ formatCurrency(p.value, p.currency) }}
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>My share</div>
+          <div class="detail-value detail-value--highlight">
+            {{ formatCurrency(adjustedValue(p), p.currency) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Charts row -->
+    <div class="row g-3 mb-4">
+      <!-- Valuation history chart -->
+      <div class="col-12 col-md-6">
+        <div class="dashboard-card p-4" style="height: 100%">
+          <h3 class="chart-section-title mb-3" i18n>Valuation history</h3>
+          @if (chartItems.length >= 2) {
+            <div class="chart-container">
+              <gf-line-chart
+                [historicalDataItems]="chartItems"
+                [isAnimated]="false"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
+                [overrideLineColor]="'rgba(59, 130, 246, 1)'"
+                [overrideLineWidth]="2"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+                [yMin]="chartYMin"
+              />
+            </div>
+          } @else {
+            <div class="text-muted text-center py-5" i18n>
+              No valuation history yet. Add valuations in the edit form.
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Ownership donut chart -->
+      <div class="col-12 col-md-6">
+        <div class="dashboard-card p-4" style="height: 100%">
+          <h3 class="chart-section-title mb-3" i18n>Ownership distribution</h3>
+          <div class="donut-container">
+            <gf-portfolio-proportion-chart
+              [data]="donutData"
+              [glow]="true"
+              [hollow]="true"
+              [isInPercentage]="true"
+              [keys]="[]"
+              [showLegend]="false"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map section -->
+    <div class="dashboard-card p-4 mb-4">
+      <h3 class="chart-section-title mb-3" i18n>Location</h3>
+
+      @if (mapSrc) {
+        <div class="map-container mb-3">
+          <iframe
+            frameborder="0"
+            marginheight="0"
+            marginwidth="0"
+            scrolling="no"
+            title="Property location"
+            [src]="mapSrc"
+          ></iframe>
+        </div>
+      }
+
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Latitude</mat-label>
+            <input
+              matInput
+              step="0.000001"
+              type="number"
+              [(ngModel)]="latitudeInput"
+              (ngModelChange)="onMapInputChange()"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Longitude</mat-label>
+            <input
+              matInput
+              step="0.000001"
+              type="number"
+              [(ngModel)]="longitudeInput"
+              (ngModelChange)="onMapInputChange()"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 d-flex gap-2 mb-3">
+          @if (fullAddress(p)) {
+            <button
+              class="flex-grow-1"
+              mat-stroked-button
+              (click)="onAutoDetect()"
+            >
+              <ion-icon name="location-outline" />
+              <span i18n>Auto-detect</span>
+            </button>
+          }
+          <button
+            class="flex-grow-1"
+            color="primary"
+            mat-flat-button
+            [disabled]="
+              isSavingLocation ||
+              latitudeInput === null ||
+              longitudeInput === null
+            "
+            (click)="onSaveLocation()"
+          >
+            <ion-icon name="save-outline" />
+            <span i18n>Save</span>
+          </button>
+        </div>
+        @if (geocodeError) {
+          <div class="col-12">
+            <p class="text-danger mb-0" i18n>
+              Could not auto-detect location. Please enter coordinates manually.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

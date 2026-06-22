@@ -32,6 +32,7 @@ import {
   input,
   OnChanges,
   output,
+  signal,
   viewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -54,6 +55,7 @@ import {
   documentTextOutline,
   flashOutline,
   happyOutline,
+  homeOutline,
   informationCircleOutline,
   libraryOutline,
   logoGithub,
@@ -116,6 +118,9 @@ export class GfHeaderComponent implements OnChanges {
 
   protected hasFilters: boolean;
   protected hasImpersonationId: boolean;
+  protected readonly realEstateProperties = signal<
+    { id: string; name: string }[]
+  >([]);
   protected hasPermissionForAuthGoogle: boolean;
   protected hasPermissionForAuthOidc: boolean;
   protected hasPermissionForAuthToken: boolean;
@@ -141,10 +146,14 @@ export class GfHeaderComponent implements OnChanges {
   protected readonly routerLinkFeatures = publicRoutes.features.routerLink;
   protected readonly routerLinkMarkets = publicRoutes.markets.routerLink;
   protected readonly routerLinkMyGoals = internalRoutes.myGoals.routerLink;
+  protected readonly routerLinkMyProperties =
+    internalRoutes.myProperties.routerLink;
   protected readonly routerLinkPortfolio = internalRoutes.portfolio.routerLink;
   protected readonly routerLinkPricing = publicRoutes.pricing.routerLink;
   protected readonly routerLinkRegister = publicRoutes.register.routerLink;
   protected readonly routerLinkResources = publicRoutes.resources.routerLink;
+
+  private fetchedForUserId: string | null = null;
 
   private readonly dataService = inject(DataService);
   private readonly destroyRef = inject(DestroyRef);
@@ -179,6 +188,7 @@ export class GfHeaderComponent implements OnChanges {
       flagOutline,
       flashOutline,
       happyOutline,
+      homeOutline,
       informationCircleOutline,
       libraryOutline,
       logoGithub,
@@ -265,6 +275,23 @@ export class GfHeaderComponent implements OnChanges {
       this.info()?.globalPermissions,
       permissions.createUserAccount
     );
+
+    const userId = this.user()?.id;
+
+    if (!userId) {
+      this.fetchedForUserId = null;
+      this.realEstateProperties.set([]);
+    } else if (userId !== this.fetchedForUserId) {
+      this.fetchedForUserId = userId;
+      this.dataService
+        .fetchRealEstateProperties()
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe((properties) => {
+          this.realEstateProperties.set(
+            properties.map((p) => ({ id: p.id, name: p.name }))
+          );
+        });
+    }
   }
 
   protected closeAssistant() {
