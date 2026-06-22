@@ -113,7 +113,8 @@ export class GfMyPropertiesPageComponent implements OnInit {
       currency: 'EUR',
       ownershipPercentage: 100,
       propertyType: 'OWNERSHIP',
-      value: 0
+      value: 0,
+      acquisitionDate: ''
     };
     this.hasMortgage = false;
     this.mortgageStartDate = '';
@@ -126,7 +127,14 @@ export class GfMyPropertiesPageComponent implements OnInit {
 
   protected onEdit(p: RealEstateProperty): void {
     this.editingId = p.id;
-    this.formData = { ...p };
+    this.formData = {
+      ...p,
+      acquisitionDate: p.acquisitionDate
+        ? typeof p.acquisitionDate === 'string'
+          ? p.acquisitionDate.substring(0, 10)
+          : new Date(p.acquisitionDate).toISOString().substring(0, 10)
+        : ''
+    };
 
     if (p.mortgage) {
       this.hasMortgage = true;
@@ -184,7 +192,8 @@ export class GfMyPropertiesPageComponent implements OnInit {
           this.formData.usufructuaryAge !== null &&
           (this.formData.usufructuaryAge as any) !== ''
             ? Number(this.formData.usufructuaryAge)
-            : null
+            : null,
+        acquisitionDate: this.formData.acquisitionDate || null
       };
 
       this.dataService
@@ -218,7 +227,8 @@ export class GfMyPropertiesPageComponent implements OnInit {
           this.formData.usufructuaryAge !== null &&
           (this.formData.usufructuaryAge as any) !== ''
             ? Number(this.formData.usufructuaryAge)
-            : null
+            : null,
+        acquisitionDate: this.formData.acquisitionDate || null
       };
 
       this.dataService

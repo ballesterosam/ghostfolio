@@ -81,8 +81,13 @@ export class RealEstatePropertyService {
     userId: string,
     dto: CreateRealEstatePropertyDto
   ): Promise<RealEstatePropertyModel> {
+    const { acquisitionDate, ...rest } = dto;
     return this.prismaService.realEstateProperty.create({
-      data: { ...dto, userId }
+      data: {
+        ...rest,
+        userId,
+        acquisitionDate: acquisitionDate ? new Date(acquisitionDate) : null
+      }
     });
   }
 
@@ -103,10 +108,18 @@ export class RealEstatePropertyService {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { id: _, ...data } = dto;
+    const { id: _, acquisitionDate, ...data } = dto;
 
     return this.prismaService.realEstateProperty.update({
-      data,
+      data: {
+        ...data,
+        acquisitionDate:
+          acquisitionDate === undefined
+            ? undefined
+            : acquisitionDate
+              ? new Date(acquisitionDate)
+              : null
+      },
       where: { id_userId: { id, userId } }
     });
   }

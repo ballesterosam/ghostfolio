@@ -381,6 +381,7 @@ model RealEstateProperty {
   latitude            Float?
   longitude           Float?
   usufructuaryAge     Int?
+  acquisitionDate     DateTime?
   user                User                        @relation(fields: [userId], onDelete: Cascade, references: [id])
   userId              String
   valuations          RealEstatePropertyValuation[]

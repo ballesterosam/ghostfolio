@@ -54,6 +54,7 @@ export interface RealEstateProperty {
   latitude?: number | null;
   longitude?: number | null;
   usufructuaryAge?: number | null;
+  acquisitionDate?: string | null;
   userId: string;
   valuations?: RealEstatePropertyValuation[];
   mortgage?: MortgageWithCalculations | null;

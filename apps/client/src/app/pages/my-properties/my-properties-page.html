@@ -68,6 +68,16 @@
         </div>
         <div class="col-12 col-md-6">
           <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Acquisition date</mat-label>
+            <input
+              matInput
+              type="date"
+              [(ngModel)]="formData.acquisitionDate"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-6">
+          <mat-form-field appearance="outline" class="w-100">
             <mat-label i18n>Street address</mat-label>
             <input matInput [(ngModel)]="formData.addressStreet" />
           </mat-form-field>

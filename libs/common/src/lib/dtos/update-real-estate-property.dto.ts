@@ -1,4 +1,5 @@
 import {
+  IsDateString,
   IsEnum,
   IsInt,
   IsNumber,
@@ -74,4 +75,8 @@ export class UpdateRealEstatePropertyDto {
   @Min(0)
   @Max(120)
   usufructuaryAge?: number;
+
+  @IsOptional()
+  @IsDateString()
+  acquisitionDate?: string;
 }
