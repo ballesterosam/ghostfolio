@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -67,4 +68,10 @@ export class UpdateRealEstatePropertyDto {
   @Min(-180)
   @Max(180)
   longitude?: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  usufructuaryAge?: number;
 }

@@ -137,7 +137,14 @@ export class GfMyPropertiesPageComponent implements OnInit {
         currency: this.formData.currency,
         ownershipPercentage: this.formData.ownershipPercentage,
         propertyType: this.formData.propertyType as any,
-        value: this.formData.value
+        value: this.formData.value,
+        usufructuaryAge:
+          this.formData.propertyType === 'BARE_OWNERSHIP' &&
+          this.formData.usufructuaryAge !== undefined &&
+          this.formData.usufructuaryAge !== null &&
+          (this.formData.usufructuaryAge as any) !== ''
+            ? Number(this.formData.usufructuaryAge)
+            : null
       };
 
       this.dataService
@@ -158,7 +165,14 @@ export class GfMyPropertiesPageComponent implements OnInit {
         currency: this.formData.currency!,
         ownershipPercentage: this.formData.ownershipPercentage ?? 100,
         propertyType: this.formData.propertyType as any,
-        value: this.formData.value ?? 0
+        value: this.formData.value ?? 0,
+        usufructuaryAge:
+          this.formData.propertyType === 'BARE_OWNERSHIP' &&
+          this.formData.usufructuaryAge !== undefined &&
+          this.formData.usufructuaryAge !== null &&
+          (this.formData.usufructuaryAge as any) !== ''
+            ? Number(this.formData.usufructuaryAge)
+            : null
       };
 
       this.dataService
@@ -256,6 +270,14 @@ export class GfMyPropertiesPageComponent implements OnInit {
   }
 
   protected adjustedValue(p: RealEstateProperty): number {
+    if (p.propertyType === 'BARE_OWNERSHIP') {
+      let reduction = 40;
+      if (p.usufructuaryAge !== undefined && p.usufructuaryAge !== null) {
+        reduction = Math.max(10, 89 - p.usufructuaryAge);
+      }
+      const reducedValue = p.value * (1 - reduction / 100);
+      return (reducedValue * p.ownershipPercentage) / 100;
+    }
     return (p.value * p.ownershipPercentage) / 100;
   }
 

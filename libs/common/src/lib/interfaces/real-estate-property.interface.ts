@@ -21,6 +21,7 @@ export interface RealEstateProperty {
   value: number;
   latitude?: number | null;
   longitude?: number | null;
+  usufructuaryAge?: number | null;
   userId: string;
   valuations?: RealEstatePropertyValuation[];
 }

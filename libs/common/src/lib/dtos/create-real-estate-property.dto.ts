@@ -1,5 +1,6 @@
 import {
   IsEnum,
+  IsInt,
   IsNumber,
   IsOptional,
   IsString,
@@ -51,4 +52,10 @@ export class CreateRealEstatePropertyDto {
   @IsNumber()
   @Min(0)
   value: number;
+
+  @IsOptional()
+  @IsInt()
+  @Min(0)
+  @Max(120)
+  usufructuaryAge?: number;
 }

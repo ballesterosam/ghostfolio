@@ -125,6 +125,14 @@ export class GfMyPropertyDetailPageComponent implements OnInit {
   }
 
   protected adjustedValue(p: RealEstateProperty): number {
+    if (p.propertyType === 'BARE_OWNERSHIP') {
+      let reduction = 40;
+      if (p.usufructuaryAge !== undefined && p.usufructuaryAge !== null) {
+        reduction = Math.max(10, 89 - p.usufructuaryAge);
+      }
+      const reducedValue = p.value * (1 - reduction / 100);
+      return (reducedValue * p.ownershipPercentage) / 100;
+    }
     return (p.value * p.ownershipPercentage) / 100;
   }
 

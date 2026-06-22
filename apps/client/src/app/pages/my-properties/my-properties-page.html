@@ -28,6 +28,20 @@
             </mat-select>
           </mat-form-field>
         </div>
+        @if (formData.propertyType === 'BARE_OWNERSHIP') {
+          <div class="col-12 col-md-6">
+            <mat-form-field appearance="outline" class="w-100">
+              <mat-label i18n>Usufructuary age</mat-label>
+              <input
+                matInput
+                max="120"
+                min="0"
+                type="number"
+                [(ngModel)]="formData.usufructuaryAge"
+              />
+            </mat-form-field>
+          </div>
+        }
         <div class="col-12 col-md-4">
           <mat-form-field appearance="outline" class="w-100">
             <mat-label i18n>Market value</mat-label>

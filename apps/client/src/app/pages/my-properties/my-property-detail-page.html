@@ -54,6 +54,20 @@
           <div class="detail-label" i18n>Ownership</div>
           <div class="detail-value">{{ p.ownershipPercentage }}%</div>
         </div>
+        @if (p.propertyType === 'BARE_OWNERSHIP') {
+          <div class="col-6 col-md-3">
+            <div class="detail-label" i18n>Usufructuary age</div>
+            <div class="detail-value">
+              @if (
+                p.usufructuaryAge !== null && p.usufructuaryAge !== undefined
+              ) {
+                {{ p.usufructuaryAge }}
+              } @else {
+                <span class="text-muted" i18n>Not specified</span>
+              }
+            </div>
+          </div>
+        }
         <div class="col-6 col-md-3">
           <div class="detail-label" i18n>Market value</div>
           <div class="detail-value">
