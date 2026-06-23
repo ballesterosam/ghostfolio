@@ -3,6 +3,8 @@ import {
   CreateAccountBalanceDto,
   CreateAccountDto,
   CreateOrderDto,
+  CreateRealEstatePropertyDto,
+  CreateRealEstatePropertyValuationDto,
   CreateTagDto,
   CreateWatchlistItemDto,
   DeleteOwnUserDto,
@@ -13,9 +15,13 @@ import {
   UpdateOrderDto,
   UpdateOwnAccessTokenDto,
   UpdatePropertyDto,
+  UpdateRealEstatePropertyDto,
   UpdateTagDto,
   UpdateUserSettingDto,
-  ConnectIntegrationDto
+  ConnectIntegrationDto,
+  CreateMortgageDto,
+  UpdateMortgageDto,
+  CreateMortgageAmortizationDto
 } from '@ghostfolio/common/dtos';
 import { DATE_FORMAT } from '@ghostfolio/common/helper';
 import {
@@ -57,7 +63,11 @@ import {
   UserItem,
   WatchlistResponse,
   PlatformIntegrationDetails,
-  ConnectIntegrationResponse
+  RealEstateProperty,
+  RealEstatePropertyValuation,
+  ConnectIntegrationResponse,
+  Mortgage,
+  MortgageAmortization
 } from '@ghostfolio/common/interfaces';
 import { filterGlobalPermissions } from '@ghostfolio/common/permissions';
 import type {
@@ -217,6 +227,103 @@ export class DataService {
     const params = this.buildFiltersAsQueryParams({ filters });
 
     return this.http.get<AccountsResponse>('/api/v1/account', { params });
+  }
+
+  public fetchRealEstateProperties(): Observable<RealEstateProperty[]> {
+    return this.http.get<RealEstateProperty[]>('/api/v1/real-estate-property');
+  }
+
+  public fetchRealEstateProperty(id: string): Observable<RealEstateProperty> {
+    return this.http.get<RealEstateProperty>(
+      `/api/v1/real-estate-property/${id}`
+    );
+  }
+
+  public postRealEstateProperty(
+    dto: CreateRealEstatePropertyDto
+  ): Observable<RealEstateProperty> {
+    return this.http.post<RealEstateProperty>(
+      '/api/v1/real-estate-property',
+      dto
+    );
+  }
+
+  public putRealEstateProperty(
+    id: string,
+    dto: UpdateRealEstatePropertyDto
+  ): Observable<RealEstateProperty> {
+    return this.http.put<RealEstateProperty>(
+      `/api/v1/real-estate-property/${id}`,
+      dto
+    );
+  }
+
+  public deleteRealEstateProperty(id: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/real-estate-property/${id}`);
+  }
+
+  public postRealEstatePropertyValuation(
+    propertyId: string,
+    dto: CreateRealEstatePropertyValuationDto
+  ): Observable<RealEstatePropertyValuation> {
+    return this.http.post<RealEstatePropertyValuation>(
+      `/api/v1/real-estate-property/${propertyId}/valuation`,
+      dto
+    );
+  }
+
+  public deleteRealEstatePropertyValuation(
+    propertyId: string,
+    valuationId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/valuation/${valuationId}`
+    );
+  }
+
+  public postMortgage(
+    propertyId: string,
+    dto: CreateMortgageDto
+  ): Observable<Mortgage> {
+    return this.http.post<Mortgage>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`,
+      dto
+    );
+  }
+
+  public putMortgage(
+    propertyId: string,
+    dto: UpdateMortgageDto
+  ): Observable<Mortgage> {
+    return this.http.put<Mortgage>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`,
+      dto
+    );
+  }
+
+  public deleteMortgage(propertyId: string): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage`
+    );
+  }
+
+  public postMortgageAmortization(
+    propertyId: string,
+    dto: CreateMortgageAmortizationDto
+  ): Observable<MortgageAmortization> {
+    return this.http.post<MortgageAmortization>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage/amortization`,
+      dto
+    );
+  }
+
+  public deleteMortgageAmortization(
+    propertyId: string,
+    amortizationId: string
+  ): Observable<void> {
+    return this.http.delete<void>(
+      `/api/v1/real-estate-property/${propertyId}/mortgage/amortization/${amortizationId}`
+    );
   }
 
   public fetchActivities({
@@ -550,11 +657,13 @@ export class DataService {
   public fetchPortfolioDetails({
     filters,
     range,
-    withMarkets = false
+    withMarkets = false,
+    includeProperties = false
   }: {
     filters?: Filter[];
     range?: DateRange;
     withMarkets?: boolean;
+    includeProperties?: boolean;
   } = {}): Observable<PortfolioDetails> {
     let params = this.buildFiltersAsQueryParams({ filters });
 
@@ -566,6 +675,10 @@ export class DataService {
       params = params.append('withMarkets', withMarkets);
     }
 
+    if (includeProperties) {
+      params = params.append('includeProperties', includeProperties);
+    }
+
     return this.http
       .get<any>('/api/v1/portfolio/details', {
         params
@@ -575,6 +688,7 @@ export class DataService {
           if (response.holdings) {
             for (const symbol of Object.keys(response.holdings)) {
               response.holdings[symbol].assetProfile.assetClassLabel =
+                response.holdings[symbol].assetProfile.assetClassLabel ||
                 translate(response.holdings[symbol].assetProfile.assetClass);
 
               response.holdings[symbol].assetProfile.assetSubClassLabel =
@@ -655,12 +769,14 @@ export class DataService {
     filters,
     range,
     withExcludedAccounts = false,
-    withItems = false
+    withItems = false,
+    includeProperties = false
   }: {
     filters?: Filter[];
     range: DateRange;
     withExcludedAccounts?: boolean;
     withItems?: boolean;
+    includeProperties?: boolean;
   }): Observable<PortfolioPerformanceResponse> {
     let params = this.buildFiltersAsQueryParams({ filters });
     params = params.append('range', range);
@@ -671,6 +787,10 @@ export class DataService {
 
     if (withItems) {
       params = params.append('withItems', withItems);
+    }
+
+    if (includeProperties) {
+      params = params.append('includeProperties', includeProperties);
     }
 
     return this.http

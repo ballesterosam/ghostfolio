@@ -1,0 +1,54 @@
+<div class="thermometer-container">
+  <div class="thermometer-wrapper">
+    <div class="thermometer-tube">
+      @if (otherPct > 0) {
+        <div
+          class="segment other-owners"
+          [attr.title]="otherOwnersTitle"
+          [style.height.%]="otherPct"
+        ></div>
+      }
+      <div
+        class="segment debt"
+        [attr.title]="debtTitle"
+        [style.height.%]="debtPct"
+      ></div>
+      <div
+        class="segment equity"
+        [attr.title]="equityTitle"
+        [style.height.%]="equityPct"
+      ></div>
+    </div>
+    <div class="thermometer-bulb" [attr.title]="equityTitle"></div>
+  </div>
+
+  <div class="labels-container">
+    <div class="label-item equity-label">
+      <span class="dot equity-dot"></span>
+      <span class="label-text" i18n
+        >My equity: <strong>{{ equityPct | number: '1.1-1' }}%</strong> ({{
+          equityVal | currency: currency : 'symbol' : '1.0-0'
+        }})</span
+      >
+    </div>
+    <div class="label-item debt-label">
+      <span class="dot debt-dot"></span>
+      <span class="label-text" i18n
+        >Outstanding mortgage:
+        <strong>{{ debtPct | number: '1.1-1' }}%</strong> ({{
+          debtVal | currency: currency : 'symbol' : '1.0-0'
+        }})</span
+      >
+    </div>
+    @if (otherPct > 0) {
+      <div class="label-item other-label">
+        <span class="dot other-dot"></span>
+        <span class="label-text" i18n
+          >Other owners: <strong>{{ otherPct | number: '1.1-1' }}%</strong> ({{
+            otherVal | currency: currency : 'symbol' : '1.0-0'
+          }})</span
+        >
+      </div>
+    }
+  </div>
+</div>

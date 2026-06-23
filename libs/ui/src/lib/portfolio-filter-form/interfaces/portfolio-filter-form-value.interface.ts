@@ -5,4 +5,5 @@ export interface PortfolioFilterFormValue {
   assetClass: string | null;
   holding: PortfolioPosition | null;
   tag: string | null;
+  includeProperties?: boolean;
 }

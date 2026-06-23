@@ -26,6 +26,7 @@ import {
   NG_VALUE_ACCESSOR,
   ReactiveFormsModule
 } from '@angular/forms';
+import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 
@@ -38,6 +39,7 @@ import { PortfolioFilterFormValue } from './interfaces';
     FormsModule,
     GfEntityLogoComponent,
     GfSymbolPipe,
+    MatCheckboxModule,
     MatFormFieldModule,
     MatSelectModule,
     ReactiveFormsModule
@@ -59,6 +61,7 @@ export class GfPortfolioFilterFormComponent
 {
   public readonly accounts = input<AccountWithPlatform[]>([]);
   public readonly assetClasses = input<Filter[]>([]);
+  public readonly disableFilters = input(false);
   public readonly disabled = model(false);
   public readonly holdings = input<PortfolioPosition[]>([]);
   public readonly tags = input<Filter[]>([]);
@@ -68,6 +71,7 @@ export class GfPortfolioFilterFormComponent
     assetClass: FormControl<string | null>;
     holding: FormControl<PortfolioPosition | null>;
     tag: FormControl<string | null>;
+    includeProperties: FormControl<boolean | null>;
   }>;
 
   private readonly changeDetectorRef = inject(ChangeDetectorRef);
@@ -79,7 +83,8 @@ export class GfPortfolioFilterFormComponent
       account: new FormControl<string | null>(null),
       assetClass: new FormControl<string | null>(null),
       holding: new FormControl<PortfolioPosition | null>(null),
-      tag: new FormControl<string | null>(null)
+      tag: new FormControl<string | null>(null),
+      includeProperties: new FormControl<boolean | null>(false)
     });
   }
 
@@ -115,19 +120,27 @@ export class GfPortfolioFilterFormComponent
   }
 
   public ngOnChanges() {
-    if (this.disabled()) {
-      this.filterForm.disable({ emitEvent: false });
-    } else {
-      this.filterForm.enable({ emitEvent: false });
+    const isDisabled = this.disabled() || this.disableFilters();
+    const controlsToDisable = ['account', 'assetClass', 'holding'];
+
+    for (const name of controlsToDisable) {
+      const control = this.filterForm.get(name);
+      if (isDisabled) {
+        control?.disable({ emitEvent: false });
+      } else {
+        control?.enable({ emitEvent: false });
+      }
     }
 
     const tagControl = this.filterForm.get('tag');
-
-    if (this.tags().length === 0) {
+    if (this.tags().length === 0 || isDisabled) {
       tagControl?.disable({ emitEvent: false });
-    } else if (!this.disabled()) {
+    } else {
       tagControl?.enable({ emitEvent: false });
     }
+
+    // includeProperties is always enabled
+    this.filterForm.get('includeProperties')?.enable({ emitEvent: false });
 
     this.changeDetectorRef.markForCheck();
   }
@@ -142,14 +155,7 @@ export class GfPortfolioFilterFormComponent
 
   public setDisabledState(isDisabled: boolean) {
     this.disabled.set(isDisabled);
-
-    if (this.disabled()) {
-      this.filterForm.disable({ emitEvent: false });
-    } else {
-      this.filterForm.enable({ emitEvent: false });
-    }
-
-    this.changeDetectorRef.markForCheck();
+    this.ngOnChanges();
   }
 
   public writeValue(value: PortfolioFilterFormValue | null) {
@@ -159,7 +165,8 @@ export class GfPortfolioFilterFormComponent
           account: value.account ?? null,
           assetClass: value.assetClass ?? null,
           holding: value.holding ?? null,
-          tag: value.tag ?? null
+          tag: value.tag ?? null,
+          includeProperties: value.includeProperties ?? false
         },
         { emitEvent: false }
       );

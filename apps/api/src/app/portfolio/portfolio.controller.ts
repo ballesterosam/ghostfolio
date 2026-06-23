@@ -88,9 +88,11 @@ export class PortfolioController {
     @Query('range') dateRange: DateRange = DEFAULT_DATE_RANGE,
     @Query('symbol') filterBySymbol?: string,
     @Query('tags') filterByTags?: string,
-    @Query('withMarkets') withMarketsParam = 'false'
+    @Query('withMarkets') withMarketsParam = 'false',
+    @Query('includeProperties') includePropertiesParam = 'false'
   ): Promise<PortfolioDetails & { hasError: boolean }> {
     const withMarkets = withMarketsParam === 'true';
+    const includeProperties = includePropertiesParam === 'true';
 
     let hasDetails = true;
     let hasError = false;
@@ -123,7 +125,8 @@ export class PortfolioController {
       impersonationId,
       withMarkets,
       userId: this.request.user.id,
-      withSummary: true
+      withSummary: true,
+      includeProperties
     });
 
     if (hasErrors || hasNotDefinedValuesInObject(holdings)) {
@@ -540,9 +543,11 @@ export class PortfolioController {
     @Query('range') dateRange: DateRange = DEFAULT_DATE_RANGE,
     @Query('symbol') filterBySymbol?: string,
     @Query('tags') filterByTags?: string,
-    @Query('withExcludedAccounts') withExcludedAccountsParam = 'false'
+    @Query('withExcludedAccounts') withExcludedAccountsParam = 'false',
+    @Query('includeProperties') includePropertiesParam = 'false'
   ): Promise<PortfolioPerformanceResponse> {
     const withExcludedAccounts = withExcludedAccountsParam === 'true';
+    const includeProperties = includePropertiesParam === 'true';
 
     const filters = this.apiService.buildFiltersFromQueryParams({
       filterByAccounts,
@@ -557,7 +562,8 @@ export class PortfolioController {
       filters,
       impersonationId,
       withExcludedAccounts,
-      userId: this.request.user.id
+      userId: this.request.user.id,
+      includeProperties
     });
 
     if (

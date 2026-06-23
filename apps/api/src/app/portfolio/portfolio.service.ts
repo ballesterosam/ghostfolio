@@ -25,6 +25,7 @@ import { DataProviderService } from '@ghostfolio/api/services/data-provider/data
 import { ExchangeRateDataService } from '@ghostfolio/api/services/exchange-rate-data/exchange-rate-data.service';
 import { I18nService } from '@ghostfolio/api/services/i18n/i18n.service';
 import { ImpersonationService } from '@ghostfolio/api/services/impersonation/impersonation.service';
+import { PrismaService } from '@ghostfolio/api/services/prisma/prisma.service';
 import { SymbolProfileService } from '@ghostfolio/api/services/symbol-profile/symbol-profile.service';
 import {
   getAnnualizedPerformancePercent,
@@ -61,6 +62,7 @@ import {
   UserSettings
 } from '@ghostfolio/common/interfaces';
 import { TimelinePosition } from '@ghostfolio/common/models';
+import { calculateMortgageSummary } from '@ghostfolio/common/mortgage-helper';
 import {
   AccountWithValue,
   DateRange,
@@ -120,11 +122,71 @@ export class PortfolioService {
     private readonly exchangeRateDataService: ExchangeRateDataService,
     private readonly i18nService: I18nService,
     private readonly impersonationService: ImpersonationService,
+    private readonly prismaService: PrismaService,
     @Inject(REQUEST) private readonly request: RequestWithUser,
     private readonly rulesService: RulesService,
     private readonly symbolProfileService: SymbolProfileService,
     private readonly userService: UserService
   ) {}
+
+  private getPropertyValueAtDate(p: any, date: Date): number {
+    if (p.acquisitionDate) {
+      const acqDate = new Date(p.acquisitionDate);
+      if (date.getTime() < acqDate.getTime()) {
+        return 0;
+      }
+    }
+
+    let baseValue = p.value;
+    if (p.valuations && p.valuations.length > 0) {
+      const sortedValuations = [...p.valuations].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      let matchedValuation = null;
+      for (const val of sortedValuations) {
+        if (new Date(val.date).getTime() <= date.getTime()) {
+          matchedValuation = val;
+        }
+      }
+
+      if (matchedValuation) {
+        baseValue = matchedValuation.value;
+      } else {
+        baseValue = sortedValuations[0].value;
+      }
+    }
+
+    if (p.propertyType === 'BARE_OWNERSHIP') {
+      let reduction = 40;
+      if (p.usufructuaryAge !== undefined && p.usufructuaryAge !== null) {
+        reduction = Math.max(10, 89 - p.usufructuaryAge);
+      }
+      baseValue = baseValue * (1 - reduction / 100);
+    }
+
+    if (p.mortgage) {
+      const mortgageStartDate = new Date(p.mortgage.startDate);
+      if (date.getTime() >= mortgageStartDate.getTime()) {
+        const summary = calculateMortgageSummary(
+          {
+            startDate: p.mortgage.startDate,
+            installments: p.mortgage.installments,
+            principal: p.mortgage.principal,
+            interestRate: p.mortgage.interestRate,
+            amortizations: p.mortgage.amortizations || []
+          },
+          baseValue,
+          date
+        );
+        const realPatrimony =
+          baseValue - summary.outstandingPrincipal - summary.remainingInterest;
+        return Math.max(0, (realPatrimony * p.ownershipPercentage) / 100);
+      }
+    }
+
+    return (baseValue * p.ownershipPercentage) / 100;
+  }
 
   public async getAccounts({
     filters,
@@ -480,7 +542,8 @@ export class PortfolioService {
     userId,
     withExcludedAccounts = false,
     withMarkets = false,
-    withSummary = false
+    withSummary = false,
+    includeProperties = false
   }: {
     dateRange?: DateRange;
     filters?: Filter[];
@@ -489,6 +552,7 @@ export class PortfolioService {
     withExcludedAccounts?: boolean;
     withMarkets?: boolean;
     withSummary?: boolean;
+    includeProperties?: boolean;
   }): Promise<PortfolioDetails & { hasErrors: boolean }> {
     userId = await this.getUserId(impersonationId, userId);
     const user = await this.userService.user({ id: userId });
@@ -523,11 +587,40 @@ export class PortfolioService {
       currency: userCurrency
     });
 
+    let propertiesValueInBaseCurrency = new Big(0);
+    let properties = [];
+    if (includeProperties) {
+      properties = await this.prismaService.realEstateProperty.findMany({
+        include: {
+          valuations: { orderBy: { date: 'asc' } },
+          mortgage: { include: { amortizations: { orderBy: { date: 'asc' } } } }
+        },
+        where: { userId }
+      });
+      const today = new Date();
+      for (const property of properties) {
+        const val = this.getPropertyValueAtDate(property, today);
+        if (val > 0) {
+          const converted = await this.exchangeRateDataService.toCurrency(
+            val,
+            property.currency,
+            userCurrency
+          );
+          propertiesValueInBaseCurrency =
+            propertiesValueInBaseCurrency.plus(converted);
+        }
+      }
+    }
+
     const holdings: PortfolioDetails['holdings'] = {};
 
-    const totalValueInBaseCurrency = currentValueInBaseCurrency.plus(
-      cashDetails.balanceInBaseCurrency
-    );
+    const currentValueInBaseCurrencyWithProperties =
+      currentValueInBaseCurrency.plus(propertiesValueInBaseCurrency);
+
+    const totalValueInBaseCurrency =
+      currentValueInBaseCurrencyWithProperties.plus(
+        cashDetails.balanceInBaseCurrency
+      );
 
     const isFilteredByAccount =
       filters?.some(({ type }) => {
@@ -541,7 +634,7 @@ export class PortfolioService {
 
     let filteredValueInBaseCurrency = isFilteredByAccount
       ? totalValueInBaseCurrency
-      : currentValueInBaseCurrency;
+      : currentValueInBaseCurrencyWithProperties;
 
     if (
       filters?.length === 0 ||
@@ -706,6 +799,63 @@ export class PortfolioService {
       };
     }
 
+    if (includeProperties && properties.length > 0) {
+      const today = new Date();
+      const totalVal = currentValueInBaseCurrencyWithProperties.plus(
+        cashDetails.balanceInBaseCurrency
+      );
+      for (const property of properties) {
+        const val = this.getPropertyValueAtDate(property, today);
+        if (val >= 0) {
+          const valInBase =
+            val > 0
+              ? await this.exchangeRateDataService.toCurrency(
+                  val,
+                  property.currency,
+                  userCurrency
+                )
+              : 0;
+
+          const symbolKey = `PROPERTY_${property.id}`;
+          holdings[symbolKey] = {
+            activitiesCount: 0,
+            accountNames: [],
+            allocationInPercentage: totalVal.eq(0)
+              ? 0
+              : new Big(valInBase).div(totalVal).toNumber(),
+            assetProfile: {
+              assetClass: symbolKey as any,
+              assetSubClass: 'REAL_ESTATE' as any,
+              countries: [],
+              currency: userCurrency,
+              dataSource: 'MANUAL' as any,
+              holdings: [],
+              name: property.name,
+              sectors: [],
+              symbol: symbolKey,
+              url: null,
+              assetClassLabel: property.name
+            },
+            dateOfFirstActivity: property.acquisitionDate
+              ? new Date(property.acquisitionDate)
+              : new Date(),
+            dividend: 0,
+            grossPerformance: 0,
+            grossPerformancePercent: 0,
+            grossPerformancePercentWithCurrencyEffect: 0,
+            grossPerformanceWithCurrencyEffect: 0,
+            investment: 0,
+            netPerformance: 0,
+            netPerformancePercent: 0,
+            netPerformancePercentWithCurrencyEffect: 0,
+            netPerformanceWithCurrencyEffect: 0,
+            quantity: 1,
+            valueInBaseCurrency: valInBase
+          } as any;
+        }
+      }
+    }
+
     const { accounts, platforms } = await this.getValueOfAccountsAndPlatforms({
       activities,
       filters,
@@ -770,7 +920,9 @@ export class PortfolioService {
         emergencyFundHoldingsValueInBaseCurrency:
           this.getEmergencyFundHoldingsValueInBaseCurrency({
             holdings
-          })
+          }),
+        includeProperties,
+        propertiesValueInBaseCurrency
       });
     }
 
@@ -1014,13 +1166,15 @@ export class PortfolioService {
     dateRange = DEFAULT_DATE_RANGE,
     filters,
     impersonationId,
-    userId
+    userId,
+    includeProperties = false
   }: {
     dateRange?: DateRange;
     filters?: Filter[];
     impersonationId: string;
     userId: string;
     withExcludedAccounts?: boolean;
+    includeProperties?: boolean;
   }): Promise<PortfolioPerformanceResponse> {
     userId = await this.getUserId(impersonationId, userId);
     const user = await this.userService.user({ id: userId });
@@ -1075,6 +1229,37 @@ export class PortfolioService {
       end: endDate,
       start: startDate
     });
+
+    if (includeProperties) {
+      const properties = await this.prismaService.realEstateProperty.findMany({
+        include: {
+          valuations: { orderBy: { date: 'asc' } },
+          mortgage: { include: { amortizations: { orderBy: { date: 'asc' } } } }
+        },
+        where: { userId }
+      });
+
+      for (const point of chart) {
+        const pointDate = new Date(point.date);
+        let propertiesValueInBaseCurrency = 0;
+        for (const property of properties) {
+          const val = this.getPropertyValueAtDate(property, pointDate);
+          if (val > 0) {
+            const converted =
+              await this.exchangeRateDataService.toCurrencyAtDate(
+                val,
+                property.currency,
+                userCurrency,
+                pointDate
+              );
+            propertiesValueInBaseCurrency += converted;
+          }
+        }
+        point.netWorth = (point.netWorth ?? 0) + propertiesValueInBaseCurrency;
+        point.valueWithCurrencyEffect =
+          (point.valueWithCurrencyEffect ?? 0) + propertiesValueInBaseCurrency;
+      }
+    }
 
     const {
       netPerformance,
@@ -1894,7 +2079,9 @@ export class PortfolioService {
     impersonationId,
     portfolioCalculator,
     userCurrency,
-    userId
+    userId,
+    includeProperties = false,
+    propertiesValueInBaseCurrency = new Big(0)
   }: {
     balanceInBaseCurrency: number;
     emergencyFundHoldingsValueInBaseCurrency: number;
@@ -1903,6 +2090,8 @@ export class PortfolioService {
     portfolioCalculator: PortfolioCalculator;
     userCurrency: string;
     userId: string;
+    includeProperties?: boolean;
+    propertiesValueInBaseCurrency?: Big;
   }): Promise<PortfolioSummary> {
     userId = await this.getUserId(impersonationId, userId);
     const user = await this.userService.user({ id: userId });
@@ -1930,14 +2119,19 @@ export class PortfolioService {
     }
 
     const {
-      currentValueInBaseCurrency,
+      currentValueInBaseCurrency: originalCurrentValueInBaseCurrency,
       totalInvestment,
       totalInvestmentWithCurrencyEffect
     } = await portfolioCalculator.getSnapshot();
 
+    const currentValueInBaseCurrency = originalCurrentValueInBaseCurrency.plus(
+      propertiesValueInBaseCurrency
+    );
+
     const { performance } = await this.getPerformance({
       impersonationId,
-      userId
+      userId,
+      includeProperties
     });
 
     const {

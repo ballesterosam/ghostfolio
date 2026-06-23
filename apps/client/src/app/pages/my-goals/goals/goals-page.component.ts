@@ -1,7 +1,12 @@
 import { UserService } from '@ghostfolio/client/services/user/user.service';
 import { getLocale } from '@ghostfolio/common/helper';
-import { GoalYear, User } from '@ghostfolio/common/interfaces';
+import {
+  GoalYear,
+  RealEstateProperty,
+  User
+} from '@ghostfolio/common/interfaces';
 import { UserSettings } from '@ghostfolio/common/interfaces/user-settings.interface';
+import { calculateMortgageSummary } from '@ghostfolio/common/mortgage-helper';
 import { DataService } from '@ghostfolio/ui/services';
 
 import {
@@ -41,6 +46,7 @@ import {
   saveOutline
 } from 'ionicons/icons';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
+import { forkJoin, of } from 'rxjs';
 
 interface GoalTableRow {
   actual: number | null;
@@ -211,10 +217,24 @@ export class GfGoalsPageComponent implements OnInit, OnDestroy {
 
     this.isLoading.set(true);
 
-    this.dataService
-      .fetchPortfolioPerformance({ range: 'max' })
+    const includeProperties = this.userService.getIncludeProperties();
+
+    const performance$ = this.dataService.fetchPortfolioPerformance({
+      includeProperties,
+      range: 'max'
+    });
+
+    const details$ = includeProperties
+      ? this.dataService.fetchPortfolioDetails({ includeProperties })
+      : of({ holdings: {} } as any);
+
+    const properties$ = includeProperties
+      ? this.dataService.fetchRealEstateProperties()
+      : of([] as any);
+
+    forkJoin([performance$, details$, properties$])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ chart }) => {
+      .subscribe(([{ chart }, details, properties]) => {
         const yearNetWorth = this.buildYearNetWorthMap(chart ?? []);
         const currentNetWorth =
           chart && chart.length > 0
@@ -224,13 +244,51 @@ export class GfGoalsPageComponent implements OnInit, OnDestroy {
             : 0;
 
         const currentYear = new Date().getFullYear();
+        const today = new Date();
 
         const rows: GoalTableRow[] = goals
           .map((goal) => {
-            const actual =
+            let actual =
               goal.year < currentYear
                 ? (yearNetWorth[goal.year] ?? null)
                 : currentNetWorth;
+
+            if (
+              actual !== null &&
+              includeProperties &&
+              properties?.length > 0
+            ) {
+              let adjustment = 0;
+              const targetDate = new Date(goal.year, 11, 31);
+
+              for (const property of properties) {
+                const holding = details?.holdings?.[`PROPERTY_${property.id}`];
+                const propertyValueToday = this.getPropertyValueAtDate(
+                  property,
+                  today
+                );
+                let rate = 1;
+
+                if (holding) {
+                  const holdingValInBase = holding.valueInBaseCurrency || 0;
+                  rate =
+                    propertyValueToday > 0
+                      ? holdingValInBase / propertyValueToday
+                      : 1;
+                }
+
+                if (goal.year >= currentYear) {
+                  const propertyValueFuture = this.getPropertyValueAtDate(
+                    property,
+                    targetDate
+                  );
+                  const diffInPropertyCurrency =
+                    propertyValueFuture - propertyValueToday;
+                  adjustment += diffInPropertyCurrency * rate;
+                }
+              }
+              actual += adjustment;
+            }
 
             const pct =
               actual != null && goal.targetAmount > 0
@@ -265,6 +323,74 @@ export class GfGoalsPageComponent implements OnInit, OnDestroy {
           this.renderComparisonChart(rows);
         }, 0);
       });
+  }
+
+  private getPropertyValueAtDate(
+    property: RealEstateProperty,
+    date: Date
+  ): number {
+    if (property.acquisitionDate) {
+      const acqDate = new Date(property.acquisitionDate);
+      if (date.getTime() < acqDate.getTime()) {
+        return 0;
+      }
+    }
+
+    let baseValue = property.value;
+    if (property.valuations && property.valuations.length > 0) {
+      const sortedValuations = [...property.valuations].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      let matchedValuation = null;
+      for (const val of sortedValuations) {
+        if (new Date(val.date).getTime() <= date.getTime()) {
+          matchedValuation = val;
+        }
+      }
+
+      if (matchedValuation) {
+        baseValue = matchedValuation.value;
+      } else {
+        baseValue = sortedValuations[0].value;
+      }
+    }
+
+    if (property.propertyType === 'BARE_OWNERSHIP') {
+      let reduction = 40;
+      if (
+        property.usufructuaryAge !== undefined &&
+        property.usufructuaryAge !== null
+      ) {
+        reduction = Math.max(10, 89 - property.usufructuaryAge);
+      }
+      baseValue = baseValue * (1 - reduction / 100);
+    }
+
+    if (property.mortgage) {
+      const mortgageStartDate = new Date(property.mortgage.startDate);
+      if (date.getTime() >= mortgageStartDate.getTime()) {
+        const summary = calculateMortgageSummary(
+          {
+            startDate: property.mortgage.startDate,
+            installments: property.mortgage.installments,
+            principal: property.mortgage.principal,
+            interestRate: property.mortgage.interestRate,
+            amortizations: property.mortgage.amortizations || []
+          },
+          baseValue,
+          date
+        );
+        const realPatrimony =
+          baseValue - summary.outstandingPrincipal - summary.remainingInterest;
+        return Math.max(
+          0,
+          (realPatrimony * property.ownershipPercentage) / 100
+        );
+      }
+    }
+
+    return (baseValue * property.ownershipPercentage) / 100;
   }
 
   private buildYearNetWorthMap(

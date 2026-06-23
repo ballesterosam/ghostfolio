@@ -104,6 +104,7 @@ describe('PortfolioService', () => {
       impersonationService,
       null,
       null,
+      null,
       symbolProfileService,
       userService
     );

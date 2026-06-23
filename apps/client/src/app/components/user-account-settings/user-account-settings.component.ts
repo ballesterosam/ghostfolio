@@ -258,6 +258,22 @@ export class GfUserAccountSettingsComponent implements OnInit {
       });
   }
 
+  public onIncludePropertiesChange(aEvent: MatSlideToggleChange) {
+    this.dataService
+      .putUserSetting({ includeProperties: aEvent.checked })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.userService
+          .get(true)
+          .pipe(takeUntilDestroyed(this.destroyRef))
+          .subscribe((user) => {
+            this.user = user;
+
+            this.changeDetectorRef.markForCheck();
+          });
+      });
+  }
+
   public async onSignInWithFingerprintChange(aEvent: MatSlideToggleChange) {
     if (aEvent.checked) {
       try {

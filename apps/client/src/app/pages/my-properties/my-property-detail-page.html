@@ -1,0 +1,505 @@
+<div class="overview p-3">
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <div class="d-flex align-items-center gap-2">
+      <a mat-icon-button [routerLink]="['/my-properties']">
+        <ion-icon name="arrow-back-outline" />
+      </a>
+      @if (isLoading()) {
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '2rem', width: '200px' }"
+        />
+      } @else {
+        <h2 class="detail-title mb-0">{{ property()?.name }}</h2>
+      }
+    </div>
+    @if (!isLoading() && property()) {
+      <button mat-stroked-button (click)="onEdit()">
+        <ion-icon class="me-1" name="create-outline" />
+        <span i18n>Edit</span>
+      </button>
+    }
+  </div>
+
+  @if (isLoading()) {
+    <div class="row g-3">
+      <div class="col-12">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '8rem', 'border-radius': '12px' }"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '18rem', 'border-radius': '12px' }"
+        />
+      </div>
+      <div class="col-12 col-md-6">
+        <ngx-skeleton-loader
+          appearance="line"
+          [theme]="{ height: '18rem', 'border-radius': '12px' }"
+        />
+      </div>
+    </div>
+  } @else if (property(); as p) {
+    <!-- Details card -->
+    <div class="dashboard-card detail-card mb-4 p-4">
+      <div class="row g-3">
+        @if (fullAddress(p)) {
+          <div class="col-12 col-md-6">
+            <div class="detail-label" i18n>Address</div>
+            <div class="detail-value">{{ fullAddress(p) }}</div>
+          </div>
+        }
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Type</div>
+          <div class="detail-value">
+            {{ propertyTypeLabel(p.propertyType) }}
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Ownership</div>
+          <div class="detail-value">{{ p.ownershipPercentage }}%</div>
+        </div>
+        @if (p.propertyType === 'BARE_OWNERSHIP') {
+          <div class="col-6 col-md-3">
+            <div class="detail-label" i18n>Usufructuary age</div>
+            <div class="detail-value">
+              @if (
+                p.usufructuaryAge !== null && p.usufructuaryAge !== undefined
+              ) {
+                {{ p.usufructuaryAge }}
+              } @else {
+                <span class="text-muted" i18n>Not specified</span>
+              }
+            </div>
+          </div>
+        }
+        @if (p.acquisitionDate) {
+          <div class="col-6 col-md-3">
+            <div class="detail-label" i18n>Acquisition date</div>
+            <div class="detail-value">
+              {{ p.acquisitionDate | date: 'dd/MM/yyyy' }}
+            </div>
+          </div>
+        }
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>Market value</div>
+          <div class="detail-value">
+            {{ formatCurrency(p.value, p.currency) }}
+          </div>
+        </div>
+        <div class="col-6 col-md-3">
+          <div class="detail-label" i18n>My share</div>
+          <div class="detail-value detail-value--highlight">
+            {{ formatCurrency(adjustedValue(p), p.currency) }}
+          </div>
+        </div>
+      </div>
+    </div>
+
+    @if (p.mortgage; as m) {
+      <div class="row g-3 mb-4">
+        <!-- 60% Left column: Mortgage Details & Amortization Table -->
+        <div class="col-12 col-md-7 col-lg-8">
+          <div class="dashboard-card p-4 h-100">
+            <h3 class="chart-section-title mb-3" i18n>Mortgage Details</h3>
+
+            <div class="row g-3 mb-4">
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Principal</div>
+                <div class="detail-value">
+                  {{ formatCurrency(m.principal, p.currency) }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Annual Interest</div>
+                <div class="detail-value">{{ m.interestRate }}%</div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Monthly Payment</div>
+                <div class="detail-value">
+                  {{ formatCurrency(m.monthlyPayment, p.currency) }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Total Cost</div>
+                <div
+                  class="detail-value"
+                  [title]="
+                    'Principal: ' +
+                    formatCurrency(m.principal, p.currency) +
+                    ' + Intereses: ' +
+                    formatCurrency(m.totalInterest, p.currency)
+                  "
+                >
+                  {{ formatCurrency(m.totalCost, p.currency) }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Remaining Interest</div>
+                <div class="detail-value">
+                  {{ formatCurrency(m.remainingInterest, p.currency) }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Total Installments</div>
+                <div class="detail-value">{{ m.installments }}</div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Remaining Installments</div>
+                <div class="detail-value">{{ m.installmentsRemaining }}</div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Start Date</div>
+                <div class="detail-value">
+                  {{ m.startDate | date: 'mediumDate' : undefined : locale }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>End Date</div>
+                <div class="detail-value">
+                  {{ m.endDate | date: 'mediumDate' : undefined : locale }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Outstanding Principal</div>
+                <div class="detail-value">
+                  {{ formatCurrency(m.outstandingPrincipal, p.currency) }}
+                </div>
+              </div>
+              <div class="col-6 col-md-4 col-lg-3">
+                <div class="detail-label" i18n>Total Amortized</div>
+                <div class="detail-value">
+                  {{ formatCurrency(m.totalAmortized, p.currency) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- Progress bar -->
+            <div class="mb-4">
+              <div class="d-flex justify-content-between text-muted small mb-1">
+                <span
+                  >{{ m.installmentsPaid }}
+                  <span i18n>installments paid</span></span
+                >
+                <span
+                  >{{ m.installmentsRemaining }}
+                  <span i18n>remaining</span></span
+                >
+              </div>
+              <div
+                class="progress"
+                style="
+                  height: 8px;
+                  background-color: rgba(0, 0, 0, 0.05);
+                  border-radius: 4px;
+                  overflow: hidden;
+                "
+              >
+                <div
+                  aria-valuemin="0"
+                  class="progress-bar bg-success"
+                  role="progressbar"
+                  [attr.aria-valuemax]="
+                    m.installmentsPaid + m.installmentsRemaining
+                  "
+                  [attr.aria-valuenow]="m.installmentsPaid"
+                  [style.width.%]="
+                    (m.installmentsPaid /
+                      (m.installmentsPaid + m.installmentsRemaining)) *
+                    100
+                  "
+                ></div>
+              </div>
+            </div>
+
+            <!-- Amortizations Table -->
+            <div class="amortizations-section">
+              <div
+                class="d-flex justify-content-between align-items-center mb-3"
+              >
+                <h4 class="mb-0" i18n style="font-size: 16px; font-weight: 500">
+                  Early Amortizations
+                </h4>
+                @if (!showAddAmortizationForm) {
+                  <button
+                    mat-stroked-button
+                    (click)="showAddAmortizationForm = true"
+                  >
+                    <ion-icon class="me-1" name="add-outline" />
+                    <span i18n>Add Amortization</span>
+                  </button>
+                }
+              </div>
+
+              <!-- Add Amortization Inline Form -->
+              @if (showAddAmortizationForm) {
+                <div
+                  class="add-amortization-form p-3 mb-3 border rounded shadow-sm"
+                >
+                  <div class="row g-2 align-items-center">
+                    <div class="col-12 col-md-3">
+                      <mat-form-field
+                        appearance="outline"
+                        class="w-100 compact-field"
+                      >
+                        <mat-label i18n>Date</mat-label>
+                        <input
+                          matInput
+                          type="date"
+                          [(ngModel)]="amortizationDate"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <mat-form-field
+                        appearance="outline"
+                        class="w-100 compact-field"
+                      >
+                        <mat-label i18n>Amount</mat-label>
+                        <input
+                          matInput
+                          min="1"
+                          type="number"
+                          [(ngModel)]="amortizationAmount"
+                        />
+                      </mat-form-field>
+                    </div>
+                    <div class="col-12 col-md-3">
+                      <mat-checkbox i18n [(ngModel)]="amortizationReduceTerm">
+                        Reduce Term
+                      </mat-checkbox>
+                    </div>
+                    <div
+                      class="col-12 col-md-3 d-flex gap-2 justify-content-end"
+                    >
+                      <button
+                        i18n
+                        mat-button
+                        (click)="showAddAmortizationForm = false"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        color="primary"
+                        i18n
+                        mat-flat-button
+                        [disabled]="
+                          !amortizationDate ||
+                          !amortizationAmount ||
+                          amortizationAmount <= 0
+                        "
+                        (click)="onAddAmortization()"
+                      >
+                        Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              }
+
+              @if (m.amortizations && m.amortizations.length > 0) {
+                <div class="table-responsive">
+                  <table class="table table-sm align-middle mb-0">
+                    <thead>
+                      <tr>
+                        <th i18n>Date</th>
+                        <th class="text-end" i18n>Amount</th>
+                        <th i18n>Type</th>
+                        <th class="text-end"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      @for (a of m.amortizations; track a.id) {
+                        <tr>
+                          <td>
+                            {{
+                              a.date | date: 'mediumDate' : undefined : locale
+                            }}
+                          </td>
+                          <td class="text-end">
+                            {{ formatCurrency(a.amount, p.currency) }}
+                          </td>
+                          <td>
+                            @if (a.reduceTerm) {
+                              <span class="badge badge-soft-primary" i18n
+                                >Reduce Term</span
+                              >
+                            } @else {
+                              <span class="badge badge-soft-info" i18n
+                                >Reduce Payment</span
+                              >
+                            }
+                          </td>
+                          <td class="text-end">
+                            <button
+                              color="warn"
+                              mat-icon-button
+                              (click)="onDeleteAmortization(a.id)"
+                            >
+                              <ion-icon name="trash-outline" />
+                            </button>
+                          </td>
+                        </tr>
+                      }
+                    </tbody>
+                  </table>
+                </div>
+              } @else {
+                <div class="text-muted small py-3 text-center" i18n>
+                  No early amortizations registered yet.
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- 40% Right column: Thermometer Chart -->
+        <div class="col-12 col-md-5 col-lg-4">
+          <div class="dashboard-card p-4 h-100 d-flex flex-column">
+            <h3 class="chart-section-title mb-3" i18n>Real Ownership</h3>
+            <div
+              class="flex-grow-1 d-flex align-items-center justify-content-center"
+            >
+              <gf-mortgage-thermometer
+                [currency]="p.currency"
+                [outstandingPrincipal]="m.outstandingPrincipal"
+                [ownershipPercentage]="p.ownershipPercentage"
+                [propertyValue]="p.value"
+                [remainingInterest]="m.remainingInterest"
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Charts row -->
+    <div class="row g-3 mb-4">
+      <!-- Valuation history chart -->
+      <div class="col-12 col-md-6">
+        <div class="dashboard-card p-4" style="height: 100%">
+          <h3 class="chart-section-title mb-3" i18n>Valuation history</h3>
+          @if (chartItems.length >= 2) {
+            <div class="chart-container">
+              <gf-line-chart
+                [historicalDataItems]="chartItems"
+                [isAnimated]="false"
+                [maintainAspectRatio]="false"
+                [overrideGradientColor]="'rgba(59, 130, 246, 0.15)'"
+                [overrideLineColor]="'rgba(59, 130, 246, 1)'"
+                [overrideLineWidth]="2"
+                [showGradient]="true"
+                [showLoader]="false"
+                [showXAxis]="false"
+                [showYAxis]="false"
+                [yMin]="chartYMin"
+              />
+            </div>
+          } @else {
+            <div class="text-muted text-center py-5" i18n>
+              No valuation history yet. Add valuations in the edit form.
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Ownership donut chart -->
+      <div class="col-12 col-md-6">
+        <div class="dashboard-card p-4" style="height: 100%">
+          <h3 class="chart-section-title mb-3" i18n>Ownership distribution</h3>
+          <div class="donut-container">
+            <gf-portfolio-proportion-chart
+              [data]="donutData"
+              [glow]="true"
+              [hollow]="true"
+              [isInPercentage]="true"
+              [keys]="[]"
+              [showLegend]="false"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Map section -->
+    <div class="dashboard-card p-4 mb-4">
+      <h3 class="chart-section-title mb-3" i18n>Location</h3>
+
+      @if (mapSrc) {
+        <div class="map-container mb-3">
+          <iframe
+            frameborder="0"
+            marginheight="0"
+            marginwidth="0"
+            scrolling="no"
+            title="Property location"
+            [src]="mapSrc"
+          ></iframe>
+        </div>
+      }
+
+      <div class="row g-2 align-items-end">
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Latitude</mat-label>
+            <input
+              matInput
+              step="0.000001"
+              type="number"
+              [(ngModel)]="latitudeInput"
+              (ngModelChange)="onMapInputChange()"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4">
+          <mat-form-field appearance="outline" class="w-100">
+            <mat-label i18n>Longitude</mat-label>
+            <input
+              matInput
+              step="0.000001"
+              type="number"
+              [(ngModel)]="longitudeInput"
+              (ngModelChange)="onMapInputChange()"
+            />
+          </mat-form-field>
+        </div>
+        <div class="col-12 col-md-4 d-flex gap-2 mb-3">
+          @if (fullAddress(p)) {
+            <button
+              class="flex-grow-1"
+              mat-stroked-button
+              (click)="onAutoDetect()"
+            >
+              <ion-icon name="location-outline" />
+              <span i18n>Auto-detect</span>
+            </button>
+          }
+          <button
+            class="flex-grow-1"
+            color="primary"
+            mat-flat-button
+            [disabled]="
+              isSavingLocation ||
+              latitudeInput === null ||
+              longitudeInput === null
+            "
+            (click)="onSaveLocation()"
+          >
+            <ion-icon name="save-outline" />
+            <span i18n>Save</span>
+          </button>
+        </div>
+        @if (geocodeError) {
+          <div class="col-12">
+            <p class="text-danger mb-0" i18n>
+              Could not auto-detect location. Please enter coordinates manually.
+            </p>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

@@ -91,32 +91,6 @@ export class GfFirePageComponent implements OnInit {
   }
 
   public ngOnInit() {
-    this.isLoading = true;
-
-    this.dataService
-      .fetchPortfolioDetails()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ summary }) => {
-        this.fireWealth = {
-          today: {
-            valueInBaseCurrency: summary?.fireWealth
-              ? summary.fireWealth.today.valueInBaseCurrency
-              : 0
-          }
-        };
-        if (this.user.subscription?.type === SubscriptionType.Basic) {
-          this.fireWealth = {
-            today: {
-              valueInBaseCurrency: 10000
-            }
-          };
-        }
-
-        this.calculateWithdrawalRates();
-
-        this.changeDetectorRef.markForCheck();
-      });
-
     this.impersonationStorageService
       .onChangeHasImpersonation()
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -149,10 +123,40 @@ export class GfFirePageComponent implements OnInit {
             { emitEvent: false }
           );
 
-          this.calculateWithdrawalRates();
-
-          this.changeDetectorRef.markForCheck();
+          this.update();
         }
+      });
+  }
+
+  private update() {
+    this.isLoading = true;
+
+    this.dataService
+      .fetchPortfolioDetails({
+        includeProperties: this.userService.getIncludeProperties()
+      })
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(({ summary }) => {
+        this.fireWealth = {
+          today: {
+            valueInBaseCurrency: summary?.fireWealth
+              ? summary.fireWealth.today.valueInBaseCurrency
+              : 0
+          }
+        };
+        if (this.user.subscription?.type === SubscriptionType.Basic) {
+          this.fireWealth = {
+            today: {
+              valueInBaseCurrency: 10000
+            }
+          };
+        }
+
+        this.calculateWithdrawalRates();
+
+        this.isLoading = false;
+
+        this.changeDetectorRef.markForCheck();
       });
   }
 

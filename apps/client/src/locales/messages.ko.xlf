@@ -9092,6 +9092,14 @@
           <context context-type="linenumber">118</context>
         </context-group>
       </trans-unit>
+          <trans-unit id="includePropertiesFilter" datatype="html">
+        <source>Include my properties in calculations</source>
+        <target state="translated">계산에 내 부동산 포함</target>
+      </trans-unit>
+      <trans-unit id="includePropertiesFilterHint" datatype="html">
+        <source>Include the calculated value of your real estate properties in the portfolio net worth and calculations</source>
+        <target state="translated">포트폴리오 순자산 및 계산에 부동산의 계산된 가치 포함</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

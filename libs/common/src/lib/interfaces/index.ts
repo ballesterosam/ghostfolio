@@ -42,6 +42,13 @@ import type { PortfolioPosition } from './portfolio-position.interface';
 import type { PortfolioReportRule } from './portfolio-report-rule.interface';
 import type { PortfolioSummary } from './portfolio-summary.interface';
 import type { Product } from './product';
+import type {
+  RealEstateProperty,
+  RealEstatePropertyValuation,
+  Mortgage,
+  MortgageAmortization,
+  MortgageWithCalculations
+} from './real-estate-property.interface';
 import type { AccessTokenResponse } from './responses/access-token-response.interface';
 import type { AccountBalancesResponse } from './responses/account-balances-response.interface';
 import type { AccountResponse } from './responses/account-response.interface';
@@ -186,6 +193,11 @@ export {
   PublicPortfolioResponse,
   QuotesResponse,
   ResponseError,
+  RealEstateProperty,
+  RealEstatePropertyValuation,
+  Mortgage,
+  MortgageAmortization,
+  MortgageWithCalculations,
   RuleSettings,
   ScraperConfiguration,
   Statistics,

@@ -1,0 +1,114 @@
+.thermometer-container {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  padding: 16px;
+  height: 100%;
+}
+
+.thermometer-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  height: 250px;
+  width: 60px;
+}
+
+.thermometer-tube {
+  width: 20px;
+  height: 200px;
+  border-radius: 10px 10px 0 0;
+  background: rgba(0, 0, 0, 0.05);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column; /* Stacks segments vertically */
+  position: relative;
+}
+
+:host-context(.theme-dark) .thermometer-tube {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.segment {
+  width: 100%;
+  transition: height 0.5s ease-in-out;
+}
+
+.segment.other-owners {
+  background-color: #dee2e6;
+}
+
+:host-context(.theme-dark) .segment.other-owners {
+  background-color: #495057;
+}
+
+.segment.debt {
+  background: linear-gradient(180deg, #ff8787 0%, #fa5252 100%);
+}
+
+.segment.equity {
+  background: linear-gradient(180deg, #69db7c 0%, #2f9e44 100%);
+}
+
+.thermometer-bulb {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #69db7c 0%, #2f9e44 100%);
+  border: 2px solid rgba(0, 0, 0, 0.1);
+  margin-top: -10px;
+  z-index: 2;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+:host-context(.theme-dark) .thermometer-bulb {
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+.labels-container {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  justify-content: center;
+}
+
+.label-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+.dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+}
+
+.equity-dot {
+  background: #2f9e44;
+}
+
+.debt-dot {
+  background: #fa5252;
+}
+
+.other-dot {
+  background: #dee2e6;
+}
+
+:host-context(.theme-dark) .other-dot {
+  background: #495057;
+}
+
+.label-text {
+  color: var(--gf-text-color, #212529);
+}
+
+:host-context(.theme-dark) .label-text {
+  color: var(--gf-text-color-dark, #f8f9fa);
+}

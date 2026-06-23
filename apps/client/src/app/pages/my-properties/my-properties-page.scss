@@ -1,0 +1,147 @@
+.property-card {
+  border-radius: 16px;
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+  min-height: 14rem;
+  overflow: hidden;
+  padding: 1.5rem;
+  position: relative;
+
+  &--ownership {
+    background: linear-gradient(160deg, #5d8ab9 0%, #304f75 100%);
+  }
+
+  &--bare-ownership {
+    background: linear-gradient(160deg, #2d7a5e 0%, #1a4a38 100%);
+  }
+
+  &--other {
+    background: linear-gradient(160deg, #6b7280 0%, #374151 100%);
+  }
+}
+
+.property-card__actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  display: flex;
+  gap: 0.25rem;
+  z-index: 2;
+
+  button {
+    color: rgba(255, 255, 255, 0.85);
+
+    &:hover {
+      color: #fff;
+    }
+  }
+}
+
+.property-card__body {
+  flex: 1;
+}
+
+.property-card__chart {
+  flex-shrink: 0;
+  height: 5rem;
+  margin: 0.75rem -1.5rem -1.5rem;
+}
+
+.property-card__name {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  margin-bottom: 0.25rem;
+  opacity: 0.82;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.property-card__value {
+  font-size: 2.6rem;
+  font-weight: 700;
+  line-height: 1;
+  margin-bottom: 0.4rem;
+}
+
+.property-card__footer {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  opacity: 0.75;
+  text-transform: uppercase;
+}
+
+.empty-state {
+  ion-icon {
+    display: block;
+    margin: 0 auto;
+  }
+}
+
+.valuations-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.valuations-list {
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.valuation-row {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  padding: 0.4rem 0.25rem;
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.valuation-date {
+  font-size: 0.85rem;
+  min-width: 7rem;
+  opacity: 0.7;
+}
+
+.valuation-value {
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.valuation-actions {
+  display: flex;
+  gap: 0.1rem;
+}
+
+.valuation-edit,
+.valuation-delete {
+  color: rgba(0, 0, 0, 0.35);
+  height: 28px;
+  width: 28px;
+
+  &:hover {
+    color: rgba(0, 0, 0, 0.7);
+  }
+}
+
+.valuation-delete:hover {
+  color: var(--warn-color, #f44336);
+}
+
+.badge-soft-warning {
+  background-color: rgba(255, 193, 7, 0.25);
+  color: #ffc107;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
