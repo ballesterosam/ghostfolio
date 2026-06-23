@@ -1,3 +1,4 @@
+import { GfAdminOpenrouterComponent } from '@ghostfolio/client/components/admin-openrouter/admin-openrouter.component';
 import { CacheService } from '@ghostfolio/client/services/cache.service';
 import { UserService } from '@ghostfolio/client/services/user/user.service';
 import {
@@ -68,6 +69,7 @@ import ms, { StringValue } from 'ms';
     ClipboardModule,
     CommonModule,
     FormsModule,
+    GfAdminOpenrouterComponent,
     GfValueComponent,
     IonIcon,
     MatButtonModule,

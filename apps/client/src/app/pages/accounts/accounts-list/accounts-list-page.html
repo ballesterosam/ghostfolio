@@ -1,7 +1,20 @@
 <div class="overview p-3">
+  <div class="d-flex align-items-center justify-content-between mb-4 pt-2">
+    <h2 class="section-title mb-0" i18n>Accounts</h2>
+    @if (
+      !hasImpersonationId &&
+      hasPermissionToCreateAccount &&
+      !user.settings.isRestrictedView
+    ) {
+      <button mat-stroked-button (click)="onCreateAccount()">
+        <ion-icon name="add-outline" />
+        <span i18n>Add Account</span>
+      </button>
+    }
+  </div>
   <div class="row">
     <div class="col">
-      <div class="pt-4">
+      <div class="pt-2">
         <gf-accounts-table
           [accounts]="accounts"
           [activitiesCount]="activitiesCount"
@@ -61,12 +74,4 @@
       </div>
     </div>
   </div>
-
-  @if (
-    !hasImpersonationId &&
-    hasPermissionToCreateAccount &&
-    !user.settings.isRestrictedView
-  ) {
-    <gf-fab [queryParams]="{ createDialog: true }" />
-  }
 </div>

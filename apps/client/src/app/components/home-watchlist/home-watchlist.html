@@ -1,12 +1,20 @@
 <div class="overview p-3">
-  <h2 class="section-title mb-4">
-    <span class="align-items-center d-flex">
-      <span i18n>Watchlist</span>
-      @if (user?.subscription?.type === 'Basic') {
-        <gf-premium-indicator class="ms-1" />
-      }
-    </span>
-  </h2>
+  <div class="d-flex align-items-center justify-content-between mb-4">
+    <h2 class="section-title mb-0">
+      <span class="align-items-center d-flex">
+        <span i18n>Watchlist</span>
+        @if (user?.subscription?.type === 'Basic') {
+          <gf-premium-indicator class="ms-1" />
+        }
+      </span>
+    </h2>
+    @if (!hasImpersonationId && hasPermissionToCreateWatchlistItem) {
+      <button mat-stroked-button (click)="onCreateWatchlistItem()">
+        <ion-icon name="add-outline" />
+        <span i18n>Add to Watchlist</span>
+      </button>
+    }
+  </div>
   <div class="row">
     <div class="col-12">
       <gf-benchmark
@@ -21,6 +29,3 @@
     </div>
   </div>
 </div>
-@if (!hasImpersonationId && hasPermissionToCreateWatchlistItem) {
-  <gf-fab [queryParams]="{ createWatchlistItemDialog: true }" />
-}

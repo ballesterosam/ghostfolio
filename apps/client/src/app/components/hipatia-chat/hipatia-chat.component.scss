@@ -1,0 +1,229 @@
+:host {
+  display: block;
+}
+
+.hipatia-fab {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 1000;
+}
+
+.hipatia-panel {
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 380px;
+  height: 100dvh;
+  max-height: 100dvh;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  background: var(--mat-sys-surface);
+  border-left: 1px solid var(--mat-sys-outline-variant);
+  box-shadow: -4px 0 16px rgba(0, 0, 0, 0.15);
+
+  @media (max-width: 480px) {
+    width: 100vw;
+  }
+}
+
+.panel-header {
+  display: flex;
+  align-items: center;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
+  gap: 0.5rem;
+
+  .panel-title {
+    flex: 1;
+    font-weight: 600;
+    font-size: 1rem;
+  }
+}
+
+.messages-container {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.message-bubble {
+  max-width: 85%;
+  padding: 0.625rem 0.875rem;
+  border-radius: 1rem;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  word-break: break-word;
+
+  &.user {
+    align-self: flex-end;
+    background: var(--primary-color, #6200ea);
+    color: white;
+    border-bottom-right-radius: 0.25rem;
+  }
+
+  &.assistant {
+    align-self: flex-start;
+    background: var(--mat-sys-surface-container);
+    color: var(--mat-sys-on-surface);
+    border-bottom-left-radius: 0.25rem;
+
+    markdown {
+      display: block;
+
+      p {
+        margin: 0 0 0.5rem;
+
+        &:last-child {
+          margin-bottom: 0;
+        }
+      }
+
+      ul,
+      ol {
+        margin: 0.25rem 0 0.5rem 1.25rem;
+        padding: 0;
+      }
+
+      li {
+        margin-bottom: 0.15rem;
+      }
+
+      code {
+        background: rgba(0, 0, 0, 0.08);
+        border-radius: 3px;
+        font-size: 0.82em;
+        padding: 0.1em 0.3em;
+      }
+
+      pre {
+        background: rgba(0, 0, 0, 0.06);
+        border-radius: 6px;
+        margin: 0.5rem 0;
+        overflow-x: auto;
+        padding: 0.75rem;
+
+        code {
+          background: none;
+          padding: 0;
+        }
+      }
+
+      h1,
+      h2,
+      h3,
+      h4 {
+        font-size: 1em;
+        font-weight: 600;
+        margin: 0.5rem 0 0.25rem;
+      }
+
+      strong {
+        font-weight: 600;
+      }
+
+      blockquote {
+        border-left: 3px solid currentColor;
+        margin: 0.5rem 0;
+        opacity: 0.8;
+        padding-left: 0.75rem;
+      }
+
+      table {
+        border-collapse: collapse;
+        font-size: 0.85em;
+        margin: 0.5rem 0;
+        width: 100%;
+
+        th,
+        td {
+          border: 1px solid rgba(0, 0, 0, 0.15);
+          padding: 0.25rem 0.5rem;
+          text-align: left;
+        }
+
+        th {
+          font-weight: 600;
+        }
+      }
+    }
+  }
+}
+
+.typing-indicator {
+  align-self: flex-start;
+  background: var(--mat-sys-surface-container);
+  border-radius: 1rem;
+  border-bottom-left-radius: 0.25rem;
+  padding: 0.625rem 0.875rem;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  span {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: typing-dot 1.2s infinite ease-in-out;
+
+    &:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+
+    &:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+  }
+}
+
+@keyframes typing-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.3;
+    transform: scale(1);
+  }
+  30% {
+    opacity: 1;
+    transform: scale(1.2);
+  }
+}
+
+.input-area {
+  display: flex;
+  align-items: flex-end;
+  padding: 0.75rem;
+  gap: 0.5rem;
+  border-top: 1px solid var(--mat-sys-outline-variant);
+
+  mat-form-field {
+    flex: 1;
+  }
+}
+
+.conversations-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  gap: 1rem;
+  color: var(--mat-sys-on-surface-variant);
+  text-align: center;
+  padding: 2rem;
+
+  .empty-icon {
+    font-size: 3rem;
+  }
+}

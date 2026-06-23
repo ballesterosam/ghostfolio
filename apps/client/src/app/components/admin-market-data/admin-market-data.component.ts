@@ -18,7 +18,6 @@ import { AdminMarketDataItem } from '@ghostfolio/common/interfaces/admin-market-
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { GfSymbolPipe } from '@ghostfolio/common/pipes';
 import { GfActivitiesFilterComponent } from '@ghostfolio/ui/activities-filter';
-import { GfFabComponent } from '@ghostfolio/ui/fab';
 import { translate } from '@ghostfolio/ui/i18n';
 import { GfPremiumIndicatorComponent } from '@ghostfolio/ui/premium-indicator';
 import { AdminService, DataService } from '@ghostfolio/ui/services';
@@ -92,7 +91,6 @@ import { CreateAssetProfileDialogParams } from './create-asset-profile-dialog/in
   imports: [
     CommonModule,
     GfActivitiesFilterComponent,
-    GfFabComponent,
     GfPremiumIndicatorComponent,
     GfSymbolPipe,
     GfValueComponent,
@@ -377,6 +375,13 @@ export class GfAdminMarketDataComponent implements AfterViewInit, OnInit {
         }
       });
     }
+  }
+
+  protected onCreateAssetProfile() {
+    this.router.navigate(['.'], {
+      queryParams: { createAssetProfileDialog: true },
+      relativeTo: this.route
+    });
   }
 
   protected onChangePage(page: PageEvent) {

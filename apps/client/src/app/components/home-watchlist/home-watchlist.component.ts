@@ -8,7 +8,6 @@ import {
 } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { GfBenchmarkComponent } from '@ghostfolio/ui/benchmark';
-import { GfFabComponent } from '@ghostfolio/ui/fab';
 import { GfPremiumIndicatorComponent } from '@ghostfolio/ui/premium-indicator';
 import { DataService } from '@ghostfolio/ui/services';
 
@@ -23,6 +22,7 @@ import {
   OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { DeviceDetectorService } from 'ngx-device-detector';
@@ -34,8 +34,8 @@ import { CreateWatchlistItemDialogParams } from './create-watchlist-item-dialog/
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     GfBenchmarkComponent,
-    GfFabComponent,
     GfPremiumIndicatorComponent,
+    MatButtonModule,
     RouterModule
   ],
   schemas: [CUSTOM_ELEMENTS_SCHEMA],
@@ -108,6 +108,13 @@ export class GfHomeWatchlistComponent implements OnInit {
 
   public ngOnInit() {
     this.loadWatchlistData();
+  }
+
+  protected onCreateWatchlistItem() {
+    this.router.navigate(['.'], {
+      queryParams: { createWatchlistItemDialog: true },
+      relativeTo: this.route
+    });
   }
 
   protected onWatchlistItemDeleted({

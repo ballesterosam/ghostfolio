@@ -12,6 +12,7 @@ export interface InfoItem {
   fearAndGreedDataSource?: string;
   globalPermissions: string[];
   isDataGatheringEnabled?: string;
+  isHipatiaEnabled?: boolean;
   isReadOnlyMode?: boolean;
   statistics: Statistics;
   subscriptionOffer?: SubscriptionOffer;

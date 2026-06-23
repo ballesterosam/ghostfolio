@@ -5,6 +5,7 @@ import { BenchmarkModule } from '@ghostfolio/api/services/benchmark/benchmark.mo
 import { ConfigurationModule } from '@ghostfolio/api/services/configuration/configuration.module';
 import { DataProviderModule } from '@ghostfolio/api/services/data-provider/data-provider.module';
 import { DemoModule } from '@ghostfolio/api/services/demo/demo.module';
+import { EncryptionModule } from '@ghostfolio/api/services/encryption/encryption.module';
 import { ExchangeRateDataModule } from '@ghostfolio/api/services/exchange-rate-data/exchange-rate-data.module';
 import { MarketDataModule } from '@ghostfolio/api/services/market-data/market-data.module';
 import { PrismaModule } from '@ghostfolio/api/services/prisma/prisma.module';
@@ -27,6 +28,7 @@ import { QueueModule } from './queue/queue.module';
     DataGatheringQueueModule,
     DataProviderModule,
     DemoModule,
+    EncryptionModule,
     ExchangeRateDataModule,
     MarketDataModule,
     PrismaModule,

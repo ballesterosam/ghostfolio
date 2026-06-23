@@ -11,7 +11,6 @@ import {
 import { AssetProfileIdentifier, User } from '@ghostfolio/common/interfaces';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { GfAccountsTableComponent } from '@ghostfolio/ui/accounts-table';
-import { GfFabComponent } from '@ghostfolio/ui/fab';
 import { NotificationService } from '@ghostfolio/ui/notifications';
 import { GfPortfolioProportionChartComponent } from '@ghostfolio/ui/portfolio-proportion-chart';
 import { DataService } from '@ghostfolio/ui/services';
@@ -20,10 +19,12 @@ import { CommonModule } from '@angular/common';
 import {
   ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { Account as AccountModel, Platform } from '@prisma/client';
@@ -41,10 +42,11 @@ import { GfTransferBalanceDialogComponent } from '../transfer-balance/transfer-b
   imports: [
     CommonModule,
     GfAccountsTableComponent,
-    GfFabComponent,
     GfPortfolioProportionChartComponent,
+    MatButtonModule,
     RouterModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'gf-accounts-list-page',
   styleUrls: ['./accounts-list-page.scss'],
   templateUrl: './accounts-list-page.html'
@@ -170,6 +172,10 @@ export class GfAccountsListPageComponent implements OnInit {
       );
 
     this.fetchPortfolioDetails();
+  }
+
+  public onCreateAccount() {
+    this.router.navigate([], { queryParams: { createDialog: true } });
   }
 
   public onDeleteAccount(aId: string, cascade = false) {

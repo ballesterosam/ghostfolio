@@ -1,0 +1,148 @@
+<!-- FAB button -->
+@if (!isPanelOpen) {
+  <button
+    aria-label="Open Hipatia AI assistant"
+    class="hipatia-fab"
+    color="primary"
+    mat-fab
+    (click)="openPanel()"
+  >
+    <ion-icon name="chatbubble-ellipses-outline" />
+  </button>
+}
+
+<!-- Slide panel -->
+@if (isPanelOpen) {
+  <div class="hipatia-panel">
+    <!-- Header -->
+    <div class="panel-header">
+      @if (viewMode === 'history') {
+        <button mat-icon-button (click)="viewMode = 'chat'">
+          <ion-icon name="arrow-back-outline" />
+        </button>
+      }
+      <span class="panel-title">
+        @if (viewMode === 'history') {
+          <span i18n>Conversations</span>
+        } @else {
+          Hipatia
+        }
+      </span>
+      @if (viewMode === 'chat') {
+        <button
+          aria-label="New conversation"
+          mat-icon-button
+          (click)="onNewConversation()"
+        >
+          <ion-icon name="add-outline" />
+        </button>
+        <button
+          aria-label="Conversation history"
+          mat-icon-button
+          (click)="openHistory()"
+        >
+          <ion-icon name="time-outline" />
+        </button>
+      }
+      <button aria-label="Close" mat-icon-button (click)="closePanel()">
+        <ion-icon name="close-outline" />
+      </button>
+    </div>
+
+    <!-- Chat view -->
+    @if (viewMode === 'chat') {
+      <div #messagesContainer class="messages-container">
+        @if (messages.length === 0) {
+          <div class="empty-state">
+            <ion-icon class="empty-icon" name="chatbubble-ellipses-outline" />
+            <p i18n>
+              Hello! I'm Hipatia, your personal financial assistant. Ask me
+              anything about your portfolio.
+            </p>
+          </div>
+        }
+
+        @for (msg of messages; track msg.id) {
+          <div
+            class="message-bubble"
+            [class.assistant]="msg.role === 'ASSISTANT'"
+            [class.user]="msg.role === 'USER'"
+          >
+            @if (msg.role === 'ASSISTANT') {
+              <markdown [data]="msg.content" />
+            } @else {
+              {{ msg.content }}
+            }
+          </div>
+        }
+
+        @if (isLoading) {
+          <div class="typing-indicator">
+            <span></span>
+            <span></span>
+            <span></span>
+          </div>
+        }
+      </div>
+
+      <div class="input-area">
+        <mat-form-field appearance="outline" subscriptSizing="dynamic">
+          <textarea
+            #messageInput
+            cdkAutosizeMaxRows="4"
+            cdkAutosizeMinRows="1"
+            cdkTextareaAutosize
+            matInput
+            rows="1"
+            [formControl]="messageControl"
+            [placeholder]="inputPlaceholder"
+            (keydown.enter)="onEnterKey($event)"
+          ></textarea>
+        </mat-form-field>
+        <button
+          color="primary"
+          mat-icon-button
+          [disabled]="isLoading || !messageControl.value?.trim()"
+          (click)="sendMessage()"
+        >
+          <ion-icon name="send-outline" />
+        </button>
+      </div>
+    }
+
+    <!-- History view -->
+    @if (viewMode === 'history') {
+      @if (isLoadingHistory) {
+        <div class="empty-state">
+          <mat-spinner diameter="32" />
+        </div>
+      } @else if (conversations.length === 0) {
+        <div class="empty-state">
+          <ion-icon class="empty-icon" name="time-outline" />
+          <p i18n>No conversations yet.</p>
+        </div>
+      } @else {
+        <mat-list class="conversations-list">
+          @for (conv of conversations; track conv.id) {
+            <mat-list-item
+              class="cursor-pointer"
+              (click)="loadConversation(conv.id)"
+            >
+              <span matListItemTitle>{{
+                conv.title || 'New conversation'
+              }}</span>
+              <span matListItemLine>{{ conv.updatedAt | date: 'short' }}</span>
+              <button
+                mat-icon-button
+                matListItemMeta
+                (click)="deleteConversation(conv.id, $event)"
+              >
+                <ion-icon name="trash-outline" />
+              </button>
+            </mat-list-item>
+          }
+        </mat-list>
+      }
+    }
+  </div>
+}

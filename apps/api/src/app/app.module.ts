@@ -44,6 +44,7 @@ import { AssetProfilesModule } from './endpoints/asset-profiles/asset-profiles.m
 import { AssetsModule } from './endpoints/assets/assets.module';
 import { BenchmarksModule } from './endpoints/benchmarks/benchmarks.module';
 import { GhostfolioModule } from './endpoints/data-providers/ghostfolio/ghostfolio.module';
+import { HipatiaModule } from './endpoints/hipatia/hipatia.module';
 import { MarketDataModule } from './endpoints/market-data/market-data.module';
 import { PlatformsModule } from './endpoints/platforms/platforms.module';
 import { PublicModule } from './endpoints/public/public.module';
@@ -119,6 +120,7 @@ import { UserModule } from './user/user.module';
     ExportModule,
     GhostfolioModule,
     HealthModule,
+    HipatiaModule,
     ImportModule,
     InfoModule,
     LogoModule,

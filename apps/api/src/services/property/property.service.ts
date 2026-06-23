@@ -13,7 +13,7 @@ export class PropertyService {
   public constructor(private readonly prismaService: PrismaService) {}
 
   public async delete({ key }: { key: string }) {
-    return this.prismaService.property.delete({
+    return this.prismaService.property.deleteMany({
       where: { key }
     });
   }

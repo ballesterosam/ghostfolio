@@ -64,12 +64,20 @@
   }
 
   <div class="mb-4">
-    <h2 class="section-title align-items-center d-flex">
-      <span i18n>Granted Access</span>
-      @if (user?.subscription?.type === 'Basic') {
-        <gf-premium-indicator class="ms-1" />
+    <div class="d-flex align-items-center justify-content-between mb-3">
+      <h2 class="section-title mb-0 align-items-center d-flex">
+        <span i18n>Granted Access</span>
+        @if (user?.subscription?.type === 'Basic') {
+          <gf-premium-indicator class="ms-1" />
+        }
+      </h2>
+      @if (hasPermissionToCreateAccess) {
+        <button mat-stroked-button (click)="onCreateAccess()">
+          <ion-icon name="add-outline" />
+          <span i18n>Share Access</span>
+        </button>
       }
-    </h2>
+    </div>
     <gf-access-table
       [accesses]="accessesGive"
       [showActions]="hasPermissionToDeleteAccess"
@@ -78,8 +86,4 @@
       (accessToUpdate)="onUpdateAccess($event)"
     />
   </div>
-
-  @if (hasPermissionToCreateAccess) {
-    <gf-fab [queryParams]="{ createDialog: true }" />
-  }
 </div>

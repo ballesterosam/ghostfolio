@@ -281,6 +281,7 @@ model User {
   updatedAt     DateTime        @updatedAt
   watchlist     SymbolProfile[] @relation("UserWatchlist")
   SymbolProfile SymbolProfile[]
+  hipatiaConversations  HipatiaConversation[]
   platformIntegrations  PlatformIntegration[]
   realEstateProperties  RealEstateProperty[]
 
@@ -476,5 +477,37 @@ model MortgageAmortization {
 
   @@index([mortgageId])
   @@index([date])
+}
+
+model HipatiaConversation {
+  id        String           @id @default(uuid())
+  createdAt DateTime         @default(now())
+  messages  HipatiaMessage[]
+  title     String?
+  updatedAt DateTime         @updatedAt
+  user      User             @relation(fields: [userId], onDelete: Cascade, references: [id])
+  userId    String
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model HipatiaMessage {
+  id             String              @id @default(uuid())
+  content        String
+  conversation   HipatiaConversation @relation(fields: [conversationId], onDelete: Cascade, references: [id])
+  conversationId String
+  createdAt      DateTime            @default(now())
+  role           HipatiaMessageRole
+  toolCallsJson  String?
+
+  @@index([conversationId])
+  @@index([createdAt])
+}
+
+enum HipatiaMessageRole {
+  USER
+  ASSISTANT
+  TOOL
 }
 

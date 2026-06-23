@@ -12,16 +12,17 @@ import {
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { DateRange } from '@ghostfolio/common/types';
 import { GfActivitiesTableComponent } from '@ghostfolio/ui/activities-table';
-import { GfFabComponent } from '@ghostfolio/ui/fab';
 import { DataService } from '@ghostfolio/ui/services';
 
 import {
   ChangeDetectorRef,
   Component,
+  CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   OnInit
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { PageEvent } from '@angular/material/paginator';
 import { MatSnackBarModule } from '@angular/material/snack-bar';
@@ -40,10 +41,11 @@ import { ImportActivitiesDialogParams } from './import-activities-dialog/interfa
 @Component({
   imports: [
     GfActivitiesTableComponent,
-    GfFabComponent,
+    MatButtonModule,
     MatSnackBarModule,
     RouterModule
   ],
+  schemas: [CUSTOM_ELEMENTS_SCHEMA],
   selector: 'gf-activities-page',
   styleUrls: ['./activities-page.scss'],
   templateUrl: './activities-page.html'
@@ -161,6 +163,10 @@ export class GfActivitiesPageComponent implements OnInit {
 
         this.changeDetectorRef.markForCheck();
       });
+  }
+
+  public onCreateActivity() {
+    this.router.navigate([], { queryParams: { createDialog: true } });
   }
 
   public onChangePage(page: PageEvent) {

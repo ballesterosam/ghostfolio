@@ -7,12 +7,14 @@ import { ExchangeRateDataService } from '@ghostfolio/api/services/exchange-rate-
 import { PropertyService } from '@ghostfolio/api/services/property/property.service';
 import {
   DEFAULT_CURRENCY,
+  PROPERTY_API_KEY_OPENROUTER,
   PROPERTY_COUNTRIES_OF_SUBSCRIBERS,
   PROPERTY_DEMO_USER_ID,
   PROPERTY_DOCKER_HUB_PULLS,
   PROPERTY_GITHUB_CONTRIBUTORS,
   PROPERTY_GITHUB_STARGAZERS,
   PROPERTY_IS_READ_ONLY_MODE,
+  PROPERTY_OPENROUTER_MODEL,
   PROPERTY_SLACK_COMMUNITY_USERS,
   PROPERTY_UPTIME,
   ghostfolioFearAndGreedIndexDataSourceStocks
@@ -44,6 +46,13 @@ export class InfoService {
   public async get(): Promise<InfoItem> {
     const info: Partial<InfoItem> = {};
     let isReadOnlyMode: boolean;
+
+    const [openRouterApiKey, openRouterModel] = await Promise.all([
+      this.propertyService.getByKey<string>(PROPERTY_API_KEY_OPENROUTER),
+      this.propertyService.getByKey<string>(PROPERTY_OPENROUTER_MODEL)
+    ]);
+
+    info.isHipatiaEnabled = !!(openRouterApiKey && openRouterModel);
 
     const globalPermissions: string[] = [];
 
