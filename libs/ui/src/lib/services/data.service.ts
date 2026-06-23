@@ -657,11 +657,13 @@ export class DataService {
   public fetchPortfolioDetails({
     filters,
     range,
-    withMarkets = false
+    withMarkets = false,
+    includeProperties = false
   }: {
     filters?: Filter[];
     range?: DateRange;
     withMarkets?: boolean;
+    includeProperties?: boolean;
   } = {}): Observable<PortfolioDetails> {
     let params = this.buildFiltersAsQueryParams({ filters });
 
@@ -673,6 +675,10 @@ export class DataService {
       params = params.append('withMarkets', withMarkets);
     }
 
+    if (includeProperties) {
+      params = params.append('includeProperties', includeProperties);
+    }
+
     return this.http
       .get<any>('/api/v1/portfolio/details', {
         params
@@ -682,6 +688,7 @@ export class DataService {
           if (response.holdings) {
             for (const symbol of Object.keys(response.holdings)) {
               response.holdings[symbol].assetProfile.assetClassLabel =
+                response.holdings[symbol].assetProfile.assetClassLabel ||
                 translate(response.holdings[symbol].assetProfile.assetClass);
 
               response.holdings[symbol].assetProfile.assetSubClassLabel =
@@ -762,12 +769,14 @@ export class DataService {
     filters,
     range,
     withExcludedAccounts = false,
-    withItems = false
+    withItems = false,
+    includeProperties = false
   }: {
     filters?: Filter[];
     range: DateRange;
     withExcludedAccounts?: boolean;
     withItems?: boolean;
+    includeProperties?: boolean;
   }): Observable<PortfolioPerformanceResponse> {
     let params = this.buildFiltersAsQueryParams({ filters });
     params = params.append('range', range);
@@ -778,6 +787,10 @@ export class DataService {
 
     if (withItems) {
       params = params.append('withItems', withItems);
+    }
+
+    if (includeProperties) {
+      params = params.append('includeProperties', includeProperties);
     }
 
     return this.http

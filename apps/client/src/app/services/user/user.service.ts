@@ -23,6 +23,7 @@ import { UserStoreState } from './user-store.state';
 })
 export class UserService extends ObservableStore<UserStoreState> {
   private deviceType: string;
+  private includePropertiesOverride: boolean | null = null;
 
   public constructor(
     private destroyRef: DestroyRef,
@@ -36,6 +37,21 @@ export class UserService extends ObservableStore<UserStoreState> {
     this.setState({ user: undefined }, UserStoreActions.Initialize);
 
     this.deviceType = this.deviceDetectorService.getDeviceInfo().deviceType;
+  }
+
+  public getIncludeProperties(): boolean {
+    if (this.includePropertiesOverride !== null) {
+      return this.includePropertiesOverride;
+    }
+    return !!this.getState().user?.settings?.includeProperties;
+  }
+
+  public setIncludePropertiesOverride(value: boolean | null) {
+    this.includePropertiesOverride = value;
+    const user = this.getState().user;
+    if (user) {
+      this.setState({ user: { ...user } }, UserStoreActions.GetUser);
+    }
   }
 
   public get(force = false) {

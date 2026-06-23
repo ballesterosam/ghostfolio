@@ -90,6 +90,10 @@ export class UpdateUserSettingDto {
 
   @IsBoolean()
   @IsOptional()
+  includeProperties?: boolean;
+
+  @IsBoolean()
+  @IsOptional()
   isRestrictedView?: boolean;
 
   @IsString()

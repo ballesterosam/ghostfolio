@@ -188,6 +188,7 @@
         #portfolioFilterForm
         [accounts]="user?.accounts ?? []"
         [assetClasses]="assetClasses"
+        [disableFilters]="!hasPermissionToChangeFilters"
         [formControl]="portfolioFilterFormControl"
         [holdings]="holdings"
         [tags]="tags"

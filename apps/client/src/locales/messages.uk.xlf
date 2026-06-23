@@ -9091,6 +9091,14 @@
           <context context-type="linenumber">166</context>
         </context-group>
       </trans-unit>
+          <trans-unit id="includePropertiesFilter" datatype="html">
+        <source>Include my properties in calculations</source>
+        <target state="translated">Включити мої об'єкти нерухомості в розрахунки</target>
+      </trans-unit>
+      <trans-unit id="includePropertiesFilterHint" datatype="html">
+        <source>Include the calculated value of your real estate properties in the portfolio net worth and calculations</source>
+        <target state="translated">Включити розраховану вартість вашої нерухомості в чисту вартість та розрахунки портфеля</target>
+      </trans-unit>
     </body>
   </file>
 </xliff>

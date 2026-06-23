@@ -92,6 +92,7 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
   @Input() hasPermissionToAccessAdminControl: boolean;
   @Input() hasPermissionToChangeDateRange: boolean;
   @Input() hasPermissionToChangeFilters: boolean;
+  @Input() includeProperties = false;
   @Input() user: User;
 
   @ViewChild('menuTrigger') menuTriggerElement: MatMenuTrigger;
@@ -122,7 +123,8 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
       account: null,
       assetClass: null,
       holding: null,
-      tag: null
+      tag: null,
+      includeProperties: false
     }
   );
 
@@ -140,6 +142,7 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
   protected readonly closed = output<void>();
   protected readonly dateRangeChanged = output<DateRange>();
   protected readonly filtersChanged = output<Filter[]>();
+  protected readonly includePropertiesChanged = output<boolean | null>();
 
   private readonly PRESELECTION_DELAY = 100;
 
@@ -432,11 +435,7 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
 
     this.dateRangeFormControl.setValue(this.user?.settings?.dateRange ?? null);
 
-    if (this.hasPermissionToChangeFilters) {
-      this.portfolioFilterFormControl.enable({ emitEvent: false });
-    } else {
-      this.portfolioFilterFormControl.disable({ emitEvent: false });
-    }
+    this.portfolioFilterFormControl.enable({ emitEvent: false });
 
     this.tags =
       this.user?.tags
@@ -523,6 +522,8 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
   public onApplyFilters() {
     const filterValue = this.portfolioFilterFormControl.value;
 
+    this.includePropertiesChanged.emit(!!filterValue?.includeProperties);
+
     this.filtersChanged.emit([
       {
         id: filterValue?.account ?? '',
@@ -562,6 +563,8 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
 
   public onResetFilters() {
     this.portfolioFilterFormControl.reset();
+
+    this.includePropertiesChanged.emit(null);
 
     this.filtersChanged.emit(
       this.filterTypes.map((type) => {
@@ -788,7 +791,8 @@ export class GfAssistantComponent implements OnChanges, OnDestroy, OnInit {
       account: this.user?.settings?.['filters.accounts']?.[0] ?? null,
       assetClass: this.user?.settings?.['filters.assetClasses']?.[0] ?? null,
       holding: selectedHolding ?? null,
-      tag: this.user?.settings?.['filters.tags']?.[0] ?? null
+      tag: this.user?.settings?.['filters.tags']?.[0] ?? null,
+      includeProperties: this.includeProperties
     });
   }
 }

@@ -214,6 +214,29 @@
         </div>
         <div class="d-flex mt-4 py-1">
           <div class="pe-1 w-50">
+            <div i18n="@@includePropertiesFilter">
+              Include my properties in calculations
+            </div>
+            <div
+              class="hint-text text-muted"
+              i18n="@@includePropertiesFilterHint"
+            >
+              Include the calculated value of your real estate properties in the
+              portfolio net worth and calculations
+            </div>
+          </div>
+          <div class="ps-1 w-50">
+            <mat-slide-toggle
+              color="primary"
+              hideIcon="true"
+              [checked]="user.settings.includeProperties"
+              [disabled]="!hasPermissionToUpdateUserSettings"
+              (change)="onIncludePropertiesChange($event)"
+            />
+          </div>
+        </div>
+        <div class="d-flex mt-4 py-1">
+          <div class="pe-1 w-50">
             <div i18n>Zen Mode</div>
             <div class="hint-text text-muted" i18n>
               Distraction-free experience for turbulent times

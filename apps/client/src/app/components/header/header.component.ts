@@ -348,6 +348,14 @@ export class GfHeaderComponent implements OnChanges {
       });
   }
 
+  protected getIncludeProperties() {
+    return this.userService.getIncludeProperties();
+  }
+
+  protected onIncludePropertiesChanged(value: boolean | null) {
+    this.userService.setIncludePropertiesOverride(value);
+  }
+
   protected onLogoClick() {
     if (['home', 'zen'].includes(this.currentRoute())) {
       this.layoutService.getShouldReloadSubject().next();

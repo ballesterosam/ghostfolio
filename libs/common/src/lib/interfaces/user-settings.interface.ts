@@ -35,4 +35,5 @@ export interface UserSettings {
   savingsRate?: number;
   viewMode?: ViewMode;
   xRayRules?: XRayRulesSettings;
+  includeProperties?: boolean;
 }

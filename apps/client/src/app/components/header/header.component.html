@@ -323,10 +323,12 @@
                 hasPermissionToChangeDateRange()
               "
               [hasPermissionToChangeFilters]="hasPermissionToChangeFilters()"
+              [includeProperties]="getIncludeProperties()"
               [user]="user()"
               (closed)="closeAssistant()"
               (dateRangeChanged)="onDateRangeChange($event)"
               (filtersChanged)="onFiltersChanged($event)"
+              (includePropertiesChanged)="onIncludePropertiesChanged($event)"
             />
           </mat-menu>
         </li>

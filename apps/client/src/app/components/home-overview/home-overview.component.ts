@@ -13,13 +13,13 @@ import {
   AssetProfileIdentifier,
   GoalYear,
   LineChartItem,
-  PortfolioDetails,
   PortfolioPerformance,
   PortfolioPosition,
   PortfolioSummary,
   User,
   UserSettings
 } from '@ghostfolio/common/interfaces';
+import { calculateMortgageSummary } from '@ghostfolio/common/mortgage-helper';
 import { hasPermission, permissions } from '@ghostfolio/common/permissions';
 import { internalRoutes } from '@ghostfolio/common/routes/routes';
 import { translate } from '@ghostfolio/ui/i18n';
@@ -79,7 +79,7 @@ import {
 } from 'ionicons/icons';
 import { DeviceDetectorService } from 'ngx-device-detector';
 import { NgxSkeletonLoaderModule } from 'ngx-skeleton-loader';
-import { switchMap } from 'rxjs';
+import { forkJoin, of, switchMap } from 'rxjs';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -105,6 +105,7 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
   >('goalDeviationCanvas');
 
   private goalDeviationChart: Chart<'bar'> | null = null;
+  private readonly properties = signal<any[]>([]);
 
   protected readonly errors = signal<AssetProfileIdentifier[]>([]);
   protected readonly hasImpersonationId = signal(false);
@@ -115,6 +116,9 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
   protected readonly isLoadingPerformance = signal(true);
   protected readonly isLoadingDetails = signal(true);
   protected readonly performance = signal<PortfolioPerformance | null>(null);
+  protected readonly netWorthPerformance = signal<PortfolioPerformance | null>(
+    null
+  );
   protected readonly performanceLabel = $localize`Performance`;
   protected readonly netWorthLabel = $localize`Net Worth`;
   protected readonly buyAndSellActivitiesTooltip = translate(
@@ -265,7 +269,8 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
       AssetSubClass.MUTUALFUND,
       AssetSubClass.ETF,
       AssetSubClass.STOCK,
-      AssetSubClass.CRYPTOCURRENCY
+      AssetSubClass.CRYPTOCURRENCY,
+      'REAL_ESTATE'
     ]);
     return Object.values(this.holdingsMap())
       .filter((h) => !mainSubClasses.has(h.assetSubClass))
@@ -458,84 +463,104 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
     this.isLoadingPerformance.set(true);
     this.isLoadingDetails.set(true);
 
-    this.dataService
-      .fetchPortfolioPerformance({
-        range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
-      })
+    const includeProperties = this.userService.getIncludeProperties();
+
+    const performance$ = this.dataService.fetchPortfolioPerformance({
+      includeProperties: false,
+      range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
+    });
+
+    const netWorthPerformance$ = includeProperties
+      ? this.dataService.fetchPortfolioPerformance({
+          includeProperties: true,
+          range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
+        })
+      : performance$;
+
+    const details$ = this.dataService.fetchPortfolioDetails({
+      filters: this.userService.getFilters(),
+      includeProperties,
+      range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
+    });
+
+    const properties$ = includeProperties
+      ? this.dataService.fetchRealEstateProperties()
+      : of([] as any);
+
+    forkJoin([performance$, netWorthPerformance$, details$, properties$])
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(({ chart, errors, performance }) => {
-        this.errors.set(errors ?? []);
-        this.performance.set(performance);
+      .subscribe(
+        ([portfolioPerf, netWorthPerf, portfolioDetails, properties]) => {
+          this.errors.set(portfolioPerf.errors ?? []);
+          this.performance.set(portfolioPerf.performance);
 
-        this.historicalDataItems.set(
-          chart?.map(
-            ({ date, netPerformanceInPercentageWithCurrencyEffect }) => {
-              return {
-                date,
-                value: (netPerformanceInPercentageWithCurrencyEffect ?? 0) * 100
-              };
-            }
-          ) ?? null
-        );
+          this.historicalDataItems.set(
+            portfolioPerf.chart?.map(
+              ({ date, netPerformanceInPercentageWithCurrencyEffect }) => {
+                return {
+                  date,
+                  value:
+                    (netPerformanceInPercentageWithCurrencyEffect ?? 0) * 100
+                };
+              }
+            ) ?? null
+          );
 
-        this.netWorthHistoricalData.set(
-          chart
-            ?.map(
-              ({
-                date,
-                netWorth,
-                totalAccountBalance,
-                totalInvestmentValueWithCurrencyEffect
-              }) => ({
-                date,
-                value:
-                  netWorth ??
-                  (totalInvestmentValueWithCurrencyEffect ?? 0) +
-                    (totalAccountBalance ?? 0)
-              })
-            )
-            .filter((item) => item.value > 0) ?? null
-        );
+          this.netWorthPerformance.set(netWorthPerf.performance);
 
-        this.precision.set(2);
+          this.netWorthHistoricalData.set(
+            netWorthPerf.chart
+              ?.map(
+                ({
+                  date,
+                  netWorth,
+                  totalAccountBalance,
+                  totalInvestmentValueWithCurrencyEffect
+                }) => ({
+                  date,
+                  value:
+                    netWorth ??
+                    (totalInvestmentValueWithCurrencyEffect ?? 0) +
+                      (totalAccountBalance ?? 0)
+                })
+              )
+              .filter((item) => item.value > 0) ?? null
+          );
 
-        if (
-          this.deviceType() === 'mobile' &&
-          performance.currentValueInBaseCurrency >=
-            NUMERICAL_PRECISION_THRESHOLD_6_FIGURES
-        ) {
-          this.precision.set(0);
+          this.precision.set(2);
+
+          if (
+            this.deviceType() === 'mobile' &&
+            portfolioPerf.performance.currentValueInBaseCurrency >=
+              NUMERICAL_PRECISION_THRESHOLD_6_FIGURES
+          ) {
+            this.precision.set(0);
+          }
+
+          this.isLoadingPerformance.set(false);
+
+          if (portfolioDetails.summary) {
+            this.summary.set(portfolioDetails.summary);
+          }
+
+          this.holdingsMap.set(
+            this.buildHoldingsMap(portfolioDetails.holdings ?? {})
+          );
+
+          this.countriesMap.set(
+            this.buildCountriesMap(portfolioDetails.holdings ?? {})
+          );
+
+          this.isLoadingDetails.set(false);
+
+          this.properties.set(properties);
+
+          setTimeout(() => {
+            this.renderGoalDeviationChart();
+            this.changeDetectorRef.markForCheck();
+          }, 0);
         }
-
-        this.isLoadingPerformance.set(false);
-
-        setTimeout(() => {
-          this.renderGoalDeviationChart();
-          this.changeDetectorRef.markForCheck();
-        }, 0);
-      });
-
-    this.dataService
-      .fetchPortfolioDetails({
-        filters: this.userService.getFilters(),
-        range: this.user()?.settings?.dateRange ?? DEFAULT_DATE_RANGE
-      })
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe((portfolioDetails: PortfolioDetails) => {
-        if (portfolioDetails.summary) {
-          this.summary.set(portfolioDetails.summary);
-        }
-
-        this.holdingsMap.set(
-          this.buildHoldingsMap(portfolioDetails.holdings ?? {})
-        );
-
-        this.countriesMap.set(
-          this.buildCountriesMap(portfolioDetails.holdings ?? {})
-        );
-
-        this.isLoadingDetails.set(false);
-      });
+      );
   }
 
   private renderGoalDeviationChart() {
@@ -555,15 +580,53 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
 
     const currentYear = new Date().getFullYear();
     const currentNetWorth = netWorthData[netWorthData.length - 1]?.value ?? 0;
+    const includeProperties = this.userService.getIncludeProperties();
+    const properties = this.properties() ?? [];
+    const detailsHoldings = this.holdingsMap() ?? {};
+    const today = new Date();
 
     const rows = goals
       .slice()
       .sort((a, b) => a.year - b.year)
       .map((goal) => {
-        const actual =
+        let actual =
           goal.year < currentYear
             ? (yearMap[goal.year] ?? null)
             : currentNetWorth;
+
+        if (actual !== null && includeProperties && properties.length > 0) {
+          let adjustment = 0;
+          const targetDate = new Date(goal.year, 11, 31);
+
+          for (const property of properties) {
+            const holding = detailsHoldings[`PROPERTY_${property.id}`];
+            const propertyValueToday = this.getPropertyValueAtDate(
+              property,
+              today
+            );
+            let rate = 1;
+
+            if (holding) {
+              const holdingValInBase = holding.value || 0;
+              rate =
+                propertyValueToday > 0
+                  ? holdingValInBase / propertyValueToday
+                  : 1;
+            }
+
+            if (goal.year >= currentYear) {
+              const propertyValueFuture = this.getPropertyValueAtDate(
+                property,
+                targetDate
+              );
+              const diffInPropertyCurrency =
+                propertyValueFuture - propertyValueToday;
+              adjustment += diffInPropertyCurrency * rate;
+            }
+          }
+          actual += adjustment;
+        }
+
         const pct =
           actual != null && goal.targetAmount > 0
             ? ((actual - goal.targetAmount) / goal.targetAmount) * 100
@@ -676,5 +739,70 @@ export class GfHomeOverviewComponent implements OnInit, OnDestroy {
     }
 
     return result;
+  }
+
+  private getPropertyValueAtDate(property: any, date: Date): number {
+    if (property.acquisitionDate) {
+      const acqDate = new Date(property.acquisitionDate);
+      if (date.getTime() < acqDate.getTime()) {
+        return 0;
+      }
+    }
+
+    let baseValue = property.value;
+    if (property.valuations && property.valuations.length > 0) {
+      const sortedValuations = [...property.valuations].sort(
+        (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+      );
+
+      let matchedValuation = null;
+      for (const val of sortedValuations) {
+        if (new Date(val.date).getTime() <= date.getTime()) {
+          matchedValuation = val;
+        }
+      }
+
+      if (matchedValuation) {
+        baseValue = matchedValuation.value;
+      } else {
+        baseValue = sortedValuations[0].value;
+      }
+    }
+
+    if (property.propertyType === 'BARE_OWNERSHIP') {
+      let reduction = 40;
+      if (
+        property.usufructuaryAge !== undefined &&
+        property.usufructuaryAge !== null
+      ) {
+        reduction = Math.max(10, 89 - property.usufructuaryAge);
+      }
+      baseValue = baseValue * (1 - reduction / 100);
+    }
+
+    if (property.mortgage) {
+      const mortgageStartDate = new Date(property.mortgage.startDate);
+      if (date.getTime() >= mortgageStartDate.getTime()) {
+        const summary = calculateMortgageSummary(
+          {
+            startDate: property.mortgage.startDate,
+            installments: property.mortgage.installments,
+            principal: property.mortgage.principal,
+            interestRate: property.mortgage.interestRate,
+            amortizations: property.mortgage.amortizations || []
+          },
+          baseValue,
+          date
+        );
+        const realPatrimony =
+          baseValue - summary.outstandingPrincipal - summary.remainingInterest;
+        return Math.max(
+          0,
+          (realPatrimony * property.ownershipPercentage) / 100
+        );
+      }
+    }
+
+    return (baseValue * property.ownershipPercentage) / 100;
   }
 }
