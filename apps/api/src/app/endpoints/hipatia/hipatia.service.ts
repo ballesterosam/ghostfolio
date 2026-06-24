@@ -40,7 +40,7 @@ const PHILOSOPHY_DESCRIPTIONS: Record<string, string> = {
 };
 
 function buildSystemPrompt(context?: {
-  memories?: Array<{ category?: string | null; content: string }>;
+  memories?: { category?: string | null; content: string }[];
   philosophy?: string;
   preferences?: string;
 }): string {
