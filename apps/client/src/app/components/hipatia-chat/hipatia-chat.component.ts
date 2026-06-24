@@ -7,7 +7,10 @@ import {
   CUSTOM_ELEMENTS_SCHEMA,
   DestroyRef,
   ElementRef,
+  EventEmitter,
   inject,
+  OnInit,
+  Output,
   ViewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -56,9 +59,15 @@ import {
   styleUrls: ['./hipatia-chat.component.scss'],
   templateUrl: './hipatia-chat.component.html'
 })
-export class GfHipatiaChat {
+export class GfHipatiaChat implements OnInit {
+  private static readonly RESTORE_KEY = 'hipatia_restore';
+
+  @Output() public panelStateChange = new EventEmitter<boolean>();
+
   @ViewChild('messagesContainer')
   private messagesContainer: ElementRef<HTMLDivElement>;
+
+  private restoredPanelOpen = false;
 
   protected readonly messageControl = new FormControl('');
   protected readonly inputPlaceholder = $localize`Ask Hipatia...`;
@@ -84,16 +93,56 @@ export class GfHipatiaChat {
       timeOutline,
       trashOutline
     });
+
+    this.restoreAfterReload();
+  }
+
+  private restoreAfterReload() {
+    const saved = sessionStorage.getItem(GfHipatiaChat.RESTORE_KEY);
+
+    if (!saved) {
+      return;
+    }
+
+    sessionStorage.removeItem(GfHipatiaChat.RESTORE_KEY);
+
+    try {
+      const { conversationId } = JSON.parse(saved) as {
+        conversationId?: string;
+      };
+
+      this.isPanelOpen = true;
+      this.viewMode = 'chat';
+      this.restoredPanelOpen = true;
+
+      if (conversationId) {
+        this.loadConversation(conversationId);
+      }
+    } catch {
+      // ignore malformed storage entries
+    }
+  }
+
+  public ngOnInit() {
+    if (this.restoredPanelOpen) {
+      this.panelStateChange.emit(true);
+    }
   }
 
   protected openPanel() {
     this.isPanelOpen = true;
     this.viewMode = 'chat';
+    this.panelStateChange.emit(true);
     this.changeDetectorRef.markForCheck();
+
+    if (this.messages.length > 0) {
+      this.scrollToBottom(200);
+    }
   }
 
   protected closePanel() {
     this.isPanelOpen = false;
+    this.panelStateChange.emit(false);
     this.changeDetectorRef.markForCheck();
   }
 
@@ -201,7 +250,7 @@ export class GfHipatiaChat {
       })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ conversationId, reply }) => {
+        next: ({ conversationId, hasDataChanges, reply }) => {
           this.currentConversationId = conversationId;
           this.isLoading = false;
 
@@ -215,6 +264,16 @@ export class GfHipatiaChat {
           this.messages = [...this.messages, assistantMessage];
           this.changeDetectorRef.markForCheck();
           this.scrollToBottom();
+
+          if (hasDataChanges) {
+            setTimeout(() => {
+              sessionStorage.setItem(
+                GfHipatiaChat.RESTORE_KEY,
+                JSON.stringify({ conversationId: this.currentConversationId })
+              );
+              window.location.reload();
+            }, 1500);
+          }
         },
         error: () => {
           this.isLoading = false;
@@ -223,12 +282,12 @@ export class GfHipatiaChat {
       });
   }
 
-  private scrollToBottom() {
+  private scrollToBottom(delay = 50) {
     setTimeout(() => {
       if (this.messagesContainer?.nativeElement) {
         const el = this.messagesContainer.nativeElement;
         el.scrollTop = el.scrollHeight;
       }
-    }, 50);
+    }, delay);
   }
 }

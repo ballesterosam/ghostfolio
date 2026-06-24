@@ -5,19 +5,104 @@ import {
   PROPERTY_API_KEY_OPENROUTER,
   PROPERTY_OPENROUTER_MODEL
 } from '@ghostfolio/common/config';
+import { UserSettings } from '@ghostfolio/common/interfaces';
 
 import { Injectable } from '@nestjs/common';
 import { createOpenRouter } from '@openrouter/ai-sdk-provider';
 import { HipatiaMessageRole } from '@prisma/client';
-import { type ModelMessage, generateText } from 'ai';
+import { type ModelMessage, generateText, stepCountIs } from 'ai';
+
+import { buildReadTools } from './hipatia-read-tools';
+import { buildWriteTools } from './hipatia-write-tools';
 
 const MAX_HISTORY_MESSAGES = 20;
+const MAX_TOOL_STEPS = 10;
 
-const SYSTEM_PROMPT = `You are Hipatia, a neutral and knowledgeable financial assistant integrated into Ghostfolio, a personal portfolio management application.
+const WRITE_TOOL_NAMES = new Set([
+  'create_account',
+  'create_activity',
+  'create_amortization',
+  'create_mortgage',
+  'create_real_estate_property',
+  'delete_activity',
+  'delete_goal',
+  'set_goal',
+  'update_activity'
+]);
+
+const PHILOSOPHY_DESCRIPTIONS: Record<string, string> = {
+  DIVIDEND:
+    'Dividend investing — focus on companies with consistent, growing dividend payments and capital preservation.',
+  GROWTH:
+    'Growth investing — focus on companies with strong revenue and earnings growth, accepting higher valuations for future potential.',
+  VALUE:
+    'Value investing — focus on fundamentally undervalued companies with strong balance sheets and margin of safety.'
+};
+
+function buildSystemPrompt(context?: {
+  memories?: Array<{ category?: string | null; content: string }>;
+  philosophy?: string;
+  preferences?: string;
+}): string {
+  const today = new Date().toISOString().slice(0, 10);
+
+  let userProfile = '';
+
+  if (context?.philosophy) {
+    const desc =
+      PHILOSOPHY_DESCRIPTIONS[context.philosophy] ?? context.philosophy;
+    userProfile += `\n### Investment philosophy: ${context.philosophy}\n${desc}\n`;
+  }
+
+  if (context?.preferences?.trim()) {
+    userProfile += `\n### Personal preferences\n${context.preferences.trim()}\n`;
+  }
+
+  if (context?.memories?.length) {
+    userProfile += `\n### Things I remember about you\n`;
+
+    for (const m of context.memories) {
+      userProfile += m.category
+        ? `- [${m.category}] ${m.content}\n`
+        : `- ${m.content}\n`;
+    }
+  }
+
+  return `You are Hipatia, a neutral and knowledgeable financial assistant integrated into Ghostfolio, a personal portfolio management application.
 Your mission is to help users manage, analyze, and improve their investment portfolio with a long-term perspective.
 Always maintain a neutral, objective tone. Do not recommend specific securities as definitive buys or sells — frame all suggestions as educational and analytical insights.
 When analyzing portfolios, consider diversification, risk exposure, asset allocation, and long-term performance.
+
+Today's date is ${today}.
+${userProfile ? `\n## Your user's profile\n${userProfile}` : ''}
+## Read tools (use proactively to answer questions)
+- get_accounts: List investment accounts
+- get_activities: List transactions with optional filters by type and date
+- get_goals: Retrieve annual savings goals
+- get_portfolio_summary: Compute current open positions
+- get_real_estate_properties: List real estate properties with full mortgage details
+
+## Write tools (modify portfolio data)
+- create_account: Create a new investment account
+- create_activity: Record a transaction (BUY/SELL/DIVIDEND need symbol; FEE/INTEREST/LIABILITY need name)
+- update_activity: Update date, quantity, price, fee, or comment of an existing activity (by ID)
+- delete_activity: Delete an activity by ID
+- create_real_estate_property: Add a real estate property
+- create_mortgage: Add a mortgage to a property
+- create_amortization: Record an early mortgage repayment
+- set_goal: Create or update an annual savings goal
+- delete_goal: Delete an annual goal by year
+
+## Memory tool
+- store_memory: Save a relevant insight about the user for future conversations (preferences, risk tolerance, excluded assets, life events). Call this proactively when the user reveals something meaningful about their financial situation or investment approach.
+
+IMPORTANT — write tool rules:
+1. Before calling any write tool, ensure you have ALL required fields. If anything is missing, ask the user.
+2. Never use placeholder or guessed values. Ask rather than assume.
+3. IDs for update/delete operations must come from a prior read tool call, not from user memory.
+
 Respond in the same language the user writes to you. Be concise and practical.`;
+}
 
 @Injectable()
 export class HipatiaService {
@@ -35,7 +120,11 @@ export class HipatiaService {
     conversationId?: string;
     message: string;
     userId: string;
-  }): Promise<{ conversationId: string; reply: string }> {
+  }): Promise<{
+    conversationId: string;
+    hasDataChanges: boolean;
+    reply: string;
+  }> {
     const [encryptedKey, openRouterModel] = await Promise.all([
       this.propertyService.getByKey<{
         encrypted: string;
@@ -65,18 +154,32 @@ export class HipatiaService {
       throw new Error('Failed to decrypt OpenRouter API key');
     }
 
-    // Get or create the conversation (strict userId ownership check)
-    let conversation = conversationId
-      ? await this.prismaService.hipatiaConversation.findFirst({
-          where: { id: conversationId, userId }
-        })
-      : null;
+    // Fetch conversation, user settings, and memories in parallel
+    const [existingConversation, settingsRecord, memories] = await Promise.all([
+      conversationId
+        ? this.prismaService.hipatiaConversation.findFirst({
+            where: { id: conversationId, userId }
+          })
+        : Promise.resolve(null),
+      this.prismaService.settings.findUnique({
+        select: { settings: true },
+        where: { userId }
+      }),
+      this.prismaService.hipatiaMemory.findMany({
+        orderBy: { createdAt: 'asc' },
+        select: { category: true, content: true },
+        take: 20,
+        where: { userId }
+      })
+    ]);
 
-    if (!conversation) {
-      conversation = await this.prismaService.hipatiaConversation.create({
+    const conversation =
+      existingConversation ??
+      (await this.prismaService.hipatiaConversation.create({
         data: { userId }
-      });
-    }
+      }));
+
+    const userSettings = settingsRecord?.settings as UserSettings | null;
 
     // Save user message before calling LLM
     await this.prismaService.hipatiaMessage.create({
@@ -100,16 +203,28 @@ export class HipatiaService {
         : { role: 'assistant' as const, content: m.content }
     );
 
-    // Call OpenRouter
     const openRouterProvider = createOpenRouter({ apiKey: openRouterApiKey });
 
-    const { text } = await generateText({
+    const { steps, text } = await generateText({
       messages,
       model: openRouterProvider.chat(openRouterModel),
-      system: SYSTEM_PROMPT
+      stopWhen: stepCountIs(MAX_TOOL_STEPS),
+      system: buildSystemPrompt({
+        memories,
+        philosophy: userSettings?.hipatiaInvestmentPhilosophy,
+        preferences: userSettings?.hipatiaInvestmentPreferences
+      }),
+      tools: {
+        ...buildReadTools(this.prismaService, userId),
+        ...buildWriteTools(this.prismaService, userId)
+      }
     });
 
-    // Save assistant reply
+    const hasDataChanges = steps.some((step) =>
+      step.toolCalls?.some((tc) => WRITE_TOOL_NAMES.has(tc.toolName))
+    );
+
+    // Save assistant reply (final text after all tool rounds)
     await this.prismaService.hipatiaMessage.create({
       data: {
         content: text,
@@ -126,7 +241,7 @@ export class HipatiaService {
       });
     }
 
-    return { conversationId: conversation.id, reply: text };
+    return { conversationId: conversation.id, hasDataChanges, reply: text };
   }
 
   public async getConversations(userId: string) {
@@ -182,6 +297,31 @@ export class HipatiaService {
     await this.prismaService.hipatiaConversation.delete({
       where: { id: conversationId }
     });
+
+    return true;
+  }
+
+  public async getMemories(userId: string) {
+    return this.prismaService.hipatiaMemory.findMany({
+      orderBy: { createdAt: 'desc' },
+      select: { category: true, content: true, createdAt: true, id: true },
+      where: { userId }
+    });
+  }
+
+  public async deleteMemory(
+    memoryId: string,
+    userId: string
+  ): Promise<boolean> {
+    const existing = await this.prismaService.hipatiaMemory.findFirst({
+      where: { id: memoryId, userId }
+    });
+
+    if (!existing) {
+      return false;
+    }
+
+    await this.prismaService.hipatiaMemory.delete({ where: { id: memoryId } });
 
     return true;
   }

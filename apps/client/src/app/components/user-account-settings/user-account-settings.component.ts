@@ -32,6 +32,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
 import {
   MatSlideToggleChange,
@@ -42,10 +43,15 @@ import { RouterModule } from '@angular/router';
 import { IonIcon } from '@ionic/angular/standalone';
 import { format, parseISO } from 'date-fns';
 import { addIcons } from 'ionicons';
-import { eyeOffOutline, eyeOutline } from 'ionicons/icons';
+import { eyeOffOutline, eyeOutline, trashOutline } from 'ionicons/icons';
 import ms from 'ms';
 import { EMPTY, throwError } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+
+import {
+  HipatiaApiService,
+  HipatiaMemory
+} from '../../services/hipatia-api.service';
 
 @Component({
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,6 +62,7 @@ import { catchError } from 'rxjs/operators';
     MatCardModule,
     MatFormFieldModule,
     MatInputModule,
+    MatRadioModule,
     MatSelectModule,
     MatSlideToggleModule,
     ReactiveFormsModule,
@@ -76,6 +83,7 @@ export class GfUserAccountSettingsComponent implements OnInit {
   public hasPermissionToDeleteOwnUser: boolean;
   public hasPermissionToUpdateViewMode: boolean;
   public hasPermissionToUpdateUserSettings: boolean;
+  public hipatiaMemories: HipatiaMemory[] = [];
   public isAccessTokenHidden = true;
   public isFingerprintSupported = this.doesBrowserSupportAuthn();
   public isWebAuthnEnabled: boolean;
@@ -104,6 +112,7 @@ export class GfUserAccountSettingsComponent implements OnInit {
     private dataService: DataService,
     private destroyRef: DestroyRef,
     private formBuilder: FormBuilder,
+    private hipatiaApiService: HipatiaApiService,
     private notificationService: NotificationService,
     private settingsStorageService: SettingsStorageService,
     private snackBar: MatSnackBar,
@@ -143,11 +152,34 @@ export class GfUserAccountSettingsComponent implements OnInit {
         }
       });
 
-    addIcons({ eyeOffOutline, eyeOutline });
+    addIcons({ eyeOffOutline, eyeOutline, trashOutline });
   }
 
   public ngOnInit() {
     this.update();
+    this.loadHipatiaMemories();
+  }
+
+  public loadHipatiaMemories() {
+    this.hipatiaApiService
+      .getMemories()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((memories) => {
+        this.hipatiaMemories = memories;
+        this.changeDetectorRef.markForCheck();
+      });
+  }
+
+  public onDeleteHipatiaMemory(memoryId: string) {
+    this.hipatiaApiService
+      .deleteMemory(memoryId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.hipatiaMemories = this.hipatiaMemories.filter(
+          (m) => m.id !== memoryId
+        );
+        this.changeDetectorRef.markForCheck();
+      });
   }
 
   public isCommunityLanguage() {

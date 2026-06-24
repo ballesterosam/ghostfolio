@@ -35,5 +35,7 @@ export interface UserSettings {
   savingsRate?: number;
   viewMode?: ViewMode;
   xRayRules?: XRayRulesSettings;
+  hipatiaInvestmentPhilosophy?: 'DIVIDEND' | 'GROWTH' | 'VALUE';
+  hipatiaInvestmentPreferences?: string;
   includeProperties?: boolean;
 }

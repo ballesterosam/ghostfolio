@@ -28,7 +28,7 @@
   </header>
 }
 
-<div class="app-window-wrapper">
+<div class="app-window-wrapper" [class.hipatia-open]="isHipatiaOpen">
   <div class="app-rounded-container">
     <header class="main-header">
       <gf-header
@@ -60,5 +60,5 @@
 </div>
 
 @if (user && info?.isHipatiaEnabled) {
-  <gf-hipatia-chat />
+  <gf-hipatia-chat (panelStateChange)="isHipatiaOpen = $event" />
 }

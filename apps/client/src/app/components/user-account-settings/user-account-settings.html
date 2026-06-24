@@ -302,6 +302,129 @@
             </button>
           </div>
         </div>
+        <hr class="mt-5" />
+        <div class="mt-4">
+          <h3 class="mb-3" style="font-size: 1rem; font-weight: 600">
+            Hipatia AI Assistant
+          </h3>
+
+          <div class="align-items-start d-flex mb-3">
+            <div class="pe-1 pt-1 w-50">
+              <div i18n>Investment Philosophy</div>
+              <div class="hint-text text-muted" i18n>
+                Guides Hipatia's analysis and recommendations
+              </div>
+            </div>
+            <div class="ps-1 w-50">
+              <mat-radio-group
+                [disabled]="!hasPermissionToUpdateUserSettings"
+                [value]="user.settings.hipatiaInvestmentPhilosophy ?? null"
+                (change)="
+                  onChangeUserSetting(
+                    'hipatiaInvestmentPhilosophy',
+                    $event.value
+                  )
+                "
+              >
+                <div class="d-flex flex-column gap-1">
+                  <mat-radio-button value="VALUE">
+                    <span class="d-flex flex-column">
+                      <span i18n>Value</span>
+                      <span class="hint-text text-muted" i18n
+                        >Undervalued companies with strong fundamentals</span
+                      >
+                    </span>
+                  </mat-radio-button>
+                  <mat-radio-button value="GROWTH">
+                    <span class="d-flex flex-column">
+                      <span i18n>Growth</span>
+                      <span class="hint-text text-muted" i18n
+                        >High-growth companies with revenue momentum</span
+                      >
+                    </span>
+                  </mat-radio-button>
+                  <mat-radio-button value="DIVIDEND">
+                    <span class="d-flex flex-column">
+                      <span i18n>Dividend</span>
+                      <span class="hint-text text-muted" i18n
+                        >Consistent dividend payers and capital
+                        preservation</span
+                      >
+                    </span>
+                  </mat-radio-button>
+                </div>
+              </mat-radio-group>
+            </div>
+          </div>
+
+          <div class="align-items-start d-flex mb-3">
+            <div class="pe-1 pt-1 w-50">
+              <div i18n>Personal Preferences</div>
+              <div class="hint-text text-muted" i18n>
+                Exclusions, constraints, or style notes for Hipatia
+              </div>
+            </div>
+            <div class="ps-1 w-50">
+              <mat-form-field appearance="outline" class="w-100 without-hint">
+                <textarea
+                  matInput
+                  rows="3"
+                  [disabled]="!hasPermissionToUpdateUserSettings"
+                  [placeholder]="'E.g. I avoid tobacco and weapons companies. Prefer European stocks.'"
+                  [value]="user.settings.hipatiaInvestmentPreferences ?? ''"
+                  (blur)="
+                    onChangeUserSetting(
+                      'hipatiaInvestmentPreferences',
+                      $event.target.value
+                    )
+                  "
+                ></textarea>
+              </mat-form-field>
+            </div>
+          </div>
+
+          @if (hipatiaMemories.length > 0) {
+            <div class="align-items-start d-flex">
+              <div class="pe-1 pt-1 w-50">
+                <div i18n>Hipatia Memories</div>
+                <div class="hint-text text-muted" i18n>
+                  Insights Hipatia has stored from your conversations
+                </div>
+              </div>
+              <div class="ps-1 w-50">
+                @for (memory of hipatiaMemories; track memory.id) {
+                  <div
+                    class="align-items-start d-flex gap-2 mb-2 p-2 rounded"
+                    style="background: var(--mat-sys-surface-container)"
+                  >
+                    <div class="flex-grow-1" style="font-size: 0.85rem">
+                      @if (memory.category) {
+                        <span
+                          class="text-muted me-1"
+                          style="font-size: 0.75rem; text-transform: uppercase"
+                          >{{ memory.category }}</span
+                        >
+                      }
+                      {{ memory.content }}
+                    </div>
+                    <button
+                      mat-icon-button
+                      style="min-width: 32px; height: 32px; line-height: 32px"
+                      (click)="onDeleteHipatiaMemory(memory.id)"
+                    >
+                      <ion-icon
+                        class="mat-icon"
+                        name="trash-outline"
+                        style="font-size: 1rem"
+                      />
+                    </button>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+
         @if (hasPermissionToDeleteOwnUser) {
           <hr class="mt-5" />
           <form

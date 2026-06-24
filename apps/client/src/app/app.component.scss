@@ -63,6 +63,11 @@
       flex-direction: column;
       background-color: #f3f4f6;
       box-sizing: border-box;
+      transition: padding-right 0.3s ease;
+
+      &.hipatia-open {
+        padding-right: 440px;
+      }
     }
 
     &.has-info-message {
@@ -110,6 +115,10 @@
   @media (min-width: 576px) {
     .app-window-wrapper {
       background-color: #0b0d14;
+
+      &.hipatia-open {
+        padding-right: 440px;
+      }
     }
     .app-rounded-container {
       background-color: var(--dark-background);

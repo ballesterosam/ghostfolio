@@ -3,11 +3,13 @@
   <button
     aria-label="Open Hipatia AI assistant"
     class="hipatia-fab"
-    color="primary"
-    mat-fab
     (click)="openPanel()"
   >
-    <ion-icon name="chatbubble-ellipses-outline" />
+    <img
+      alt="Hipatia"
+      class="hipatia-fab-avatar"
+      src="../assets/images/hipatia.png"
+    />
   </button>
 }
 
@@ -20,6 +22,13 @@
         <button mat-icon-button (click)="viewMode = 'chat'">
           <ion-icon name="arrow-back-outline" />
         </button>
+      }
+      @if (viewMode === 'chat') {
+        <img
+          alt="Hipatia"
+          class="panel-avatar"
+          src="../assets/images/hipatia.png"
+        />
       }
       <span class="panel-title">
         @if (viewMode === 'history') {
@@ -54,7 +63,11 @@
       <div #messagesContainer class="messages-container">
         @if (messages.length === 0) {
           <div class="empty-state">
-            <ion-icon class="empty-icon" name="chatbubble-ellipses-outline" />
+            <img
+              alt="Hipatia"
+              class="empty-avatar"
+              src="../assets/images/hipatia.png"
+            />
             <p i18n>
               Hello! I'm Hipatia, your personal financial assistant. Ask me
               anything about your portfolio.

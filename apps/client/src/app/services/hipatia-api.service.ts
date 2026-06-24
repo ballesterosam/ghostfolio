@@ -23,7 +23,15 @@ export interface HipatiaMessageDto {
 
 export interface HipatiaReply {
   conversationId: string;
+  hasDataChanges: boolean;
   reply: string;
+}
+
+export interface HipatiaMemory {
+  id: string;
+  category: string | null;
+  content: string;
+  createdAt: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -50,5 +58,13 @@ export class HipatiaApiService {
     return this.http.delete<void>(
       `/api/v1/hipatia/conversations/${conversationId}`
     );
+  }
+
+  public getMemories(): Observable<HipatiaMemory[]> {
+    return this.http.get<HipatiaMemory[]>('/api/v1/hipatia/memories');
+  }
+
+  public deleteMemory(memoryId: string): Observable<void> {
+    return this.http.delete<void>(`/api/v1/hipatia/memories/${memoryId}`);
   }
 }

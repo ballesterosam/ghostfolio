@@ -67,6 +67,7 @@ export class GfAppComponent implements OnInit {
   public hasPromotion = false;
   public hasTabs = false;
   public info: InfoItem;
+  public isHipatiaOpen = false;
   public pageTitle: string;
   public routerLinkRegister = publicRoutes.register.routerLink;
   public showFooter = false;

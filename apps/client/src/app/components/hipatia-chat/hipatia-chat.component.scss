@@ -7,13 +7,36 @@
   bottom: 2rem;
   right: 2rem;
   z-index: 1000;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 50%;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    transform: scale(1.06);
+  }
+}
+
+.hipatia-fab-avatar {
+  width: 128px;
+  height: 128px;
+  object-fit: cover;
+  border-radius: 50%;
+  display: block;
+  border: 3px solid #339af0;
 }
 
 .hipatia-panel {
   position: fixed;
   bottom: 0;
   right: 0;
-  width: 380px;
+  width: 440px;
   height: 100dvh;
   max-height: 100dvh;
   z-index: 999;
@@ -31,15 +54,32 @@
 .panel-header {
   display: flex;
   align-items: center;
-  padding: 0.75rem 1rem;
+  padding: 1rem 1rem;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
-  gap: 0.5rem;
+  gap: 0.75rem;
 
   .panel-title {
     flex: 1;
     font-weight: 600;
     font-size: 1rem;
   }
+}
+
+.panel-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  object-fit: cover;
+  flex-shrink: 0;
+  border: 2px solid #339af0;
+}
+
+.empty-avatar {
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid #339af0;
 }
 
 .messages-container {
@@ -73,11 +113,12 @@
     color: var(--mat-sys-on-surface);
     border-bottom-left-radius: 0.25rem;
 
-    markdown {
+    // ::ng-deep pierces Angular view encapsulation into ngx-markdown's rendered HTML
+    ::ng-deep markdown {
       display: block;
 
       p {
-        margin: 0 0 0.5rem;
+        margin: 0 0 0.25rem;
 
         &:last-child {
           margin-bottom: 0;
@@ -86,12 +127,12 @@
 
       ul,
       ol {
-        margin: 0.25rem 0 0.5rem 1.25rem;
+        margin: 0.15rem 0 0.25rem 1.25rem;
         padding: 0;
       }
 
       li {
-        margin-bottom: 0.15rem;
+        margin-bottom: 0.1rem;
       }
 
       code {
@@ -104,7 +145,7 @@
       pre {
         background: rgba(0, 0, 0, 0.06);
         border-radius: 6px;
-        margin: 0.5rem 0;
+        margin: 0.25rem 0;
         overflow-x: auto;
         padding: 0.75rem;
 
@@ -120,7 +161,7 @@
       h4 {
         font-size: 1em;
         font-weight: 600;
-        margin: 0.5rem 0 0.25rem;
+        margin: 0.35rem 0 0.15rem;
       }
 
       strong {
@@ -129,7 +170,7 @@
 
       blockquote {
         border-left: 3px solid currentColor;
-        margin: 0.5rem 0;
+        margin: 0.25rem 0;
         opacity: 0.8;
         padding-left: 0.75rem;
       }
@@ -137,7 +178,7 @@
       table {
         border-collapse: collapse;
         font-size: 0.85em;
-        margin: 0.5rem 0;
+        margin: 0.25rem 0;
         width: 100%;
 
         th,

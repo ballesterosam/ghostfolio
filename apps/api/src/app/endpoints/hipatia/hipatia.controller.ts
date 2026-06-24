@@ -79,4 +79,26 @@ export class HipatiaController {
       throw new NotFoundException('Conversation not found');
     }
   }
+
+  @Get('memories')
+  @HasPermission(permissions.readAiPrompt)
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  public async getMemories() {
+    return this.hipatiaService.getMemories(this.request.user.id);
+  }
+
+  @Delete('memories/:id')
+  @HasPermission(permissions.updateUserSettings)
+  @UseGuards(AuthGuard('jwt'), HasPermissionGuard)
+  @HttpCode(HttpStatus.NO_CONTENT)
+  public async deleteMemory(@Param('id') memoryId: string) {
+    const deleted = await this.hipatiaService.deleteMemory(
+      memoryId,
+      this.request.user.id
+    );
+
+    if (!deleted) {
+      throw new NotFoundException('Memory not found');
+    }
+  }
 }

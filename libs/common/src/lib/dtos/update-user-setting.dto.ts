@@ -14,7 +14,8 @@ import {
   IsIn,
   IsNumber,
   IsOptional,
-  IsString
+  IsString,
+  MaxLength
 } from 'class-validator';
 import { eachYearOfInterval, format } from 'date-fns';
 
@@ -87,6 +88,15 @@ export class UpdateUserSettingDto {
   @IsBoolean()
   @IsOptional()
   isExperimentalFeatures?: boolean;
+
+  @IsIn(['DIVIDEND', 'GROWTH', 'VALUE'])
+  @IsOptional()
+  hipatiaInvestmentPhilosophy?: 'DIVIDEND' | 'GROWTH' | 'VALUE';
+
+  @IsString()
+  @MaxLength(2000)
+  @IsOptional()
+  hipatiaInvestmentPreferences?: string;
 
   @IsBoolean()
   @IsOptional()
